@@ -4,12 +4,14 @@
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/lodash": "^4.17.10"
+    "@types/lodash": "^4.17.10",
+    "@types/random": "^3.0.1"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "random": "^5.1.1"
   }
 }

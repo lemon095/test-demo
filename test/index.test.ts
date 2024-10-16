@@ -27,3 +27,20 @@ test("is DuoBao pending", () => {
 		slot.isDuoBaoPending({ preFs: { s: 10, ts: 10 }, preWp: { 1: [1, 2, 3] } })
 	).toBeFalse();
 });
+test("random tgm", () => {
+	expect(slot.getRandomTgmByIcon([2])).toBe(2);
+	expect(slot.getRandomTgmByIcon([3, 3])).toBe(3);
+});
+test("tmd computed", () => {
+	expect(
+		slot.getTmd({
+			icons: [6, 8, 2, 6],
+			preTmd: [[3, 2]],
+			twp: { 9: [0] },
+			trns: [6],
+			tgmByIcon: 2,
+			tgmWeight: [2, 3],
+		})
+	).toEqual([[2, 2]]);
+	// 测试用例处理
+});

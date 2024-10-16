@@ -1,4 +1,5 @@
-import { isEmpty, isNumber } from "lodash";
+import { flatMapDeep, isArray, isEmpty, isNumber, values } from "lodash";
+import random from "random";
 export default class BaseSlot {
 	/** 是否连续15次未中奖 */
 	public isNotWinOver15(count: number) {
@@ -45,12 +46,73 @@ export default class BaseSlot {
 		return false;
 	}
 
-	/** tmd 的计算逻辑 */
+	/**
+	 * trl 中 tmd（图标倍数）的计算信息
+	 * @param {Object} options - 配置选项
+	 * @param {array} options.icons 必填，最新的trl图标信息
+	 * @param {number} options.tgmByIcon 必填，当前图标id 如果图标id 2 对应倍数信息，那么给id 2
+	 * @param {array} [options.preTmd] 上一次的 tmd 信息
+	 * @param {object} [options.twp] 当前trl中的中间信息
+	 * @param {array} [options.trns] 当前trl的掉落图标信息
+	 * @param {array} [options.tgmWeight] 倍数权重表
+	 * @returns {array} tmd 倍数信息
+	 */
 	public getTmd({
 		icons,
+		tgmByIcon,
+		preTmd,
+		twp,
+		trns,
+		tgmWeight,
 	}: {
 		icons: number[];
-		preIcons: number[];
-		preTmd: number[][];
-	}) {}
+		tgmByIcon: number;
+		preTmd?: [number, number][];
+		twp?: Record<string, number[]>;
+		trns?: number[];
+		tgmWeight: number[];
+	}): [number, number][] {
+		if (!isEmpty(twp) && !isEmpty(preTmd) && !isEmpty(trns)) {
+			// 掉落下的图标倍数信息
+			// 获取删除的位置信息
+			const delPoss = flatMapDeep(values(twp));
+			// 先修改 preTmd 的位置信息
+			const currentTmd = preTmd!.map(([pos, tgm]) => {
+				const len = delPoss.filter((delPos) => delPos < pos).length;
+				return [pos - len, tgm];
+			}) as [number, number][];
+			// 再获取新生成的 图标位置信息
+			const newTmd = trns!
+				.map((icon, index) => {
+					if (icon === tgmByIcon) {
+						return [
+							icons.length - trns!.length + index,
+							this.getRandomTgmByIcon(tgmWeight),
+						];
+					}
+					return null;
+				})
+				.filter((item) => item) as [number, number][];
+			return [...currentTmd!, ...newTmd];
+		}
+		const newTmd = icons!
+			.map((icon, index) => {
+				if (icon === tgmByIcon) {
+					return [index, this.getRandomTgmByIcon(tgmWeight)];
+				}
+				return null;
+			})
+			.filter((item) => item) as [number, number][];
+		return newTmd;
+	}
+
+	/**
+	 * 随机图标的倍数
+	 * @param tgms 倍数权重表
+	 * @returns tgm 倍数信息
+	 */
+	public getRandomTgmByIcon(tgms: number[]) {
+		const tgm = random.int(0, tgms.length - 1);
+		return tgms[tgm];
+	}
 }

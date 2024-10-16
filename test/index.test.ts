@@ -42,5 +42,28 @@ test("tmd computed", () => {
 			tgmWeight: [2, 3],
 		})
 	).toEqual([[2, 2]]);
+	expect(
+		slot.getTmd({
+			icons: [6, 8, 2, 6],
+			preTmd: [[2, 2]],
+			twp: { 9: [3] },
+			trns: [6],
+			tgmByIcon: 2,
+			tgmWeight: [2, 3],
+		})
+	).toEqual([[2, 2]]);
+	expect(
+		slot.getTmd({
+			icons: [6, 2, 4, 6],
+			preTmd: [[1, 2]],
+			twp: { 9: [2, 3] },
+			trns: [6, 3],
+			tgmByIcon: 2,
+			tgmWeight: [2, 2],
+		})
+	).toEqual([
+		[1, 2],
+		[2, 2],
+	]);
 	// 测试用例处理
 });

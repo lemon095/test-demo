@@ -67,27 +67,27 @@ export default class BaseSlot {
 	 * trl 中 tmd（图标倍数）的计算信息
 	 * @param {Object} options - 配置选项
 	 * @param {array} options.icons 必填，最新的trl图标信息
-	 * @param {number} options.tgmByIcon 必填，当前图标id 如果图标id 2 对应倍数信息，那么给 2
+	 * @param {number} options.gmByIcon 必填，当前的倍数图标id信息 如果是图标id2对应倍数信息，那么给 2
 	 * @param {array} [options.preTmd] 上一次的 tmd 信息
 	 * @param {object} [options.twp] 当前trl中的中奖信息
 	 * @param {array} [options.trns] 当前trl的掉落图标信息
-	 * @param {array} [options.tgmWeight] 倍数权重表
+	 * @param {array} [options.weights] 倍数权重表
 	 * @returns {array} tmd 倍数信息
 	 */
 	public getTmd({
 		icons,
-		tgmByIcon,
+		gmByIcon,
 		preTmd,
 		twp,
 		trns,
-		tgmWeight,
+		weights,
 	}: {
 		icons: number[];
-		tgmByIcon: number;
+		gmByIcon: number;
 		preTmd?: [number, number][];
 		twp?: Record<string, number[]>;
 		trns?: number[];
-		tgmWeight: number[];
+		weights: number[];
 	}): [number, number][] {
 		if (!isEmpty(twp) && !isEmpty(preTmd) && !isEmpty(trns)) {
 			// 掉落下的图标倍数信息
@@ -101,10 +101,10 @@ export default class BaseSlot {
 			// 再获取新生成的 图标位置信息
 			const newTmd = trns!
 				.map((icon, index) => {
-					if (icon === tgmByIcon) {
+					if (icon === gmByIcon) {
 						return [
 							icons.length - trns!.length + index,
-							this.getRandomTgmByIcon(tgmWeight),
+							this.getRandomTgmByIcon(weights),
 						];
 					}
 					return null;
@@ -114,14 +114,33 @@ export default class BaseSlot {
 		}
 		const newTmd = icons!
 			.map((icon, index) => {
-				if (icon === tgmByIcon) {
-					return [index, this.getRandomTgmByIcon(tgmWeight)];
+				if (icon === gmByIcon) {
+					return [index, this.getRandomTgmByIcon(weights)];
 				}
 				return null;
 			})
 			.filter((item) => item) as [number, number][];
 		return newTmd;
 	}
+
+	/**
+	 * rl 中 md（图标倍数）的计算信息
+	 * @param {Object} options - 配置选项
+	 * @param {array} options.icons 必填，最新的rl图标信息
+	 * @param {number} options.gmByIcon 必填，当前的倍数图标id信息 如果是图标id2对应倍数信息，那么给 2
+	 * @param {array} [options.preMd] 上一次的 md 信息
+	 * @param {object} [options.bwp] 当前rl中的中奖信息
+	 */
+	public getMd({
+		icons,
+	}: {
+		icons: number[][];
+		gmByIcon: number;
+		preMd: [number, number][];
+		bwp: Record<string, number[]>;
+		rns: number[][];
+		weights: number[];
+	}) {}
 
 	/**
 	 * 随机图标的倍数

@@ -1,16 +1,28 @@
 import { flatMapDeep, isArray, isEmpty, isNumber, values } from "lodash";
 import random from "random";
 export default class BaseSlot {
-	/** 是否连续15次未中奖 */
-	public isNotWinOver15(count: number) {
-		return count >= 15;
+	/**
+	 * 是否大于等于某个次数，默认值为 15
+	 * @param count 当前次数
+	 * @param total 总数，默认值为 15
+	 */
+	public isNotWinOver15(count: number, total = 15) {
+		return count >= total;
 	}
-	/** 上一次是否中奖 */
-	public isPreWin(preWp?: Record<string, number[]> | null) {
+	/**
+	 * 上一次是否中奖
+	 * @param preWp 上一次的 wp 信息
+	 */
+	public isPreWin(preWp?: Record<string, number[]> | null): boolean {
 		return !isEmpty(preWp);
 	}
 
-	/** 是否未夺宝流程 */
+	/**
+	 * 是否未夺宝流程
+	 * @param {Object} options - 配置选项
+	 * @param {Object} options.preFs - 上一次的 fs 信息
+	 * @param {Object} options.preWp - 选填，上一次的 wp 信息
+	 */
 	public isDuoBaoPending({
 		preFs,
 		preWp,
@@ -32,7 +44,12 @@ export default class BaseSlot {
 		}
 	}
 
-	/** 是否为夺宝的最后一次 */
+	/**
+	 * 是否为夺宝的最后一次
+	 * @param {Object} options - 配置选项
+	 * @param {Object} options.currentWp - 当前的 wp 信息
+	 * @param {Object} options.crrFs - 当前的 fs 信息
+	 */
 	public isLastDuoBao({
 		currentWp,
 		crrFs,
@@ -50,9 +67,9 @@ export default class BaseSlot {
 	 * trl 中 tmd（图标倍数）的计算信息
 	 * @param {Object} options - 配置选项
 	 * @param {array} options.icons 必填，最新的trl图标信息
-	 * @param {number} options.tgmByIcon 必填，当前图标id 如果图标id 2 对应倍数信息，那么给id 2
+	 * @param {number} options.tgmByIcon 必填，当前图标id 如果图标id 2 对应倍数信息，那么给 2
 	 * @param {array} [options.preTmd] 上一次的 tmd 信息
-	 * @param {object} [options.twp] 当前trl中的中间信息
+	 * @param {object} [options.twp] 当前trl中的中奖信息
 	 * @param {array} [options.trns] 当前trl的掉落图标信息
 	 * @param {array} [options.tgmWeight] 倍数权重表
 	 * @returns {array} tmd 倍数信息

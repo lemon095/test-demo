@@ -1,7 +1,7 @@
 import { test, expect, describe, it } from "bun:test";
 import BaseSlot from "..";
 const slot = new BaseSlot();
-describe("is not win over 15", () => {
+describe("通用：是否超过15", () => {
 	it("测试边界情况，比如-1,null,undefined,NaN,空字符串", () => {
 		expect(slot.isNotWinOver15(-1)).toBeFalsy();
 		expect(slot.isNotWinOver15(null as never)).toBeFalsy();
@@ -19,39 +19,43 @@ describe("is not win over 15", () => {
 		expect(slot.isNotWinOver15(106)).toBeTrue();
 	});
 });
-
-describe("is pre win", () => {
-	it("input empty value, output false", () => {
+describe("通用：上一次是否中奖", () => {
+	it("测试输入空值的情况，比如：{}、null、undefined", () => {
 		expect(slot.isPreWin({})).toBeFalse();
 		expect(slot.isPreWin(null)).toBe(false);
 		expect(slot.isPreWin()).toBeFalse();
 	});
-	it("input pre wp, output true", () => {
+	it("测试正常情况", () => {
 		expect(slot.isPreWin({ 1: [1, 2, 3] })).toBeTrue();
 	});
 });
-describe("is DuoBao pending", () => {
-	it("输入空对象输出 false", () => {
+describe("通用：是否为夺宝流程", () => {
+	it("测试输入空值的情况，比如：{}", () => {
 		expect(slot.isDuoBaoPending({})).toBeFalse();
 	});
-	it("fs.s=0&&fs.ts=10 输出 false", () => {
+	it("次数为0，上一次未中奖的情况", () => {
 		expect(slot.isDuoBaoPending({ preFs: { s: 0, ts: 10 } })).toBeFalse();
 	});
-	it("fs.s=null 输出 undefined", () => {
+	it("次数为0，上一次中奖的情况", () => {
+		expect(
+			slot.isDuoBaoPending({ preFs: { s: 0, ts: 10 }, preWp: { 1: [1, 2, 3] } })
+		).toBeTrue();
+	});
+	it("次数为空值的情况，上一次未中奖", () => {
 		expect(slot.isDuoBaoPending({ preFs: { s: null } })).toBeUndefined();
 	});
-	it("fs.s>0&&上一次未中奖, 输出 true", () => {
+	it("次数大于 0，上一次未中奖", () => {
 		expect(slot.isDuoBaoPending({ preFs: { s: 1, ts: 10 } })).toBeTrue();
 	});
-	it("fs.s===fs.ts 输出 true", () => {
+	it("次数和总次数相等，上一次未中奖", () => {
 		expect(slot.isDuoBaoPending({ preFs: { s: 10, ts: 10 } })).toBeTrue();
 	});
-	it("fs.s >0 && fs.s !== ts && 上一次中奖 输出 true", () => {
+	it("次数大于0小于总次数，上一次中奖", () => {
 		expect(
 			slot.isDuoBaoPending({ preFs: { s: 2, ts: 10 }, preWp: { 1: [1, 2, 3] } })
 		).toBeTrue();
 	});
-	it("fs.s === fs.s && 上一次未中奖 输出 false", () => {
+	it("次数等于总次数，上一次中奖", () => {
 		expect(
 			slot.isDuoBaoPending({
 				preFs: { s: 10, ts: 10 },
@@ -60,7 +64,7 @@ describe("is DuoBao pending", () => {
 		).toBeFalse();
 	});
 });
-describe("random tgm", () => {
+describe("极速：随机tgm倍数", () => {
 	it("随机长度为 1", () => {
 		expect(slot.getRandomTgmByIcon([2])).toBe(2);
 	});
@@ -68,7 +72,7 @@ describe("random tgm", () => {
 		expect(slot.getRandomTgmByIcon([3, 3])).toBe(3);
 	});
 });
-describe("tmd computed", () => {
+describe("极速：tmd 计算", () => {
 	it("上一次中奖且中奖位置小于倍数图标的位置，本次掉落未出现 2", () => {
 		expect(
 			slot.getTmd({

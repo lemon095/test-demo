@@ -11,6 +11,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "decimal.js": "^10.4.3",
     "lodash": "^4.17.21",
     "random": "^5.1.1"
   }

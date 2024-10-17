@@ -80,8 +80,8 @@ describe("极速：tmd 计算", () => {
 				preTmd: [[3, 2]],
 				twp: { 9: [0] },
 				trns: [6],
-				tgmByIcon: 2,
-				tgmWeight: [2, 3],
+				gmByIcon: 2,
+				weights: [2, 3],
 			})
 		).toEqual([[2, 2]]);
 	});
@@ -92,8 +92,8 @@ describe("极速：tmd 计算", () => {
 				preTmd: [[2, 2]],
 				twp: { 9: [3] },
 				trns: [6],
-				tgmByIcon: 2,
-				tgmWeight: [2, 3],
+				gmByIcon: 2,
+				weights: [2, 3],
 			})
 		).toEqual([[2, 2]]);
 	});
@@ -104,8 +104,8 @@ describe("极速：tmd 计算", () => {
 				preTmd: [[0, 2]],
 				twp: { 9: [2, 3] },
 				trns: [2, 2],
-				tgmByIcon: 2,
-				tgmWeight: [5, 5],
+				gmByIcon: 2,
+				weights: [2, 3],
 			})
 		).toEqual([
 			[0, 2],
@@ -120,8 +120,8 @@ describe("极速：tmd 计算", () => {
 				preTmd: [[3, 2]],
 				twp: { 9: [0, 1] },
 				trns: [2, 2],
-				tgmByIcon: 2,
-				tgmWeight: [3, 3],
+				gmByIcon: 2,
+				weights: [2, 3],
 			})
 		).toEqual([
 			[1, 2],

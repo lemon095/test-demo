@@ -210,7 +210,7 @@ export default class BaseSlot {
 		oldAcw: number;
 	}): number {
 		let amount = new Decimal(0);
-		if (this.isPreWin(oldWp)) {
+		if (!this.isPreWin(oldWp)) {
 			//上一次没有中奖的情况下，本次为收费或消耗次数
 			if (isEmpty(wp) || isEmpty(lw)) {
 				//本次也没有中

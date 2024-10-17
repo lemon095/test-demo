@@ -94,10 +94,10 @@ export default class BaseSlot {
 	}: {
 		icons: number[];
 		gmByIcon: number;
-		preTmd?: [number, number][] | null;
-		twp?: Record<string, number[]>;
-		trns?: number[];
 		weights: number[];
+		preTmd?: [number, number][] | null;
+		twp?: Record<string, number[]> | null;
+		trns?: number[] | null;
 	}): [number, number][] | null {
 		if (!isEmpty(twp) && !isEmpty(trns)) {
 			// 掉落下的图标倍数信息
@@ -150,13 +150,15 @@ export default class BaseSlot {
 		bwp,
 		rns,
 		weights,
+		ebb,
 	}: {
 		icons: number[][];
 		gmByIcon: number;
-		preMd: [number, number][];
-		bwp: Record<string, number[]>;
-		rns: number[][];
 		weights: number[];
+		ebb?: Record<string, any>;
+		preMd?: [number, number][] | null;
+		bwp?: Record<string, number[]> | null;
+		rns?: number[][] | null;
 	}): [number, number][] | null {
 		// 非掉落下的图标倍数信息
 		if (isEmpty(bwp) || isEmpty(rns)) {

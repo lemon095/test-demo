@@ -96,17 +96,33 @@ describe("tmd computed", () => {
 	it("上一次中奖且中奖位置大于倍数图标的位置，本次掉落出现 2", () => {
 		expect(
 			slot.getTmd({
-				icons: [6, 2, 4, 6],
-				preTmd: [[1, 2]],
+				icons: [2, 6, 4, 6],
+				preTmd: [[0, 2]],
 				twp: { 9: [2, 3] },
-				trns: [2, 3],
+				trns: [2, 2],
 				tgmByIcon: 2,
-				tgmWeight: [2, 2],
+				tgmWeight: [5, 5],
+			})
+		).toEqual([
+			[0, 2],
+			[2, 5],
+			[3, 5],
+		]);
+	});
+	it("上一次中奖且中奖位置小于倍数图标的位置，本次掉落出现 2", () => {
+		expect(
+			slot.getTmd({
+				icons: [6, 1, 4, 2],
+				preTmd: [[3, 2]],
+				twp: { 9: [0, 1] },
+				trns: [2, 2],
+				tgmByIcon: 2,
+				tgmWeight: [3, 3],
 			})
 		).toEqual([
 			[1, 2],
-			[2, 2],
+			[2, 3],
+			[3, 3],
 		]);
 	});
-	// 测试用例处理
 });

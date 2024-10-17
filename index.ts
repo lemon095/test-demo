@@ -19,18 +19,19 @@ export default class BaseSlot {
   }
 
   /**
-   * 是否未夺宝流程
+   * 是否为夺宝流程
    * @param {Object} options - 配置选项
    * @param {object} options.preFs - 上一次的 fs 信息
    * @param {object} options.preWp - 选填，上一次的 wp 信息
+   * @returns {boolean|undefined} 是否为夺宝流程
    */
   public isDuoBaoPending({
     preFs,
     preWp,
-  }: Partial<{
-    preFs: Record<string, any> | null;
-    preWp: Record<string, any> | null;
-  }>) {
+  }: {
+    preFs?: Record<string, any> | null;
+    preWp?: Record<string, any> | null;
+  }) {
     if (isEmpty(preFs)) return false;
     const fs = preFs;
     // 如果上一次的 s === fs 并且上一次有中奖，则表示还未进夺宝流程

@@ -1,18 +1,22 @@
 {
-  "name": "slot",
-  "module": "index.ts",
-  "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/lodash": "^4.17.10",
-    "@types/random": "^3.0.1"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "decimal.js": "^10.4.3",
-    "lodash": "^4.17.21",
-    "random": "^5.1.1"
-  }
+	"name": "slot",
+	"module": "index.ts",
+	"type": "module",
+	"scripts": {
+		"doc": "typedoc --out docs ./index.ts"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"@types/lodash": "^4.17.10",
+		"@types/random": "^3.0.1",
+		"typedoc": "^0.26.10"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"decimal.js": "^10.4.3",
+		"lodash": "^4.17.21",
+		"random": "^5.1.1"
+	}
 }

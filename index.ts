@@ -1,5 +1,13 @@
 import Decimal from "decimal.js";
-import { flatMapDeep, isArray, isEmpty, isNumber, keys, values } from "lodash";
+import {
+	flatMapDeep,
+	flatten,
+	isArray,
+	isEmpty,
+	isNumber,
+	keys,
+	values,
+} from "lodash";
 import random from "random";
 export default class BaseSlot {
 	/**
@@ -86,20 +94,20 @@ export default class BaseSlot {
 	}: {
 		icons: number[];
 		gmByIcon: number;
-		preTmd?: [number, number][];
+		preTmd?: [number, number][] | null;
 		twp?: Record<string, number[]>;
 		trns?: number[];
 		weights: number[];
-	}): [number, number][] {
-		if (!isEmpty(twp) && !isEmpty(preTmd) && !isEmpty(trns)) {
+	}): [number, number][] | null {
+		if (!isEmpty(twp) && !isEmpty(trns)) {
 			// 掉落下的图标倍数信息
 			// 获取删除的位置信息
 			const delPoss = flatMapDeep(values(twp));
 			// 先修改 preTmd 的位置信息
-			const currentTmd = preTmd!.map(([pos, tgm]) => {
+			const currentTmd = preTmd?.map(([pos, tgm]) => {
 				const len = delPoss.filter((delPos) => delPos < pos).length;
 				return [pos - len, tgm];
-			}) as [number, number][];
+			});
 			// 再获取新生成的 图标位置信息
 			const newTmd = trns!
 				.map((icon, index) => {
@@ -112,7 +120,7 @@ export default class BaseSlot {
 					return null;
 				})
 				.filter((item) => item) as [number, number][];
-			return [...currentTmd!, ...newTmd];
+			return isEmpty([...(currentTmd || []), ...newTmd]) ? null : newTmd;
 		}
 		const newTmd = icons!
 			.map((icon, index) => {
@@ -122,7 +130,7 @@ export default class BaseSlot {
 				return null;
 			})
 			.filter((item) => item) as [number, number][];
-		return newTmd;
+		return isEmpty(newTmd) ? null : newTmd;
 	}
 
 	/**
@@ -130,11 +138,18 @@ export default class BaseSlot {
 	 * @param {Object} options - 配置选项
 	 * @param {array} options.icons 必填，最新的rl图标信息
 	 * @param {number} options.gmByIcon 必填，当前的倍数图标id信息 如果是图标id2对应倍数信息，那么给 2
-	 * @param {array} [options.preMd] 上一次的 md 信息
-	 * @param {object} [options.bwp] 当前rl中的中奖信息
+	 * @param {array} options.preMd 上一次的 md 信息
+	 * @param {object} options.bwp 当前rl中的中奖信息
+	 * @param {object} options.rns 当前rl的掉落图标信息
+	 * @param {array} options.weights 倍数权重表
 	 */
 	public getMd({
 		icons,
+		gmByIcon,
+		preMd,
+		bwp,
+		rns,
+		weights,
 	}: {
 		icons: number[][];
 		gmByIcon: number;
@@ -142,7 +157,28 @@ export default class BaseSlot {
 		bwp: Record<string, number[]>;
 		rns: number[][];
 		weights: number[];
-	}) {}
+	}): [number, number][] | null {
+		// 非掉落下的图标倍数信息
+		if (isEmpty(bwp) || isEmpty(rns)) {
+			let idx = 0;
+			const result = flatten(
+				icons.map((col) => {
+					const mds: [number, number][] = [];
+					for (let rowIndex = 0; rowIndex < col.length; rowIndex++) {
+						idx = idx + 1;
+						const icon = col[rowIndex];
+						if (icon === gmByIcon) {
+							mds.push([idx - 1, this.getRandomTgmByIcon(weights)]);
+						}
+					}
+					return mds.filter(isArray);
+				})
+			);
+			return isEmpty(result) ? null : result;
+		}
+		// 掉落下的图标倍数信息
+		return [];
+	}
 
 	/**
 	 * 随机图标的倍数

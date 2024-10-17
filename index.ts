@@ -152,12 +152,14 @@ export default class BaseSlot {
     const tgm = random.int(0, tgms.length - 1);
     return tgms[tgm];
   }
+
   /**
-   *
-   * @param lw: 本次的图标:图标对应中奖金额
-   * @param wp: 本次的中奖图标：对应索引位置
-   * @param wp: 本次的中奖图标：对应索引位置
-   * @param oldAcw: 上一次的中奖金额
+   * 中奖金额
+   * @param {Object} options - 配置选项
+   * @param {Object} [options.lw] 本次的图标:图标对应中奖金额
+   * @param {Object} [options.wp] 本次的中奖图标：对应索引位置
+   * @param {Object} [options.oldWp] 上一次次的中奖图标：对应索引位置
+   * @param {number} [options.oldAcw] 上一次的中奖金额
    */
   public getAcw({
     lw,

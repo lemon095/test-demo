@@ -120,7 +120,8 @@ export default class BaseSlot {
 					return null;
 				})
 				.filter((item) => item) as [number, number][];
-			return isEmpty([...(currentTmd || []), ...newTmd]) ? null : newTmd;
+			const result = [...(currentTmd || []), ...newTmd] as [number, number][];
+			return isEmpty(result) ? null : result;
 		}
 		const newTmd = icons!
 			.map((icon, index) => {
@@ -155,7 +156,7 @@ export default class BaseSlot {
 		icons: number[][];
 		gmByIcon: number;
 		weights: number[];
-		ebb?: Record<string, any>;
+		ebb?: Record<string, { fp: number; lp: number; bt: number; ls: number }>;
 		preMd?: [number, number][] | null;
 		bwp?: Record<string, number[]> | null;
 		rns?: number[][] | null;
@@ -163,15 +164,29 @@ export default class BaseSlot {
 		// 非掉落下的图标倍数信息
 		if (isEmpty(bwp) || isEmpty(rns)) {
 			let idx = 0;
+			const ebbValues = values(ebb);
 			const result = flatten(
 				icons.map((col) => {
 					const mds: [number, number][] = [];
+					let breakCount = 0;
 					for (let rowIndex = 0; rowIndex < col.length; rowIndex++) {
-						idx = idx + 1;
 						const icon = col[rowIndex];
 						if (icon === gmByIcon) {
-							mds.push([idx - 1, this.getRandomTgmByIcon(weights)]);
+							const bordered = ebbValues.find(({ fp, lp }) => {
+								return idx >= fp && idx <= lp;
+							});
+							if (bordered) {
+								if (breakCount <= 0) {
+									mds.push([idx, this.getRandomTgmByIcon(weights)]);
+									breakCount = bordered.lp - bordered.fp;
+								} else {
+									breakCount -= 1;
+								}
+							} else {
+								mds.push([idx, this.getRandomTgmByIcon(weights)]);
+							}
 						}
+						idx = idx + 1;
 					}
 					return mds.filter(isArray);
 				})

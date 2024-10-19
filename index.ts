@@ -199,4 +199,69 @@ export default class BaseSlot {
 
     return amount.toNumber();
   }
+
+  /**
+   * 中奖金额
+   * @param {Object} options - 配置选项
+   * @param {Object} options.snww 中奖图标图标:路线
+   * @param {Object} options.rwsp 中奖图标图标:图标对应倍数
+   * @param {number} options.totalBet 投注金额
+   */
+  public getLw({
+    snww,
+    rwsp,
+    totalBet,
+  }: {
+    snww: Record<string, number> | null;
+    rwsp: Record<string, number> | null;
+    totalBet: number;
+  }): Record<string, number> | null {
+    if (isEmpty(snww) || isEmpty(rwsp)) {
+      return null;
+    }
+
+    let lw: Record<number | string, Decimal> = {};
+    keys(snww).forEach((key) => {
+      lw[key] = new Decimal(totalBet).div(20).mul(rwsp[key]).mul(snww[key]);
+    });
+    let newLw: Record<string, number> = {};
+    keys(lw).forEach((key) => {
+      newLw[key] = lw[key].toNumber();
+    });
+
+    return newLw;
+  }
+
+  public getCtw({
+    lw,
+    acw,
+    oldWp,
+    tgm,
+  }: {
+    lw?: Record<string, number> | null;
+    acw: number;
+    oldWp?: Record<string, number[]> | null;
+    tgm: number;
+  }): number {
+    let ctw = new Decimal(0);
+    if (isEmpty(oldWp)) {
+      //如果上一次没中, 那么本次中为lw的图标金额的和，否则为0
+      if (isEmpty(lw)) {
+        return ctw.toNumber();
+      }
+      keys(lw).forEach((key) => {
+        ctw = ctw.add(lw[key]);
+      });
+      return ctw.toNumber();
+    }
+    //如果上一次中, 本次没有中
+    if (isEmpty(lw)) {
+      return new Decimal(acw).mul(tgm).sub(acw).toNumber();
+    }
+    //上一次中, 本次中
+    keys(lw).forEach((key) => {
+      ctw = ctw.add(lw[key]);
+    });
+    return ctw.toNumber();
+  }
 }

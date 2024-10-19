@@ -177,3 +177,47 @@ describe("极速: acw计算", () => {
     ).toBe(7.2);
   });
 });
+describe("极速: ctw计算", () => {
+  it("上一次没中奖，本次也没有中奖", () => {
+    expect(slot.getCtw({ lw: null, acw: 0, oldWp: null, tgm: 1 })).toBe(0);
+  });
+  it("上一次没中奖，本次中奖", () => {
+    expect(
+      slot.getCtw({
+        lw: {
+          "6": 7.2,
+        },
+        acw: 7.2,
+        oldWp: null,
+        tgm: 26,
+      })
+    ).toBe(7.2);
+  });
+  it("上一次中奖，本次没有中奖", () => {
+    expect(
+      slot.getCtw({
+        lw: null,
+        acw: 7.2,
+        oldWp: {
+          "6": [3, 4, 7, 10, 11],
+        },
+        tgm: 31,
+      })
+    ).toBe(216);
+  });
+  it("上一次中奖，本次中奖", () => {
+    expect(
+      slot.getCtw({
+        lw: {
+          "11": 1.8,
+        },
+        acw: 14.4,
+        oldWp: {
+          "5": [3],
+          "9": [4, 9, 14, 17, 18],
+        },
+        tgm: 0,
+      })
+    ).toBe(1.8);
+  });
+});

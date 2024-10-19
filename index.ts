@@ -143,7 +143,7 @@ export default class BaseSlot {
 	 * @param {array} options.preMd 上一次的 md 信息
 	 * @param {object} options.bwp 当前rl中的中奖信息
 	 * @param {object} options.rns 当前rl的掉落图标信息
-	 * @param {array} options.weights 倍数权重表
+	 * @param {array} options.weights 倍数权重表集合，根据合并框的长度来取对应的权重表，key是框的长度，value是长度对应权重表
 	 * @param {number} options.colLength 每一列的长度
 	 */
 	public getMd({
@@ -158,7 +158,7 @@ export default class BaseSlot {
 	}: {
 		icons: number[][];
 		gmByIcon: number;
-		weights: number[];
+		weights: Record<number, number[]>;
 		colLength: number;
 		ebb?: Record<string, { fp: number; lp: number; bt: number; ls: number }>;
 		preMd?: [number, number][] | null;
@@ -181,13 +181,16 @@ export default class BaseSlot {
 							});
 							if (bordered) {
 								if (breakCount <= 0) {
-									mds.push([idx, this.getRandomTgmByIcon(weights)]);
 									breakCount = bordered.lp - bordered.fp;
+									mds.push([
+										idx,
+										this.getRandomTgmByIcon(weights[breakCount + 1]),
+									]);
 								} else {
 									breakCount -= 1;
 								}
 							} else {
-								mds.push([idx, this.getRandomTgmByIcon(weights)]);
+								mds.push([idx, this.getRandomTgmByIcon(weights[1])]);
 							}
 						}
 						idx = idx + 1;
@@ -228,7 +231,7 @@ export default class BaseSlot {
 						.map((_, index) => {
 							// 新生成的图标会掉落在每一列的最前面
 							// 那么新的 md position 计算只需要：每一列的基础位置 + 新生成的位置
-							return [basePos + index, this.getRandomTgmByIcon(weights)];
+							return [basePos + index, this.getRandomTgmByIcon(weights[1])];
 						})
 				);
 			})

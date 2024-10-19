@@ -79,7 +79,7 @@ describe("极速：tmd 计算", () => {
 			slot.getTmd({
 				icons: [6, 8, 2, 6],
 				preTmd: [[3, 2]],
-				twp: { 9: [0] },
+				preTwp: { 9: [0] },
 				trns: [6],
 				gmByIcon: 2,
 				weights: [2, 3],
@@ -91,7 +91,7 @@ describe("极速：tmd 计算", () => {
 			slot.getTmd({
 				icons: [6, 8, 2, 6],
 				preTmd: [[2, 2]],
-				twp: { 9: [3] },
+				preTwp: { 9: [3] },
 				trns: [6],
 				gmByIcon: 2,
 				weights: [2, 3],
@@ -103,7 +103,7 @@ describe("极速：tmd 计算", () => {
 			slot.getTmd({
 				icons: [2, 6, 4, 6],
 				preTmd: [[0, 2]],
-				twp: { 9: [2, 3] },
+				preTwp: { 9: [2, 3] },
 				trns: [2, 2],
 				gmByIcon: 2,
 				weights: [5, 5],
@@ -119,7 +119,7 @@ describe("极速：tmd 计算", () => {
 			slot.getTmd({
 				icons: [6, 1, 4, 2],
 				preTmd: [[3, 2]],
-				twp: { 9: [0, 1] },
+				preTwp: { 9: [0, 1] },
 				trns: [2, 2],
 				gmByIcon: 2,
 				weights: [3, 3],

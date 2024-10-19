@@ -79,17 +79,17 @@ export default class BaseSlot {
 	 * @param {Object} options - 配置选项
 	 * @param {array} options.icons 必填，最新的trl图标信息
 	 * @param {number} options.gmByIcon 必填，当前的倍数图标id信息 如果是图标id2对应倍数信息，那么给 2
-	 * @param {array} [options.preTmd] 上一次的 tmd 信息
-	 * @param {object} [options.twp] 当前trl中的中奖信息
-	 * @param {array} [options.trns] 当前trl的掉落图标信息
-	 * @param {array} [options.weights] 倍数权重表
+	 * @param {array} options.preTmd 上一次的 tmd 信息
+	 * @param {object} options.preTwp 上一次trl中的中奖信息
+	 * @param {array} options.trns 当前trl的掉落图标信息
+	 * @param {array} options.weights 倍数权重表
 	 * @returns {array} tmd 倍数信息
 	 */
 	public getTmd({
 		icons,
 		gmByIcon,
 		preTmd,
-		twp,
+		preTwp,
 		trns,
 		weights,
 	}: {
@@ -97,13 +97,13 @@ export default class BaseSlot {
 		gmByIcon: number;
 		weights: number[];
 		preTmd?: [number, number][] | null;
-		twp?: Record<string, number[]> | null;
+		preTwp?: Record<string, number[]> | null;
 		trns?: number[] | null;
 	}): [number, number][] | null {
-		if (!isEmpty(twp) && !isEmpty(trns)) {
+		if (!isEmpty(preTwp) && !isEmpty(trns)) {
 			// 掉落下的图标倍数信息
 			// 获取删除的位置信息
-			const delPoss = flatMapDeep(values(twp));
+			const delPoss = flatMapDeep(values(preTwp));
 			// 先修改 preTmd 的位置信息
 			const currentTmd = preTmd?.map(([pos, tgm]) => {
 				const len = delPoss.filter((delPos) => delPos < pos).length;
@@ -146,6 +146,7 @@ export default class BaseSlot {
 	 * @param {array} options.weights 倍数权重表集合，根据合并框的长度来取对应的权重表，key是框的长度，value是长度对应权重表
 	 * @param {number} options.colLength 每一列的长度
 	 * @param {object} options.ebb 当前每一列中的边框信息
+	 * @returns {array} md 倍数信息
 	 */
 	public getMd({
 		icons,

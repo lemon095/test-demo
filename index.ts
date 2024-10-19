@@ -6,6 +6,7 @@ import {
 	isEmpty,
 	isNumber,
 	keys,
+	union,
 	values,
 } from "lodash";
 import random from "random";
@@ -143,6 +144,7 @@ export default class BaseSlot {
 	 * @param {object} options.bwp 当前rl中的中奖信息
 	 * @param {object} options.rns 当前rl的掉落图标信息
 	 * @param {array} options.weights 倍数权重表
+	 * @param {number} options.colLength 每一列的长度
 	 */
 	public getMd({
 		icons,
@@ -152,17 +154,19 @@ export default class BaseSlot {
 		rns,
 		weights,
 		ebb,
+		colLength,
 	}: {
 		icons: number[][];
 		gmByIcon: number;
 		weights: number[];
+		colLength: number;
 		ebb?: Record<string, { fp: number; lp: number; bt: number; ls: number }>;
 		preMd?: [number, number][] | null;
-		bwp?: Record<string, number[]> | null;
+		bwp?: Record<string, number[][]> | null;
 		rns?: number[][] | null;
 	}): [number, number][] | null {
 		// 非掉落下的图标倍数信息
-		if (isEmpty(bwp) || isEmpty(rns)) {
+		if (isEmpty(bwp) && isEmpty(rns)) {
 			let idx = 0;
 			const ebbValues = values(ebb);
 			const result = flatten(
@@ -193,8 +197,39 @@ export default class BaseSlot {
 			);
 			return isEmpty(result) ? null : result;
 		}
+		if (isEmpty(rns)) {
+			throw new Error("掉落的情况下，rns不能为空");
+		}
 		// 掉落下的图标倍数信息
-		return [];
+		// 1. 获取删除的图标位置，需要去重
+		const delPoss = union(flatMapDeep(values(bwp)));
+		// 2. 根据删除的图标位置信息来更新 preMd 中的位置信息
+		const currentMds = preMd?.map(([mdPos, gm]) => {
+			// 获取移动的长度
+			const moveLength = delPoss.filter((delPos) => {
+				const delCol = Math.floor(delPos / colLength);
+				const mdCol = Math.floor(mdPos / colLength);
+				return delCol === mdCol && delPos < mdPos;
+			}).length;
+			return [mdPos - moveLength, gm];
+		});
+		// 3. 根据新生成的图标信息来生成新的图标倍数信息和索引位置
+		// 这时候不需要考虑 ebb，因为掉落不会重新生成框信息
+		const newMds = rns!.map((iconsByCol, colIndex) => {
+			const basePos = colIndex * colLength;
+			return flatten(
+				iconsByCol
+					.filter((icon) => icon === gmByIcon)
+					.map((_, index) => {
+						// 新生成的图标会掉落在每一列的最前面
+						// 如果新的 md position 计算只需要：
+						// 每一列的基础位置 + 新生成的位置
+						return [basePos + index, this.getRandomTgmByIcon(weights)];
+					})
+			);
+		});
+		const result = [...(currentMds || []), ...newMds] as [number, number][];
+		return isEmpty(result) ? null : result;
 	}
 
 	/**

@@ -233,7 +233,9 @@ export default class BaseSlot {
 				);
 			})
 			.filter((md) => md.length);
-		const result = [...(currentMds || []), ...newMds] as [number, number][];
+		const result = [...(currentMds || []), ...newMds].sort(
+			(a, b) => a[0] - b[0]
+		) as [number, number][];
 		return isEmpty(result) ? null : result;
 	}
 

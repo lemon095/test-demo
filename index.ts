@@ -201,6 +201,9 @@ export default class BaseSlot {
 			);
 			return isEmpty(result) ? null : result;
 		}
+		if (isEmpty(preBwp)) {
+			throw new Error("掉落流程下，上一次中奖信息不能为空");
+		}
 		// 掉落下的图标倍数信息
 		// 1. 获取删除的图标位置，需要去重
 		const delPoss = union(flatMapDeep(values(preBwp)));

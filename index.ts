@@ -1,5 +1,14 @@
 import Decimal from "decimal.js";
-import { flatMapDeep, isArray, isEmpty, isNumber, keys, values } from "lodash";
+import {
+  flatMapDeep,
+  flatten,
+  isArray,
+  isEmpty,
+  isNumber,
+  keys,
+  union,
+  values,
+} from "lodash";
 import random from "random";
 export default class BaseSlot {
   /**
@@ -70,36 +79,36 @@ export default class BaseSlot {
    * @param {Object} options - 配置选项
    * @param {array} options.icons 必填，最新的trl图标信息
    * @param {number} options.gmByIcon 必填，当前的倍数图标id信息 如果是图标id2对应倍数信息，那么给 2
-   * @param {array} [options.preTmd] 上一次的 tmd 信息
-   * @param {object} [options.twp] 当前trl中的中奖信息
-   * @param {array} [options.trns] 当前trl的掉落图标信息
-   * @param {array} [options.weights] 倍数权重表
+   * @param {array} options.preTmd 上一次的 tmd 信息
+   * @param {object} options.preTwp 上一次trl中的中奖信息
+   * @param {array} options.trns 当前trl的掉落图标信息
+   * @param {array} options.weights 倍数权重表
    * @returns {array} tmd 倍数信息
    */
   public getTmd({
     icons,
     gmByIcon,
     preTmd,
-    twp,
+    preTwp,
     trns,
     weights,
   }: {
     icons: number[];
     gmByIcon: number;
-    preTmd?: [number, number][];
-    twp?: Record<string, number[]>;
-    trns?: number[];
     weights: number[];
-  }): [number, number][] {
-    if (!isEmpty(twp) && !isEmpty(preTmd) && !isEmpty(trns)) {
+    preTmd?: [number, number][] | null;
+    preTwp?: Record<string, number[]> | null;
+    trns?: number[] | null;
+  }): [number, number][] | null {
+    if (!isEmpty(preTwp) && !isEmpty(trns)) {
       // 掉落下的图标倍数信息
       // 获取删除的位置信息
-      const delPoss = flatMapDeep(values(twp));
+      const delPoss = flatMapDeep(values(preTwp));
       // 先修改 preTmd 的位置信息
-      const currentTmd = preTmd!.map(([pos, tgm]) => {
+      const currentTmd = preTmd?.map(([pos, tgm]) => {
         const len = delPoss.filter((delPos) => delPos < pos).length;
         return [pos - len, tgm];
-      }) as [number, number][];
+      });
       // 再获取新生成的 图标位置信息
       const newTmd = trns!
         .map((icon, index) => {
@@ -112,7 +121,8 @@ export default class BaseSlot {
           return null;
         })
         .filter((item) => item) as [number, number][];
-      return [...currentTmd!, ...newTmd];
+      const result = [...(currentTmd || []), ...newTmd] as [number, number][];
+      return isEmpty(result) ? null : result;
     }
     const newTmd = icons!
       .map((icon, index) => {
@@ -122,7 +132,7 @@ export default class BaseSlot {
         return null;
       })
       .filter((item) => item) as [number, number][];
-    return newTmd;
+    return isEmpty(newTmd) ? null : newTmd;
   }
 
   /**
@@ -130,19 +140,109 @@ export default class BaseSlot {
    * @param {Object} options - 配置选项
    * @param {array} options.icons 必填，最新的rl图标信息
    * @param {number} options.gmByIcon 必填，当前的倍数图标id信息 如果是图标id2对应倍数信息，那么给 2
-   * @param {array} [options.preMd] 上一次的 md 信息
-   * @param {object} [options.bwp] 当前rl中的中奖信息
+   * @param {array} options.preMd 上一次的 md 信息
+   * @param {object} options.preBwp 上一次rl中的中奖信息
+   * @param {object} options.rns 当前rl的掉落图标信息
+   * @param {array} options.weights 倍数权重表集合，根据合并框的长度来取对应的权重表，key是框的长度，value是长度对应权重表
+   * @param {number} options.colLength 每一列的长度
+   * @param {object} options.ebb 当前每一列中的边框信息
+   * @returns {array} md 倍数信息
    */
   public getMd({
     icons,
+    gmByIcon,
+    preMd,
+    preBwp,
+    rns,
+    weights,
+    ebb,
+    colLength,
   }: {
     icons: number[][];
     gmByIcon: number;
-    preMd: [number, number][];
-    bwp: Record<string, number[]>;
-    rns: number[][];
-    weights: number[];
-  }) {}
+    weights: Record<number, number[]>;
+    colLength: number;
+    ebb?: Record<string, { fp: number; lp: number; bt: number; ls: number }>;
+    preMd?: [number, number][] | null;
+    preBwp?: Record<string, number[][]> | null;
+    rns?: number[][] | null;
+  }): [number, number][] | null {
+    // 非掉落下的图标倍数信息
+    if (isEmpty(rns)) {
+      let idx = 0;
+      const ebbValues = values(ebb);
+      const result = flatten(
+        icons.map((col) => {
+          const mds: [number, number][] = [];
+          let breakCount = 0;
+          for (let rowIndex = 0; rowIndex < col.length; rowIndex++) {
+            const icon = col[rowIndex];
+            if (icon === gmByIcon) {
+              const bordered = ebbValues.find(({ fp, lp }) => {
+                return idx >= fp && idx <= lp;
+              });
+              if (bordered) {
+                if (breakCount <= 0) {
+                  breakCount = bordered.lp - bordered.fp;
+                  mds.push([
+                    idx,
+                    this.getRandomTgmByIcon(weights[breakCount + 1]),
+                  ]);
+                } else {
+                  breakCount -= 1;
+                }
+              } else {
+                mds.push([idx, this.getRandomTgmByIcon(weights[1])]);
+              }
+            }
+            idx = idx + 1;
+          }
+          return mds.filter(isArray);
+        })
+      );
+      return isEmpty(result) ? null : result;
+    }
+    if (isEmpty(preBwp)) {
+      throw new Error("掉落流程下，上一次中奖信息不能为空");
+    }
+    // 掉落下的图标倍数信息
+    // 1. 获取删除的图标位置，需要去重
+    const delPoss = union(flatMapDeep(values(preBwp)));
+    // 2. 根据删除的图标位置信息来更新 preMd 中的位置信息
+    const currentMds = preMd?.map(([mdPos, gm]) => {
+      // 获取移动的长度
+      const moveLength = delPoss.filter((delPos) => {
+        const delCol = Math.floor(delPos / colLength);
+        const mdCol = Math.floor(mdPos / colLength);
+        // 是否需要移动位置
+        const isNeedMove = delPos > mdPos;
+        // 是否为同一列
+        const isEqualCol = delCol === mdCol;
+        return isEqualCol && isNeedMove;
+      }).length;
+      return [mdPos - moveLength, gm];
+    });
+    // 3. 根据新生成的图标信息来生成新的图标倍数信息和索引位置
+    // 这时候不需要考虑 ebb，因为掉落不会重新生成框信息
+    const newMds = rns!
+      .map((iconsByCol, colIndex) => {
+        const basePos = colIndex * colLength;
+        return flatten(
+          iconsByCol
+            .filter((icon) => icon === gmByIcon)
+            .map((_, index) => {
+              // 新生成的图标会掉落在每一列的最前面
+              // 那么新的 md position 计算只需要：每一列的基础位置 + 新生成的位置
+              return [basePos + index, this.getRandomTgmByIcon(weights[1])];
+            })
+        );
+      })
+      .filter((md) => md.length);
+    const result = [...(currentMds || []), ...newMds].sort(
+      (a, b) => a[0] - b[0]
+    ) as [number, number][];
+    return isEmpty(result) ? null : result;
+  }
 
   /**
    * 随机图标的倍数

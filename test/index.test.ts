@@ -508,7 +508,7 @@ describe("极速：md 计算", () => {
 			})
 		).toEqual(null);
 	});
-	it("上一次中奖，上一次有图标 2，当前没有", () => {
+	it("上一次中奖，上一次有图标 2，当前掉落信息中没有", () => {
 		expect(
 			slot.getMd({
 				icons: chunk(

@@ -209,25 +209,30 @@ export default class BaseSlot {
 			const moveLength = delPoss.filter((delPos) => {
 				const delCol = Math.floor(delPos / colLength);
 				const mdCol = Math.floor(mdPos / colLength);
-				return delCol === mdCol && delPos < mdPos;
+				// 是否需要移动位置
+				const isNeedMove = delPos > mdPos;
+				// 是否为同一列
+				const isEqualCol = delCol === mdCol;
+				return isEqualCol && isNeedMove;
 			}).length;
 			return [mdPos - moveLength, gm];
 		});
 		// 3. 根据新生成的图标信息来生成新的图标倍数信息和索引位置
 		// 这时候不需要考虑 ebb，因为掉落不会重新生成框信息
-		const newMds = rns!.map((iconsByCol, colIndex) => {
-			const basePos = colIndex * colLength;
-			return flatten(
-				iconsByCol
-					.filter((icon) => icon === gmByIcon)
-					.map((_, index) => {
-						// 新生成的图标会掉落在每一列的最前面
-						// 如果新的 md position 计算只需要：
-						// 每一列的基础位置 + 新生成的位置
-						return [basePos + index, this.getRandomTgmByIcon(weights)];
-					})
-			);
-		});
+		const newMds = rns!
+			.map((iconsByCol, colIndex) => {
+				const basePos = colIndex * colLength;
+				return flatten(
+					iconsByCol
+						.filter((icon) => icon === gmByIcon)
+						.map((_, index) => {
+							// 新生成的图标会掉落在每一列的最前面
+							// 那么新的 md position 计算只需要：每一列的基础位置 + 新生成的位置
+							return [basePos + index, this.getRandomTgmByIcon(weights)];
+						})
+				);
+			})
+			.filter((md) => md.length);
 		const result = [...(currentMds || []), ...newMds] as [number, number][];
 		return isEmpty(result) ? null : result;
 	}

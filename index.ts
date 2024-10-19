@@ -141,16 +141,17 @@ export default class BaseSlot {
 	 * @param {array} options.icons 必填，最新的rl图标信息
 	 * @param {number} options.gmByIcon 必填，当前的倍数图标id信息 如果是图标id2对应倍数信息，那么给 2
 	 * @param {array} options.preMd 上一次的 md 信息
-	 * @param {object} options.bwp 当前rl中的中奖信息
+	 * @param {object} options.preBwp 上一次rl中的中奖信息
 	 * @param {object} options.rns 当前rl的掉落图标信息
 	 * @param {array} options.weights 倍数权重表集合，根据合并框的长度来取对应的权重表，key是框的长度，value是长度对应权重表
 	 * @param {number} options.colLength 每一列的长度
+	 * @param {object} options.ebb 当前每一列中的边框信息
 	 */
 	public getMd({
 		icons,
 		gmByIcon,
 		preMd,
-		bwp,
+		preBwp,
 		rns,
 		weights,
 		ebb,
@@ -162,11 +163,11 @@ export default class BaseSlot {
 		colLength: number;
 		ebb?: Record<string, { fp: number; lp: number; bt: number; ls: number }>;
 		preMd?: [number, number][] | null;
-		bwp?: Record<string, number[][]> | null;
+		preBwp?: Record<string, number[][]> | null;
 		rns?: number[][] | null;
 	}): [number, number][] | null {
 		// 非掉落下的图标倍数信息
-		if (isEmpty(bwp) && isEmpty(rns)) {
+		if (isEmpty(rns)) {
 			let idx = 0;
 			const ebbValues = values(ebb);
 			const result = flatten(
@@ -200,12 +201,9 @@ export default class BaseSlot {
 			);
 			return isEmpty(result) ? null : result;
 		}
-		if (isEmpty(rns)) {
-			throw new Error("掉落的情况下，rns不能为空");
-		}
 		// 掉落下的图标倍数信息
 		// 1. 获取删除的图标位置，需要去重
-		const delPoss = union(flatMapDeep(values(bwp)));
+		const delPoss = union(flatMapDeep(values(preBwp)));
 		// 2. 根据删除的图标位置信息来更新 preMd 中的位置信息
 		const currentMds = preMd?.map(([mdPos, gm]) => {
 			// 获取移动的长度

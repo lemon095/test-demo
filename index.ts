@@ -220,7 +220,12 @@ export default class BaseSlot {
 				const isEqualCol = delCol === mdCol;
 				return isEqualCol && isNeedMove;
 			}).length;
-			return [mdPos - moveLength, gm];
+			const colIndex = Math.floor(mdPos / colLength);
+			const colLastPos = colIndex * colLength + (colLength - 1);
+			if (mdPos + moveLength > colLastPos) {
+				throw new Error("超出边界");
+			}
+			return [mdPos + moveLength, gm];
 		});
 		// 3. 根据新生成的图标信息来生成新的图标倍数信息和索引位置
 		// 这时候不需要考虑 ebb，因为掉落不会重新生成框信息
@@ -229,12 +234,15 @@ export default class BaseSlot {
 				const basePos = colIndex * colLength;
 				return flatten(
 					iconsByCol
-						.filter((icon) => icon === gmByIcon)
-						.map((_, index) => {
+						.map((icon, index) => {
 							// 新生成的图标会掉落在每一列的最前面
 							// 那么新的 md position 计算只需要：每一列的基础位置 + 新生成的位置
-							return [basePos + index, this.getRandomTgmByIcon(weights[1])];
+							if (icon === gmByIcon) {
+								return [basePos + index, this.getRandomTgmByIcon(weights[1])];
+							}
+							return null;
 						})
+						.filter(isArray)
 				);
 			})
 			.filter((md) => md.length);

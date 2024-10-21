@@ -103,7 +103,7 @@ export default class BaseSlot {
 		if (!isEmpty(preTwp) && !isEmpty(trns)) {
 			// 掉落下的图标倍数信息
 			// 获取删除的位置信息
-			const delPoss = flatMapDeep(values(preTwp));
+			const delPoss = union(flatMapDeep(values(preTwp)));
 			// 先修改 preTmd 的位置信息
 			const currentTmd = preTmd?.map(([pos, tgm]) => {
 				const len = delPoss.filter((delPos) => delPos < pos).length;

@@ -117,18 +117,20 @@ describe("极速：tmd 计算", () => {
 	it("上一次中奖且中奖位置小于倍数图标的位置，本次掉落出现 2", () => {
 		expect(
 			slot.getTmd({
-				icons: [6, 1, 4, 2],
-				preTmd: [[3, 2]],
-				preTwp: { 9: [0, 1] },
-				trns: [2, 2],
+				icons: [12, 3, 9, 10],
+				preTmd: [[2, 3]],
+				preTwp: {
+					"4": [1],
+					"6": [1],
+					"7": [1],
+					"8": [1],
+					"11": [1],
+				},
+				trns: [10],
 				gmByIcon: 2,
 				weights: [3, 3],
 			})
-		).toEqual([
-			[1, 2],
-			[2, 3],
-			[3, 3],
-		]);
+		).toEqual([[1, 3]]);
 	});
 });
 describe("极速: acw计算", () => {
@@ -628,46 +630,46 @@ describe("极速：md 计算", () => {
 	});
 });
 describe("极速: ctw计算", () => {
-  it("上一次没中奖，本次也没有中奖", () => {
-    expect(slot.getCtw({ lw: null, acw: 0, oldWp: null, tgm: 1 })).toBe(0);
-  });
-  it("上一次没中奖，本次中奖", () => {
-    expect(
-      slot.getCtw({
-        lw: {
-          "6": 7.2,
-        },
-        acw: 7.2,
-        oldWp: null,
-        tgm: 26,
-      })
-    ).toBe(7.2);
-  });
-  it("上一次中奖，本次没有中奖", () => {
-    expect(
-      slot.getCtw({
-        lw: null,
-        acw: 7.2,
-        oldWp: {
-          "6": [3, 4, 7, 10, 11],
-        },
-        tgm: 31,
-      })
-    ).toBe(216);
-  });
-  it("上一次中奖，本次中奖", () => {
-    expect(
-      slot.getCtw({
-        lw: {
-          "11": 1.8,
-        },
-        acw: 14.4,
-        oldWp: {
-          "5": [3],
-          "9": [4, 9, 14, 17, 18],
-        },
-        tgm: 0,
-      })
-    ).toBe(1.8);
-  });
+	it("上一次没中奖，本次也没有中奖", () => {
+		expect(slot.getCtw({ lw: null, acw: 0, oldWp: null, tgm: 1 })).toBe(0);
+	});
+	it("上一次没中奖，本次中奖", () => {
+		expect(
+			slot.getCtw({
+				lw: {
+					"6": 7.2,
+				},
+				acw: 7.2,
+				oldWp: null,
+				tgm: 26,
+			})
+		).toBe(7.2);
+	});
+	it("上一次中奖，本次没有中奖", () => {
+		expect(
+			slot.getCtw({
+				lw: null,
+				acw: 7.2,
+				oldWp: {
+					"6": [3, 4, 7, 10, 11],
+				},
+				tgm: 31,
+			})
+		).toBe(216);
+	});
+	it("上一次中奖，本次中奖", () => {
+		expect(
+			slot.getCtw({
+				lw: {
+					"11": 1.8,
+				},
+				acw: 14.4,
+				oldWp: {
+					"5": [3],
+					"9": [4, 9, 14, 17, 18],
+				},
+				tgm: 0,
+			})
+		).toBe(1.8);
+	});
 });

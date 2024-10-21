@@ -83,6 +83,7 @@ export default class BaseSlot {
 	 * @param {object} options.preTwp 上一次trl中的中奖信息
 	 * @param {array} options.trns 当前trl的掉落图标信息
 	 * @param {array} options.weights 倍数权重表
+	 * @param {object} options.preWp 上一次rl的中奖信息
 	 * @returns {array} tmd 倍数信息
 	 */
 	public getTmd({
@@ -92,6 +93,7 @@ export default class BaseSlot {
 		preTwp,
 		trns,
 		weights,
+		preWp,
 	}: {
 		icons: number[];
 		gmByIcon: number;
@@ -99,8 +101,9 @@ export default class BaseSlot {
 		preTmd?: [number, number][] | null;
 		preTwp?: Record<string, number[]> | null;
 		trns?: number[] | null;
+		preWp?: Record<string, number[]>;
 	}): [number, number][] | null {
-		if (!isEmpty(preTwp) && !isEmpty(trns)) {
+		if (this.isPreWin(preWp)) {
 			// 掉落下的图标倍数信息
 			// 获取删除的位置信息
 			const delPoss = union(flatMapDeep(values(preTwp)));

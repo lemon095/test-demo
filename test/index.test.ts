@@ -83,6 +83,7 @@ describe("极速：tmd 计算", () => {
 				trns: [6],
 				gmByIcon: 2,
 				weights: [2, 3],
+				preWp: { 1: [2] },
 			})
 		).toEqual([[2, 2]]);
 	});
@@ -95,6 +96,7 @@ describe("极速：tmd 计算", () => {
 				trns: [6],
 				gmByIcon: 2,
 				weights: [2, 3],
+				preWp: { 1: [2] },
 			})
 		).toEqual([[2, 2]]);
 	});
@@ -107,6 +109,7 @@ describe("极速：tmd 计算", () => {
 				trns: [2, 2],
 				gmByIcon: 2,
 				weights: [5, 5],
+				preWp: { 1: [2] },
 			})
 		).toEqual([
 			[0, 2],
@@ -117,18 +120,12 @@ describe("极速：tmd 计算", () => {
 	it("上一次中奖且中奖位置小于倍数图标的位置，本次掉落出现 2", () => {
 		expect(
 			slot.getTmd({
-				icons: [12, 3, 9, 10],
-				preTmd: [[2, 3]],
-				preTwp: {
-					"4": [1],
-					"6": [1],
-					"7": [1],
-					"8": [1],
-					"11": [1],
-				},
+				icons: [12, 2, 9, 10],
+				preTmd: [[1, 3]],
 				trns: [10],
 				gmByIcon: 2,
-				weights: [3, 3],
+				weights: [2, 2],
+				preWp: { 1: [2, 3, 4] },
 			})
 		).toEqual([[1, 3]]);
 	});

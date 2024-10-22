@@ -12,6 +12,40 @@ import {
 import random from "random";
 export default class BaseSlot {
 	/**
+	 * 随机 rl 中的图标信息
+	 * @param weights - 权重表
+	 * @param count - 每一列的图标数量
+	 * @returns rl的随机信息
+	 */
+	public getRandomRl(weights: number[][], count: number) {
+		let result: number[][] = [];
+		for (let i = 0; i < weights.length; i++) {
+			const row: number[] = [];
+			const colWeight = weights[i];
+			for (let j = 0; j < count; j++) {
+				const idx = random.int(0, colWeight.length - 1);
+				row.push(colWeight[idx]);
+			}
+			result.push(row as number[]);
+		}
+		return result;
+	}
+
+	/**
+	 * 随机 trl 中的图标信息
+	 * @param weights - trl 的权重表
+	 * @returns trl的随机信息
+	 */
+	public getRandomTrl(weights: number[][]) {
+		let result: number[] = [];
+		for (let i = 0; i < weights.length; i++) {
+			const colWeight = weights[i];
+			const idx = random.int(0, colWeight.length - 1);
+			result.push(colWeight[idx]);
+		}
+		return result;
+	}
+	/**
 	 * 是否大于等于某个次数，默认值为 15
 	 * @param count 当前次数
 	 * @param total 总数，默认值为 15

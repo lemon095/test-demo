@@ -670,3 +670,75 @@ describe("极速: ctw计算", () => {
 		).toBe(1.8);
 	});
 });
+describe("通用：rl 随机图标", () => {
+	it("rl 随机 5 行 6 列", () => {
+		const rl = slot.getRandomRl(
+			[
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+			],
+			5
+		);
+		expect(rl).toHaveLength(6);
+		rl.forEach((column) => {
+			expect(column).toHaveLength(5);
+		});
+	});
+	it("rl 随机 3 行 3 列", () => {
+		const rl = slot.getRandomRl(
+			[
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+			],
+			3
+		);
+		expect(rl).toHaveLength(3);
+		rl.forEach((column) => {
+			expect(column).toHaveLength(3);
+		});
+	});
+	it("rl 随机 1 行 3 列", () => {
+		const rl = slot.getRandomRl(
+			[
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+			],
+			1
+		);
+		expect(rl).toHaveLength(3);
+		rl.forEach((column) => {
+			expect(column).toHaveLength(1);
+		});
+	});
+});
+describe("通用：trl 随机图标", () => {
+	it("trl 随机 1 行 4 列", () => {
+		const trl = slot.getRandomTrl([
+			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+		]);
+		expect(trl).toHaveLength(4);
+	});
+});
+describe("通用：trl 随机图标", () => {
+	it("trl 随机 1 行 3 列", () => {
+		const trl = slot.getRandomTrl([
+			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
+		]);
+		expect(trl).toHaveLength(3);
+	});
+	it("trl 随机 1 行 1 列", () => {
+		const trl = slot.getRandomTrl([[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]]);
+		expect(trl).toHaveLength(1);
+	});
+});

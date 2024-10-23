@@ -1,7 +1,8 @@
-import { test, expect, describe, it } from "bun:test";
-import BaseSlot from "..";
+import { expect, describe, it } from "bun:test";
+import BaseSlot, { UserType } from "..";
 import { chunk } from "lodash";
-const slot = new BaseSlot();
+import { RL_WEIGHTS, TRL_WEIGHTS } from "../TetWeights";
+const slot = new BaseSlot({ rlWeights: RL_WEIGHTS, trlWeights: TRL_WEIGHTS });
 describe("通用：是否超过15", () => {
 	it("测试边界情况，比如-1,null,undefined,NaN,空字符串", () => {
 		expect(slot.isNotWinOver15(-1)).toBeFalsy();
@@ -672,7 +673,7 @@ describe("极速: ctw计算", () => {
 });
 describe("通用：rl 随机图标", () => {
 	it("rl 随机 5 行 6 列", () => {
-		const rl = slot.getRandomRl(
+		const rl = slot.randomRl(
 			[
 				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
 				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
@@ -689,7 +690,7 @@ describe("通用：rl 随机图标", () => {
 		});
 	});
 	it("rl 随机 3 行 3 列", () => {
-		const rl = slot.getRandomRl(
+		const rl = slot.randomRl(
 			[
 				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
 				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
@@ -703,7 +704,7 @@ describe("通用：rl 随机图标", () => {
 		});
 	});
 	it("rl 随机 1 行 3 列", () => {
-		const rl = slot.getRandomRl(
+		const rl = slot.randomRl(
 			[
 				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
 				[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
@@ -719,7 +720,7 @@ describe("通用：rl 随机图标", () => {
 });
 describe("通用：trl 随机图标", () => {
 	it("trl 随机 1 行 4 列", () => {
-		const trl = slot.getRandomTrl([
+		const trl = slot.randomTrl([
 			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
 			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
 			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
@@ -730,7 +731,7 @@ describe("通用：trl 随机图标", () => {
 });
 describe("通用：trl 随机图标", () => {
 	it("trl 随机 1 行 3 列", () => {
-		const trl = slot.getRandomTrl([
+		const trl = slot.randomTrl([
 			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
 			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
 			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
@@ -738,7 +739,41 @@ describe("通用：trl 随机图标", () => {
 		expect(trl).toHaveLength(3);
 	});
 	it("trl 随机 1 行 1 列", () => {
-		const trl = slot.getRandomTrl([[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]]);
+		const trl = slot.randomTrl([[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]]);
 		expect(trl).toHaveLength(1);
+	});
+});
+describe("通用：rl 权重表", () => {
+	it("试玩用户的权重表", () => {
+		slot.userType = UserType.trail;
+		expect(slot.rlTables).toBeArrayOfSize(6);
+		slot.rlTables.forEach((column) => expect(column).toBeArrayOfSize(520));
+	});
+	it("新用户的权重表", () => {
+		slot.userType = UserType.newuser;
+		expect(slot.rlTables).toBeArrayOfSize(6);
+		slot.rlTables.forEach((column) => expect(column).toBeArrayOfSize(520));
+	});
+	it("普通用户的权重表", () => {
+		slot.userType = UserType.common;
+		expect(slot.rlTables).toBeArrayOfSize(6);
+		slot.rlTables.forEach((column) => expect(column).toBeArrayOfSize(520));
+	});
+});
+describe("通用：trl 权重表", () => {
+	it("试玩用户的权重表", () => {
+		slot.userType = UserType.trail;
+		expect(slot.trlTables).toBeArrayOfSize(4);
+		slot.trlTables.forEach((column) => expect(column).toBeArrayOfSize(130));
+	});
+	it("新用户的权重表", () => {
+		slot.userType = UserType.newuser;
+		expect(slot.trlTables).toBeArrayOfSize(4);
+		slot.trlTables.forEach((column) => expect(column).toBeArrayOfSize(130));
+	});
+	it("普通用户的权重表", () => {
+		slot.userType = UserType.common;
+		expect(slot.trlTables).toBeArrayOfSize(4);
+		slot.trlTables.forEach((column) => expect(column).toBeArrayOfSize(130));
 	});
 });

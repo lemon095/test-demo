@@ -5,19 +5,81 @@ import {
 	isArray,
 	isEmpty,
 	isNumber,
+	isUndefined,
 	keys,
 	union,
 	values,
 } from "lodash";
 import random from "random";
+
+export enum UserType {
+	/** 试玩 */
+	trail = 0,
+	/** 新用户 */
+	newuser = 1,
+	/** 正常用户 */
+	common = 2,
+}
+
 export default class BaseSlot {
+	/** rl的权重表 */
+	private rlWeightsMap: PGSlot.RandomWeights;
+	/** trl的权重表 */
+	private trlWeightsMap: PGSlot.RandomWeights;
+	/** 用户类型 */
+	private innerUserType?: PGSlot.UserType;
+	/**
+	 * base slot 构造器
+	 * @param {Object} options - 配置选项
+	 * @param {array} options.rlWeights 必填，rl的权重表
+	 * @param {array} options.trlWeights 必填，trl的权重表
+	 */
+	constructor({
+		rlWeights,
+		trlWeights,
+	}: {
+		rlWeights: PGSlot.RandomWeights;
+		trlWeights: PGSlot.RandomWeights;
+	}) {
+		this.rlWeightsMap = rlWeights;
+		this.trlWeightsMap = trlWeights;
+	}
+	/**
+	 * rl 的权重表信息
+	 */
+	public get rlTables(): number[][] {
+		if (isUndefined(this.userType)) {
+			throw new Error("请先设置用户类型");
+		}
+		return this.convertWeights(this.rlWeightsMap[this.userType]);
+	}
+	/**
+	 * trl 的权重表信息
+	 */
+	public get trlTables(): number[][] {
+		if (isUndefined(this.userType)) {
+			throw new Error("请先设置用户类型");
+		}
+		return this.convertWeights(this.trlWeightsMap[this.userType]);
+	}
+	/**
+	 * 设置用户类型
+	 * @param {PGSlot.UserType} type - 用户类型
+	 */
+	public set userType(type: PGSlot.UserType) {
+		this.innerUserType = type;
+	}
+	/** 获取用户类型 */
+	public get userType(): PGSlot.UserType | undefined {
+		return this.innerUserType;
+	}
 	/**
 	 * 随机 rl 中的图标信息
 	 * @param weights - 权重表
 	 * @param count - 每一列的图标数量
 	 * @returns rl的随机信息
 	 */
-	public getRandomRl(weights: number[][], count: number) {
+	public randomRl(weights: number[][], count: number) {
 		let result: number[][] = [];
 		for (let i = 0; i < weights.length; i++) {
 			const row: number[] = [];
@@ -36,7 +98,7 @@ export default class BaseSlot {
 	 * @param weights - trl 的权重表
 	 * @returns trl的随机信息
 	 */
-	public getRandomTrl(weights: number[][]) {
+	public randomTrl(weights: number[][]) {
 		let result: number[] = [];
 		for (let i = 0; i < weights.length; i++) {
 			const colWeight = weights[i];
@@ -408,5 +470,16 @@ export default class BaseSlot {
 			ctw = ctw.add(lw[key]);
 		});
 		return ctw.toNumber();
+	}
+
+	/**
+	 * 将权重配置转为权重表
+	 * @param {PGSlot.WeightCfg[][]} weights - 权重配置信息
+	 * @returns 权重表数据
+	 */
+	public convertWeights(weights: PGSlot.WeightCfg[][]): number[][] {
+		return weights.map((item) =>
+			flatten(item.map((weight) => Array(weight.weight).fill(weight.icon)))
+		);
 	}
 }

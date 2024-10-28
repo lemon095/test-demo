@@ -166,6 +166,26 @@ export default class BaseChicky {
 		console.log(result);
 		return "test";
 	}
+
+	/**
+	 * 上一局是否赢
+	 * @returns {boolean} true:赢，false:输
+	 */
+	public get isPrevWin(): boolean {
+		return this.isCurrentWin(CarPos.left, GameOperate.left);
+	}
+
+	/**
+	 * 本局是否输赢
+	 * @param {CarPos} 车的位置
+	 * @param {GameOperate} 小鸡的位置，选填。不填则为当局游戏的小鸡位置
+	 * @returns {boolean} true:赢，false:输
+	 */
+	public isCurrentWin(carPos: CarPos, ps = this.ps) {
+		if (ps === GameOperate.left && carPos === CarPos.left) return true;
+		if (ps === GameOperate.right && carPos === CarPos.right) return true;
+		return false;
+	}
 	/**
 	 * 随机车的位置
 	 * @returns {CarPos} 左二右一

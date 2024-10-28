@@ -45,7 +45,7 @@ export default class BaseChicky {
 	 * @param {PGSlot.WeightCfg[]} weights - 权重配置信息
 	 * @returns 权重表数据
 	 */
-	public convertWeights(weights: PGSlot.WeightCfg[]): number[][] {
+	public convertWeights(weights: PGSlot.WeightCfg[]): number[] {
 		return flatMapDeep(
 			weights.map((item) => Array(item.weight).fill(item.icon))
 		);

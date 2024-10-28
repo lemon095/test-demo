@@ -95,14 +95,12 @@ export default class BaseChicky {
 
   /**
    * agcc 累计金币的数量
-   * @gcc 本次金币的数量
-   * @ib true: 金币模式; false: 普通模式
-   * @ps 表示状态 1,2表示操作阶段，3表示继续/开始游戏，4表示领取
-   * @gcc 本次金币的数量
-   * @preAgcc 上一次金币的数量
+   * @param {Object} options - 配置选项
+   * @param {number} options.gcc 本次金币的数量
+   * @param {number} options.preAgcc 上一次累计的金币数量
    */
-  public agcc({ gcc, preAgcc }: { gcc: number; preAgcc: number }): number {
-    if (!this.ib || this.ps === 3) {
+  public getAgcc({ gcc, preAgcc }: { gcc: number; preAgcc: number }): number {
+    if (!this.ib || this.ps === GameOperate.start_play) {
       return 0;
     }
 
@@ -111,9 +109,10 @@ export default class BaseChicky {
 
   /**
    * agcv 收集的金币金额
-   * @agcc 金币的总数量
+   *
+   * @param {number} agcc 金币的总数量
    */
-  public agcv(agcc: number): number {
+  public getAgcv(agcc: number): number {
     const agcv = new Decimal(agcc).mul(this.totalBet).mul(0.5).toNumber();
     return agcv;
   }

@@ -25,4 +25,12 @@ export default class BaseChicky {
 	public testFn() {
 		return "test";
 	}
+	/**
+	 * 随机车的位置
+	 * @returns {number} 左二右一
+	 */
+	public getRR(): 1 | 2 {
+		const r = random.int(1, 2);
+		return r as 1 | 2;
+	}
 }

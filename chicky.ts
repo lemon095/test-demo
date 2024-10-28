@@ -12,6 +12,7 @@ import {
 } from "lodash";
 import random from "random";
 
+/** 用户类型 */
 export enum UserType {
 	/** 试玩 */
 	trail = 0,
@@ -21,7 +22,68 @@ export enum UserType {
 	common = 2,
 }
 
+/** 用户操作 */
+export enum GameOperate {
+	/** 小鸡在左侧 */
+	left = 1,
+	/** 小鸡在右侧 */
+	right = 2,
+	/** 开始游戏 */
+	start_play = 3,
+	/** 游戏胜利/领奖 */
+	winner_paly = 4,
+}
+
+/** 车（物体）的位置 */
+export enum CarPos {
+	/** 车在左侧 */
+	left = 2,
+	/** 车在右侧 */
+	right = 1,
+}
+
+export interface BaseChickyParams {
+	/** 用户行为 */
+	ps: GameOperate;
+	/** 金币模式信息 */
+	ib: boolean;
+	/** 投注额 */
+	cs: number;
+	/** 投注线 */
+	ml: number;
+}
+
 export default class BaseChicky {
+	public readonly ps: GameOperate;
+	public readonly ib: boolean;
+	public readonly cs: number;
+	public readonly ml: number;
+	public readonly totalBet: number;
+
+	/**
+	 * base Chicky 构造器
+	 * @param {Object} options - 配置选项
+	 * @param {GameOperate} options.ps 必填，用户的操作信息
+	 * @param {boolean} options.ib 必填，是否为金币模式
+	 * @param {boolean} options.cs 必填，投注额
+	 * @param {boolean} options.ml 必填，投注线
+	 */
+	constructor({ ps, ib, cs, ml }: BaseChickyParams) {
+		this.ps = ps;
+		this.ib = ib;
+		this.cs = cs;
+		this.ml = ml;
+		this.totalBet = new Decimal(cs).mul(ml).toNumber();
+	}
+
+	/**
+	 * 是否为金币模式
+	 * @returns {boolean} true:金币模式，false:非金币模式
+	 */
+	public get isGlod(): boolean {
+		return this.ib;
+	}
+
 	public testFn() {
 		const result = this.convertWeights([
 			{ icon: 0, weight: 22 },
@@ -34,11 +96,11 @@ export default class BaseChicky {
 	}
 	/**
 	 * 随机车的位置
-	 * @returns {number} 左二右一
+	 * @returns {CarPos} 左二右一
 	 */
-	public getRR(): 1 | 2 {
-		const r = random.int(1, 2);
-		return r as 1 | 2;
+	public getRR(): CarPos {
+		const r = random.int(CarPos.left, CarPos.right);
+		return r;
 	}
 	/**
 	 * 将权重配置转为权重表

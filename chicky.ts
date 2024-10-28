@@ -51,6 +51,8 @@ export interface BaseChickyParams {
 	cs: number;
 	/** 投注线 */
 	ml: number;
+	/** 上一局的游戏信息 */
+	prevSi?: Record<string, any>;
 }
 
 export default class BaseChicky {
@@ -59,6 +61,7 @@ export default class BaseChicky {
 	public readonly cs: number;
 	public readonly ml: number;
 	public readonly totalBet: number;
+	public readonly prevSi?: Record<string, any>;
 
 	/**
 	 * base Chicky 构造器
@@ -67,12 +70,14 @@ export default class BaseChicky {
 	 * @param {boolean} options.ib 必填，是否为金币模式
 	 * @param {boolean} options.cs 必填，投注额
 	 * @param {boolean} options.ml 必填，投注线
+	 * @param {Record<string, any>} options.prevSi 可选，上次游戏信息
 	 */
-	constructor({ ps, ib, cs, ml }: BaseChickyParams) {
+	constructor({ ps, ib, cs, ml, prevSi }: BaseChickyParams) {
 		this.ps = ps;
 		this.ib = ib;
 		this.cs = cs;
 		this.ml = ml;
+		this.prevSi = prevSi;
 		this.totalBet = new Decimal(cs).mul(ml).toNumber();
 	}
 
@@ -100,7 +105,7 @@ export default class BaseChicky {
 	 * @returns {boolean} true:赢，false:输
 	 */
 	public get isPrevWin(): boolean {
-		return this.isCurrentWin(CarPos.left, GameOperate.left);
+		return this.isCurrentWin(this.prevSi?.rr, this.prevSi?.ps);
 	}
 
 	/**

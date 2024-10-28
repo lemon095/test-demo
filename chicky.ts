@@ -60,6 +60,17 @@ export default class BaseChicky {
 
     return 0;
   }
+  /**
+   * 将权重配置转为权重表
+   * @param {PGSlot.WeightCfg[][]} weights - 权重配置信息
+   * @returns 权重表数据
+   */
+  public convertWeights(weights: PGSlot.WeightCfg[][]): number[][] {
+    return weights.map((item) =>
+      flatten(item.map((weight) => Array(weight.weight).fill(weight.icon)))
+    );
+  }
+
   public testFn() {
     return "test";
   }

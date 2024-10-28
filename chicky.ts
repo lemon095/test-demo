@@ -51,46 +51,84 @@ export interface BaseChickyParams {
   cs: number;
   /** 投注线 */
   ml: number;
+  prevSi?: Record<string, any>;
 }
 
-export default class BaseChicky {
-  /**
-   * @ib true: 金币模式; false: 普通模式
-   * @ps 表示状态 1,2表示操作阶段，3表示继续/开始游戏，4表示领取
-   */
-  public gcc({
-    ib,
-    ps,
-    isWin,
-  }: {
-    ib: boolean;
-    ps: number;
-    isWin: boolean;
-  }): number {
-    if (!ib || ps === 3 || ps === 4 || !isWin) {
-      return 0;
-    }
-    //根据概率随机
-    const confProbability: Record<number, number> = {
-      0: 22,
-      1: 59,
-      2: 18,
-      3: 1,
-    };
-    let Data: Record<number, number> = {};
-    let totalProbability = 0;
-    for (const key in confProbability) {
-      totalProbability += confProbability[key];
-      Data[key] = totalProbability;
-    }
-    const randNum = random.int(1, 100);
-    for (const key in Data) {
-      if (randNum < Data[key]) {
-        return Number(key);
-      }
-    }
+// export default class BaseChicky {
+//   /**
+//    * @ib true: 金币模式; false: 普通模式
+//    * @ps 表示状态 1,2表示操作阶段，3表示继续/开始游戏，4表示领取
+//    */
+//   public gcc({
+//     ib,
+//     ps,
+//     isWin,
+//   }: {
+//     ib: boolean;
+//     ps: number;
+//     isWin: boolean;
+//   }): number {
+//     if (!ib || ps === 3 || ps === 4 || !isWin) {
+//       return 0;
+//     }
+//     //根据概率随机
+//     const confProbability: Record<number, number> = {
+//       0: 22,
+//       1: 59,
+//       2: 18,
+//       3: 1,
+//     };
+//     let Data: Record<number, number> = {};
+//     let totalProbability = 0;
+//     for (const key in confProbability) {
+//       totalProbability += confProbability[key];
+//       Data[key] = totalProbability;
+//     }
+//     const randNum = random.int(1, 100);
+//     for (const key in Data) {
+//       if (randNum < Data[key]) {
+//         return Number(key);
+//       }
+//     }
 
-    return 0;
+//     return 0;
+//   }
+// 	/** 用户行为 */
+// 	ps: GameOperate;
+// 	/** 金币模式信息 */
+// 	ib: boolean;
+// 	/** 投注额 */
+// 	cs: number;
+// 	/** 投注线 */
+// 	ml: number;
+// 	/** 上一局的游戏信息 */
+// 	prevSi?: Record<string, any>;
+// }
+
+export default class BaseChicky {
+  public readonly ps: GameOperate;
+  public readonly ib: boolean;
+  public readonly cs: number;
+  public readonly ml: number;
+  public readonly totalBet: number;
+  public readonly prevSi?: Record<string, any>;
+
+  /**
+   * base Chicky 构造器
+   * @param {Object} options - 配置选项
+   * @param {GameOperate} options.ps 必填，用户的操作信息
+   * @param {boolean} options.ib 必填，是否为金币模式
+   * @param {boolean} options.cs 必填，投注额
+   * @param {boolean} options.ml 必填，投注线
+   * @param {Record<string, any>} options.prevSi 可选，上次游戏信息
+   */
+  constructor({ ps, ib, cs, ml, prevSi }: BaseChickyParams) {
+    this.ps = ps;
+    this.ib = ib;
+    this.cs = cs;
+    this.ml = ml;
+    this.prevSi = prevSi;
+    this.totalBet = new Decimal(cs).mul(ml).toNumber();
   }
 
   /**
@@ -116,27 +154,12 @@ export default class BaseChicky {
     const agcv = new Decimal(agcc).mul(this.totalBet).mul(0.5).toNumber();
     return agcv;
   }
-
-  public readonly ps: GameOperate;
-  public readonly ib: boolean;
-  public readonly cs: number;
-  public readonly ml: number;
-  public readonly totalBet: number;
-
   /**
-   * base Chicky 构造器
-   * @param {Object} options - 配置选项
-   * @param {GameOperate} options.ps 必填，用户的操作信息
-   * @param {boolean} options.ib 必填，是否为金币模式
-   * @param {boolean} options.cs 必填，投注额
-   * @param {boolean} options.ml 必填，投注线
+   * 上一局是否赢
+   * @returns {boolean} true:赢，false:输
    */
-  constructor({ ps, ib, cs, ml }: BaseChickyParams) {
-    this.ps = ps;
-    this.ib = ib;
-    this.cs = cs;
-    this.ml = ml;
-    this.totalBet = new Decimal(cs).mul(ml).toNumber();
+  public get isPrevWin(): boolean {
+    return this.isCurrentWin(this.prevSi?.rr, this.prevSi?.ps);
   }
 
   /**
@@ -156,14 +179,6 @@ export default class BaseChicky {
     ]);
     console.log(result);
     return "test";
-  }
-
-  /**
-   * 上一局是否赢
-   * @returns {boolean} true:赢，false:输
-   */
-  public get isPrevWin(): boolean {
-    return this.isCurrentWin(CarPos.left, GameOperate.left);
   }
 
   /**

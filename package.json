@@ -3,8 +3,10 @@
 	"module": "index.ts",
 	"type": "module",
 	"scripts": {
-		"doc": "typedoc --out docs ./index.ts",
-		"test:basic": "bun test test/index.test.ts",
+		"docs": "bun docs:slot && bun docs:chicky",
+		"docs:slot": "typedoc --out docs/slot ./index.ts",
+		"docs:chicky": "typedoc --out docs/chicky ./chicky.ts",
+		"test:slot": "bun test test/index.test.ts",
 		"test:chicky": "bun test test/chicky.test.ts"
 	},
 	"devDependencies": {

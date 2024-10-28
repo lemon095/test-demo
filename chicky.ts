@@ -51,16 +51,24 @@ export default class BaseChicky {
       totalProbability += confProbability[key];
       Data[key] = totalProbability;
     }
-    const randNum = Math.random() * totalProbability;
+    const randNum = random.int(1, 100);
     for (const key in Data) {
       if (randNum < Data[key]) {
-        return key.toNumber();
+        return Number(key);
       }
     }
 
-    return 1;
+    return 0;
   }
   public testFn() {
     return "test";
+  }
+  /**
+   * 随机车的位置
+   * @returns {number} 左二右一
+   */
+  public getRR(): 1 | 2 {
+    const r = random.int(1, 2);
+    return r as 1 | 2;
   }
 }

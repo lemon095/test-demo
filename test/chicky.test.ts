@@ -1,8 +1,12 @@
 import { expect, describe, it, beforeAll, test } from "bun:test";
 import BaseChicky, { UserType } from "../chicky";
 import { chunk } from "lodash";
+<<<<<<< HEAD
 const slot = new BaseChicky();
 
+=======
+const slot = new BaseChicky({ cs: 1, ib: true, ml: 1, ps: 3 });
+>>>>>>> a5ea43f1736b82543e4b1cac02172b0d20979e2b
 describe("chicky test", () => {
   it("test", () => {
     expect(slot.testFn()).toBe("test");

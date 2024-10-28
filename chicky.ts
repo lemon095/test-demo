@@ -60,18 +60,48 @@ export default class BaseChicky {
 
     return 0;
   }
+
   /**
-   * 将权重配置转为权重表
-   * @param {PGSlot.WeightCfg[][]} weights - 权重配置信息
-   * @returns 权重表数据
+   * agcc 累计金币的数量
+   * @gcc 本次金币的数量
+   * @ib true: 金币模式; false: 普通模式
+   * @ps 表示状态 1,2表示操作阶段，3表示继续/开始游戏，4表示领取
+   * @gcc 本次金币的数量
+   * @preAgcc 上一次金币的数量
    */
-  public convertWeights(weights: PGSlot.WeightCfg[][]): number[][] {
-    return weights.map((item) =>
-      flatten(item.map((weight) => Array(weight.weight).fill(weight.icon)))
-    );
+  public agcc({
+    ib,
+    ps,
+    gcc,
+    preAgcc,
+  }: {
+    ib: boolean;
+    ps: number;
+    gcc: number;
+    preAgcc: number;
+  }): number {
+    if (!ib || ps === 3) {
+      return 0;
+    }
+
+    return preAgcc + gcc;
+  }
+
+  /**
+   * agcv 收集的金币金额
+   */
+  public agcv({ agcc, totalBet }: { agcc: number; totalBet: number }): number {
+    return 0;
   }
 
   public testFn() {
+    const result = this.convertWeights([
+      { icon: 0, weight: 22 },
+      { icon: 1, weight: 59 },
+      { icon: 2, weight: 18 },
+      { icon: 3, weight: 1 },
+    ]);
+    console.log(result);
     return "test";
   }
   /**
@@ -81,5 +111,15 @@ export default class BaseChicky {
   public getRR(): 1 | 2 {
     const r = random.int(1, 2);
     return r as 1 | 2;
+  }
+  /**
+   * 将权重配置转为权重表
+   * @param {PGSlot.WeightCfg[]} weights - 权重配置信息
+   * @returns 权重表数据
+   */
+  public convertWeights(weights: PGSlot.WeightCfg[]): number[][] {
+    return flatMapDeep(
+      weights.map((item) => Array(item.weight).fill(item.icon))
+    );
   }
 }

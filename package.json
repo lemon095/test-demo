@@ -3,7 +3,9 @@
 	"module": "index.ts",
 	"type": "module",
 	"scripts": {
-		"doc": "typedoc --out docs ./index.ts"
+		"doc": "typedoc --out docs ./index.ts",
+		"test:basic": "bun test test/index.test.ts",
+		"test:chicky": "bun test test/chicky.test.ts"
 	},
 	"devDependencies": {
 		"@types/bun": "latest",

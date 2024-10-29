@@ -213,7 +213,7 @@ export default class BaseChicky {
    * @returns {CarPos} 左二右一
    */
   public getRR(): CarPos {
-    const r = random.int(CarPos.left, CarPos.right);
+    const r = random.int(CarPos.right, CarPos.left);
     return r;
   }
   /**

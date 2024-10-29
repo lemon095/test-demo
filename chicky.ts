@@ -163,6 +163,42 @@ export default class BaseChicky {
   }
 
   /**
+   * gcv 本次金币的金额
+   * @param {Object} options - 配置选项
+   * @param {number} options.gcc 本次金币的数量
+   * @param {number} options.sgcv 每一枚金币的价值
+   */
+  public getGcv({ gcc, sgcv }: { gcc: number; sgcv: number }): number {
+    if (!this.ib) {
+      return 0;
+    }
+    const gcvCount = new Decimal(sgcv).mul(gcc).toNumber();
+    return gcvCount;
+  }
+
+  /**
+   * getSgcv 每一枚金币的价值
+   */
+  public getSgcv(): number {
+    if (!this.ib) {
+      return 0;
+    }
+    const amount = new Decimal(this.totalBet).mul(0.5).toNumber();
+
+    return amount;
+  }
+
+  /**
+   * getCfc 游戏状态
+   */
+  public getCfc(): number {
+    if (this.ps === 1 || this.ps === 2) {
+      return 1;
+    }
+    return 0;
+  }
+
+  /**
    * 是否为金币模式
    * @returns {boolean} true:金币模式，false:非金币模式
    */

@@ -54,20 +54,16 @@ export interface BaseChickyParams {
   prevSi?: Record<string, any>;
 }
 
-// export default class BaseChicky {
-// 	/** 用户行为 */
-// 	ps: GameOperate;
-// 	/** 金币模式信息 */
-// 	ib: boolean;
-// 	/** 投注额 */
-// 	cs: number;
-// 	/** 投注线 */
-// 	ml: number;
-// 	/** 上一局的游戏信息 */
-// 	prevSi?: Record<string, any>;
-// }
+export const ChickyMultiple: Record<number, number> = {
+  /**档位对应的倍率 */
+  1: 1.92,
+  2: 3.84,
+  3: 7.68,
+  4: 15.36,
+  5: 30.72,
+};
 
-export default class BaseChicky {
+export class BaseChicky {
   public readonly ps: GameOperate;
   public readonly ib: boolean;
   public readonly cs: number;
@@ -169,10 +165,38 @@ export default class BaseChicky {
   }
 
   /**
-   * getCfc 游戏状态
+   *
    */
-  public getCfc(): number {
-    if (this.ps === 1 || this.ps === 2) {
+  /**
+   * getGmi 倍率
+   * @param {number} cfc 游戏状态
+   */
+  public getGmi(cfc: number): number {
+    const preGmi = this.prevSi?.["gmi"] || 0;
+    if (cfc === 1) {
+      const preGmi = this.prevSi?.["gmi"] || 0;
+      return preGmi + 1;
+    }
+    return preGmi;
+  }
+
+  /**
+   * getGe
+   */
+  public getGe(): number[] {
+    if (this.ib) return [3, 11];
+    return [1, 11];
+  }
+
+  /**
+   * getCfc 游戏状态
+   * @param {boolean} isCurrentWin 本次是否中
+   */
+  public getCfc(isCurrentWin: boolean): number {
+    if (
+      isCurrentWin &&
+      (this.ps === GameOperate.left || this.ps === GameOperate.right)
+    ) {
       return 1;
     }
     return 0;
@@ -203,9 +227,10 @@ export default class BaseChicky {
    * @param {GameOperate} 小鸡的位置，选填。不填则为当局游戏的小鸡位置
    * @returns {boolean} true:赢，false:输
    */
-  public isCurrentWin(carPos: CarPos, ps = this.ps) {
+  public isCurrentWin(carPos: CarPos, ps = this.ps): boolean {
     if (ps === GameOperate.left && carPos === CarPos.left) return true;
     if (ps === GameOperate.right && carPos === CarPos.right) return true;
+    if (ps == GameOperate.winner_paly && this.isPrevWin) return true;
     return false;
   }
   /**

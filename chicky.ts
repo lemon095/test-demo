@@ -40,6 +40,8 @@ export enum CarPos {
   left = 2,
   /** 车在右侧 */
   right = 1,
+  /** 暂无状态  */
+  None = 0,
 }
 
 export interface BaseChickyParams {
@@ -63,7 +65,7 @@ export const ChickyMultiple: Record<number, number> = {
   5: 30.72,
 };
 
-export class BaseChicky {
+export default class BaseChicky {
   public readonly ps: GameOperate;
   public readonly ib: boolean;
   public readonly cs: number;
@@ -175,17 +177,10 @@ export class BaseChicky {
     const preGmi = this.prevSi?.["gmi"] || 0;
     if (cfc === 1) {
       const preGmi = this.prevSi?.["gmi"] || 0;
-      return preGmi + 1;
+      return ChickyMultiple[preGmi + 1];
     }
-    return preGmi;
-  }
-
-  /**
-   * getGe
-   */
-  public getGe(): number[] {
-    if (this.ib) return [3, 11];
-    return [1, 11];
+    if (preGmi === 0) return 0;
+    return ChickyMultiple[preGmi];
   }
 
   /**
@@ -233,11 +228,13 @@ export class BaseChicky {
     if (ps == GameOperate.winner_paly && this.isPrevWin) return true;
     return false;
   }
+
   /**
    * 随机车的位置
    * @returns {CarPos} 左二右一
    */
   public getRR(): CarPos {
+    if (this.isPrevWin) return CarPos.None;
     const r = random.int(CarPos.right, CarPos.left);
     return r;
   }
@@ -250,5 +247,92 @@ export class BaseChicky {
     return flatMapDeep(
       weights.map((item) => Array(item.weight).fill(item.icon))
     );
+  }
+
+  /**
+   * 当前是否为购买
+   * @returns {boolean} true:是，false:否
+   */
+  public get isBuyPlay() {
+    return this.ps === GameOperate.start_play;
+  }
+
+  /**
+   * 获取 cr
+   * @returns {number} count
+   */
+  public getCr(): number {
+    return this.prevSi?.nr || 1;
+  }
+
+  /**
+   * 获取 nr
+   * @returns {number} count
+   */
+  public getNr(carPos: CarPos): number {
+    // 游戏购买则为 1
+    if (this.isBuyPlay) return 1;
+    /** 游戏失败则为 0 */
+    if (!this.isCurrentWin(carPos, this.ps)) return 0;
+    /** 游戏领取则为 0 */
+    if (this.ps === GameOperate.winner_paly) return 0;
+    return (this.prevSi?.cr || 1) + 1;
+  }
+
+  /**
+   * 获取 acfc
+   * @returns { number } count
+   */
+  public getAcfc(carPos: CarPos) {
+    // 购买时为 0
+    if (this.isBuyPlay) return 0;
+    // 游戏失败 则为上一次的值
+    if (!this.isCurrentWin(carPos, this.ps)) return this.prevSi?.acfc || 0;
+    // 游戏领取则为上一次的值
+    if (this.ps === GameOperate.winner_paly) return this.prevSi?.acfc || 0;
+    // 累加
+    return (this.prevSi?.acfc || 0) + 1;
+  }
+
+  /**
+   * 获取小鸡的位置信息
+   * @returns {Array<number>} 小鸡的位置信息
+   */
+  public getArr(): number[] {
+    const prevArr: number[] = this.prevSi?.arr || [];
+    if (this.isBuyPlay || this.ps === GameOperate.winner_paly) {
+      return isEmpty(prevArr) ? Array(10).fill(0) : prevArr;
+    }
+    const prevPos = prevArr.filter((item) => item > 0);
+    const currentPos = [...prevPos, this.ps];
+    const count = Math.min(10, Math.max(10 - currentPos.length, 0));
+    return [...currentPos, ...Array(count).fill(0)];
+  }
+
+  /**
+   * 获取 nst 的值
+   * @returns {number} 1: 输 2: 赢
+   */
+  public getNst(carPos: CarPos) {
+    if (this.isBuyPlay) return 2;
+    if (this.ps === GameOperate.winner_paly) return 1;
+    if (this.isCurrentWin(carPos, this.ps)) return 2;
+    return 1;
+  }
+
+  /**
+   * 获取 st 的值
+   */
+  public getSt() {
+    return this.prevSi?.nst || 1;
+  }
+
+  /**
+   * 获取 ge
+   * @returns {Array<number>}
+   */
+  public getGe() {
+    if (this.isGlod) return [3, 11];
+    return [1, 11];
   }
 }

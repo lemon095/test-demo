@@ -17,7 +17,7 @@ describe("随机车的位置: getRR", () => {
 		}
 	});
 	const numTrials = 10000;
-	const counts = { 1: 0, 2: 0 };
+	const counts = { 1: 0, 2: 0, 0: 0 };
 	const expectedProbability = 0.5; // 期望的概率是 0.5
 	const tolerance = 0.1; // 允许的误差范围
 	beforeAll(() => {

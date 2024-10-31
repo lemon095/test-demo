@@ -179,8 +179,71 @@ export default class BaseChicky {
       const preGmi = this.prevSi?.["gmi"] || 0;
       return ChickyMultiple[preGmi + 1];
     }
-    if (preGmi === 0) return 0;
+    if (preGmi === 0) return 1;
     return ChickyMultiple[preGmi];
+  }
+
+  /**
+   * getCwc 累计中奖次数 在领奖时为1 其他时候为0
+   */
+  public getCwc(): number {
+    if (this.ps === GameOperate.winner_paly && this.isPrevWin) return 1;
+    return 0;
+  }
+
+  /**
+   * getTw 领奖金额 领奖时 为上一次的ctw金额
+   */
+  public getTw(): number {
+    if (this.ps === GameOperate.winner_paly && this.isPrevWin) {
+      return this.prevSi?.["ctw"] || 0;
+    }
+    return 0;
+  }
+
+  /**
+   * getRtw 计算对应的金额
+   * @param {boolean} isCurrentWin 本次是否中
+   * @param gmi 本次的倍率
+   */
+  public getRtw({
+    isCurrentWin,
+    gmi,
+  }: {
+    isCurrentWin: boolean;
+    gmi: number;
+  }): number {
+    let rtw: number = 0;
+    if (isCurrentWin) {
+      rtw = new Decimal(this.totalBet).mul(gmi).toDecimalPlaces(2).toNumber();
+    }
+    return rtw;
+  }
+
+  /**
+   * getCtw
+   */
+  public getCtw({
+    isCurrentWin,
+    gmi,
+    agcc,
+    sgcv,
+  }: {
+    isCurrentWin: boolean;
+    gmi: number;
+    agcc: number;
+    sgcv: number;
+  }): number {
+    let ctw: number = 0;
+    if (isCurrentWin) {
+      ctw = new Decimal(this.totalBet)
+        .mul(gmi)
+        .add(new Decimal(agcc).mul(sgcv))
+        .toDecimalPlaces(2)
+        .toNumber();
+    }
+
+    return ctw;
   }
 
   /**

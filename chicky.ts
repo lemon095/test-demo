@@ -202,7 +202,7 @@ export default class BaseChicky {
   }
 
   /**
-   * getRtw 计算对应的金额
+   * getRtw 获胜时的对应金额
    * @param {boolean} isCurrentWin 本次是否中
    * @param gmi 本次的倍率
    */
@@ -221,7 +221,13 @@ export default class BaseChicky {
   }
 
   /**
-   * getCtw
+   * getCtw 操作获胜时的累计金额
+   * @param {Object} options - 配置选项
+   * @param {boolean} options.isCurrentWin 本次是否获胜
+   * @param {number} options.gmi 本次对应的倍率
+   * @param {number} options.agcc 累计金币的数量
+   * @param {number} options.sgcv 每一枚金币对应的价值
+   *
    */
   public getCtw({
     isCurrentWin,
@@ -235,7 +241,7 @@ export default class BaseChicky {
     sgcv: number;
   }): number {
     let ctw: number = 0;
-    if (isCurrentWin) {
+    if (isCurrentWin && this.ps !== GameOperate.winner_paly) {
       ctw = new Decimal(this.totalBet)
         .mul(gmi)
         .add(new Decimal(agcc).mul(sgcv))

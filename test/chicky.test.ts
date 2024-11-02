@@ -1,25 +1,21 @@
 import { expect, describe, it, beforeAll, test } from "bun:test";
 import BaseChicky, { UserType } from "../chicky";
-const slot = new BaseChicky({
-	cs: 1,
-	ib: true,
-	ml: 1,
-	ps: 3,
-	gmMul: {
-		/**档位对应的倍率 */
-		1: 1.92,
-		2: 3.84,
-		3: 7.68,
-		4: 15.36,
-		5: 30.72,
-	},
-});
-describe("chicky test", () => {
-	it("test", () => {
-		expect(slot.testFn()).toBe("test");
-	});
-});
+
 describe("随机车的位置: getRR", () => {
+	const slot = new BaseChicky({
+		cs: 1,
+		ib: true,
+		ml: 1,
+		ps: 3,
+		gmMul: {
+			/**档位对应的倍率 */
+			1: 1.92,
+			2: 3.84,
+			3: 7.68,
+			4: 15.36,
+			5: 30.72,
+		},
+	});
 	it("验证是否为 1 或者 2", () => {
 		expect([1, 2]).toContain(slot.getRR());
 	});
@@ -47,3 +43,15 @@ describe("随机车的位置: getRR", () => {
 		expect(probability2).toBeCloseTo(expectedProbability, tolerance);
 	});
 });
+
+/**
+ * 金币模式逻辑
+ * ps == 3
+ * ps == 4
+ * ps == 1
+ * ps == 2
+ * this.prevWin
+ * this.winnerPlay
+ * this.currentWin
+ * 争取没有任何问题....（除了RTP这块）
+ */

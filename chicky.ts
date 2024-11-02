@@ -21,7 +21,7 @@ export enum GameOperate {
 	/** 开始游戏 */
 	start_play = 3,
 	/** 游戏胜利/领奖 */
-	winner_paly = 4,
+	winner_play = 4,
 }
 
 /** 车（物体）的位置 */
@@ -48,15 +48,6 @@ export interface BaseChickyParams {
 	gmMul: Record<string, number>;
 }
 
-export const ChickyMultiple: Record<number, number> = {
-	/**档位对应的倍率 */
-	1: 1.92,
-	2: 3.84,
-	3: 7.68,
-	4: 15.36,
-	5: 30.72,
-};
-
 export default class BaseChicky {
 	public readonly ps: GameOperate;
 	public readonly ib: boolean;
@@ -66,6 +57,17 @@ export default class BaseChicky {
 	public readonly prevSi?: Record<string, any>;
 	/** 倍数信息 */
 	public readonly gmMul: Record<string, any>;
+	private rr: CarPos = CarPos.None;
+	private gmi: number = 0;
+
+	/**
+	 * 当前是否为领奖
+	 * @returns {boolean} true:是，false:否
+	 */
+	public get isWinnerPlay() {
+		if (this.gmi === 5 && this.isCurrentWin(this.rr)) return true;
+		return this.ps === GameOperate.winner_play;
+	}
 
 	/**
 	 * base Chicky 构造器
@@ -87,18 +89,16 @@ export default class BaseChicky {
 		this.totalBet = new Decimal(cs).mul(ml).toNumber();
 	}
 	/**
-	 * @ib true: 金币模式; false: 普通模式
-	 * @ps 表示状态 1,2表示操作阶段，3表示继续/开始游戏，4表示领取
+	 * 本次随机的金币数量
+	 * @param {Object} options - 配置选项
+	 * @param {boolean} options.isCurrentWin 本次是否中奖
+	 * @return {number} 本次随机的金币数量
 	 */
 	public getGcc({ isCurrentWin }: { isCurrentWin: boolean }): number {
-		if (
-			!this.ib ||
-			this.ps === GameOperate.start_play ||
-			this.ps === GameOperate.winner_paly ||
-			!isCurrentWin
-		) {
-			return 0;
-		}
+		const excludes = [GameOperate.start_play, GameOperate.winner_play];
+		if (!this.ib) return 0;
+		if (excludes.includes(this.ps)) return 0;
+		if (!isCurrentWin) return 0;
 		//根据概率随机
 		const randNum = random.int(1, 100);
 		const result = this.convertWeights([
@@ -168,34 +168,41 @@ export default class BaseChicky {
 	}
 
 	/**
-	 *
-	 */
-	/**
 	 * getGmi 倍数档位
 	 * @param {number} cfc 游戏状态
 	 * @returns 返回当前的倍数档位
 	 */
-	public getGmi(cfc: number): number {
-		if (cfc === 1) {
-			const preGmi = this.prevSi?.["gmi"] || 0;
-			return Math.min(preGmi + 1, 5);
+	public getGmi(): number {
+		if (this.ps === GameOperate.winner_play) {
+			const nowGim = this.prevSi?.gmi || 0;
+			this.gmi = nowGim;
+			return nowGim;
 		}
-		return this.prevSi?.["gmi"] || 1;
+		if (this.isBuyPlay) {
+			this.gmi = 0;
+			return 0;
+		}
+		const preGmi = this.prevSi?.["gmi"] || 0;
+		const nowGmi = Math.min(preGmi + 1, 5);
+		this.gmi = nowGmi;
+		return nowGmi;
 	}
 
 	/**
-	 * getCwc 累计中奖次数 在领奖时为1 其他时候为0
+	 * getCwc 在领奖时为1 其他时候为0
+	 * @returns {number}
 	 */
 	public getCwc(): number {
-		if (this.ps === GameOperate.winner_paly && this.isPrevWin) return 1;
+		if (this.isWinnerPlay && this.isPrevWin) return 1;
 		return 0;
 	}
 
 	/**
 	 * getTw 领奖金额 领奖时 为上一次的ctw金额
+	 * @returns {number}领奖金额
 	 */
 	public getTw(): number {
-		if (this.ps === GameOperate.winner_paly && this.isPrevWin) {
+		if (this.isWinnerPlay && this.isPrevWin) {
 			return this.prevSi?.["ctw"] || 0;
 		}
 		return 0;
@@ -215,13 +222,10 @@ export default class BaseChicky {
 	}): number {
 		let rtw: number = 0;
 		const gm = this.getGmByGmi(gmi);
-		if (
-			(this.ps === GameOperate.left || this.ps === GameOperate.right) &&
-			isCurrentWin
-		) {
+		if (isCurrentWin) {
 			rtw = new Decimal(this.totalBet).mul(gm).toDecimalPlaces(2).toNumber();
 		}
-		if (this.ps === GameOperate.winner_paly && this.isPrevWin) {
+		if (this.isWinnerPlay && this.isPrevWin) {
 			rtw = new Decimal(this.totalBet).mul(gm).toDecimalPlaces(2).toNumber();
 		}
 		return rtw;
@@ -230,8 +234,10 @@ export default class BaseChicky {
 	/**
 	 * 获取 gmi 对应的倍率
 	 */
-	public getGmByGmi(gmi: number) {
-		return this.gmMul[gmi];
+	public getGmByGmi(gmi: number): number {
+		const gm = this.gmMul[gmi];
+		console.log("gm===========:", gm, gmi);
+		return gm;
 	}
 
 	/**
@@ -307,8 +313,8 @@ export default class BaseChicky {
 	 * @returns {boolean} true:赢，false:输
 	 */
 	public isCurrentWin(carPos: CarPos, ps = this.ps): boolean {
-		if (ps === GameOperate.left && carPos === CarPos.left) return true;
-		if (ps === GameOperate.right && carPos === CarPos.right) return true;
+		if (ps === GameOperate.left && carPos === CarPos.right) return true;
+		if (ps === GameOperate.right && carPos === CarPos.left) return true;
 		return false;
 	}
 
@@ -318,12 +324,20 @@ export default class BaseChicky {
 	 * @returns {CarPos} 左二右一
 	 */
 	public getRR(mode?: "noPrize"): CarPos {
-		if (this.isPrevWin) return CarPos.None;
+		if (this.isBuyPlay) {
+			this.rr = CarPos.None;
+			return CarPos.None;
+		}
 		if (mode === "noPrize") {
-			if (this.ps === GameOperate.left) return CarPos.left;
+			if (this.ps === GameOperate.left) {
+				this.rr = CarPos.left;
+				return CarPos.left;
+			}
+			this.rr = CarPos.right;
 			return CarPos.right;
 		}
 		const r = random.int(CarPos.right, CarPos.left);
+		this.rr = r;
 		return r;
 	}
 	/**
@@ -370,7 +384,7 @@ export default class BaseChicky {
 		/** 游戏失败则为 0 */
 		if (!this.isCurrentWin(carPos, this.ps)) return 0;
 		/** 游戏领取则为 0 */
-		if (this.ps === GameOperate.winner_paly) return 0;
+		if (this.isWinnerPlay) return 0;
 		return (this.prevSi?.cr || 1) + 1;
 	}
 
@@ -384,7 +398,7 @@ export default class BaseChicky {
 		// 游戏失败 则为上一次的值
 		if (!this.isCurrentWin(carPos, this.ps)) return this.prevSi?.acfc || 0;
 		// 游戏领取则为上一次的值
-		if (this.ps === GameOperate.winner_paly) return this.prevSi?.acfc || 0;
+		if (this.isWinnerPlay) return this.prevSi?.acfc || 0;
 		// 累加
 		return (this.prevSi?.acfc || 0) + 1;
 	}
@@ -395,7 +409,8 @@ export default class BaseChicky {
 	 */
 	public getArr(): number[] {
 		const prevArr: number[] = this.prevSi?.arr || [];
-		if (this.isBuyPlay || this.ps === GameOperate.winner_paly) {
+		const include = [GameOperate.winner_play, GameOperate.start_play];
+		if (this.isBuyPlay || include.includes(this.ps)) {
 			return isEmpty(prevArr) ? Array(10).fill(0) : prevArr;
 		}
 		const prevPos = prevArr.filter((item) => item > 0);
@@ -410,7 +425,7 @@ export default class BaseChicky {
 	 */
 	public getNst(carPos: CarPos) {
 		if (this.isBuyPlay) return 2;
-		if (this.ps === GameOperate.winner_paly) return 1;
+		if (this.isWinnerPlay) return 1;
 		if (this.isCurrentWin(carPos, this.ps)) return 2;
 		return 1;
 	}

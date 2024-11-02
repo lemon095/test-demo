@@ -1,7 +1,19 @@
 import { expect, describe, it, beforeAll, test } from "bun:test";
 import BaseChicky, { UserType } from "../chicky";
-import { chunk } from "lodash";
-const slot = new BaseChicky({ cs: 1, ib: true, ml: 1, ps: 3 });
+const slot = new BaseChicky({
+	cs: 1,
+	ib: true,
+	ml: 1,
+	ps: 3,
+	gmMul: {
+		/**档位对应的倍率 */
+		1: 1.92,
+		2: 3.84,
+		3: 7.68,
+		4: 15.36,
+		5: 30.72,
+	},
+});
 describe("chicky test", () => {
 	it("test", () => {
 		expect(slot.testFn()).toBe("test");

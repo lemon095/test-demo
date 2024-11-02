@@ -214,8 +214,14 @@ export default class BaseChicky {
 		gmi: number;
 	}): number {
 		let rtw: number = 0;
-		if (isCurrentWin) {
-			const gm = this.getGmByGmi(gmi);
+		const gm = this.getGmByGmi(gmi);
+		if (
+			(this.ps === GameOperate.left || this.ps === GameOperate.right) &&
+			isCurrentWin
+		) {
+			rtw = new Decimal(this.totalBet).mul(gm).toDecimalPlaces(2).toNumber();
+		}
+		if (this.ps === GameOperate.winner_paly && this.isPrevWin) {
 			rtw = new Decimal(this.totalBet).mul(gm).toDecimalPlaces(2).toNumber();
 		}
 		return rtw;
@@ -249,7 +255,7 @@ export default class BaseChicky {
 		sgcv: number;
 	}): number {
 		let ctw: number = 0;
-		if (isCurrentWin && this.ps !== GameOperate.winner_paly) {
+		if (isCurrentWin) {
 			const gm = this.getGmByGmi(gmi);
 			ctw = new Decimal(this.totalBet)
 				.mul(gm)
@@ -308,10 +314,15 @@ export default class BaseChicky {
 
 	/**
 	 * 随机车的位置
+	 * @param {string} mode - 模式，默认为空，表示正常模式，noPrize表示无奖模式
 	 * @returns {CarPos} 左二右一
 	 */
-	public getRR(): CarPos {
+	public getRR(mode?: "noPrize"): CarPos {
 		if (this.isPrevWin) return CarPos.None;
+		if (mode === "noPrize") {
+			if (this.ps === GameOperate.left) return CarPos.left;
+			return CarPos.right;
+		}
 		const r = random.int(CarPos.right, CarPos.left);
 		return r;
 	}
@@ -418,5 +429,14 @@ export default class BaseChicky {
 	public getGe() {
 		if (this.isGlod) return [3, 11];
 		return [1, 11];
+	}
+	/**
+	 * 获取 fstc
+	 */
+	public getFstc(cr: number) {
+		if (this.isBuyPlay) return null;
+		return {
+			2: cr,
+		};
 	}
 }

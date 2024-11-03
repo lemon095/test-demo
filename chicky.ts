@@ -49,6 +49,8 @@ export interface BaseChickyParams {
 }
 
 export default class BaseChicky {
+	protected testRtp: boolean = false;
+	protected testWin: boolean = false;
 	public readonly ps: GameOperate;
 	public readonly ib: boolean;
 	public readonly cs: number;
@@ -57,7 +59,7 @@ export default class BaseChicky {
 	public readonly prevSi?: Record<string, any>;
 	/** 倍数信息 */
 	public readonly gmMul: Record<string, any>;
-	private rr: CarPos = CarPos.None;
+	public rr: CarPos = CarPos.None;
 	private gmi: number = 0;
 
 	/**
@@ -198,17 +200,6 @@ export default class BaseChicky {
 	}
 
 	/**
-	 * getTw 领奖金额 领奖时 为上一次的ctw金额
-	 * @returns {number}领奖金额
-	 */
-	public getTw(): number {
-		if (this.isWinnerPlay && this.isPrevWin) {
-			return this.prevSi?.["ctw"] || 0;
-		}
-		return 0;
-	}
-
-	/**
 	 * getRtw 获胜时的对应金额
 	 * @param {boolean} isCurrentWin 本次是否中
 	 * @param gmi 本次的倍率
@@ -323,18 +314,10 @@ export default class BaseChicky {
 	 * @param {string} mode - 模式，默认为空，表示正常模式，noPrize表示无奖模式
 	 * @returns {CarPos} 左二右一
 	 */
-	public getRR(mode?: "noPrize"): CarPos {
+	public getRR(): CarPos {
 		if (this.isBuyPlay) {
 			this.rr = CarPos.None;
 			return CarPos.None;
-		}
-		if (mode === "noPrize") {
-			if (this.ps === GameOperate.left) {
-				this.rr = CarPos.left;
-				return CarPos.left;
-			}
-			this.rr = CarPos.right;
-			return CarPos.right;
 		}
 		const r = random.int(CarPos.right, CarPos.left);
 		this.rr = r;
@@ -385,7 +368,7 @@ export default class BaseChicky {
 		if (!this.isCurrentWin(carPos, this.ps)) return 0;
 		/** 游戏领取则为 0 */
 		if (this.isWinnerPlay) return 0;
-		return (this.prevSi?.cr || 1) + 1;
+		return (this.prevSi?.nr || 1) + 1;
 	}
 
 	/**
@@ -404,19 +387,28 @@ export default class BaseChicky {
 	}
 
 	/**
-	 * 获取小鸡的位置信息
-	 * @returns {Array<number>} 小鸡的位置信息
+	 * 获取小鸡正确的位置
+	 * @returns {Array<number>} 获取小鸡正确的位置
 	 */
-	public getArr(): number[] {
+	public getArr(rr: number): number[] {
 		const prevArr: number[] = this.prevSi?.arr || [];
-		const include = [GameOperate.winner_play, GameOperate.start_play];
-		if (this.isBuyPlay || include.includes(this.ps)) {
+		if (this.isBuyPlay || this.ps === GameOperate.winner_play) {
 			return isEmpty(prevArr) ? Array(10).fill(0) : prevArr;
 		}
 		const prevPos = prevArr.filter((item) => item > 0);
-		const currentPos = [...prevPos, this.ps];
+		let nextPos;
+		if (this.isCurrentWin(rr)) {
+			nextPos = this.ps;
+		} else {
+			if (this.ps === GameOperate.left) {
+				nextPos = 2;
+			} else {
+				nextPos = 1;
+			}
+		}
+		const currentPos = [...prevPos, nextPos];
 		const count = Math.min(10, Math.max(10 - currentPos.length, 0));
-		return [...currentPos, ...Array(count).fill(0)];
+		return [...currentPos, ...Array(count).fill(0)].slice(-10);
 	}
 
 	/**
@@ -453,5 +445,11 @@ export default class BaseChicky {
 		return {
 			2: cr,
 		};
+	}
+
+	/** 计算tw */
+	public getTw(rtw: number) {
+		if (this.isWinnerPlay) return rtw;
+		return 0;
 	}
 }

@@ -23,11 +23,17 @@ export enum UserType {
 
 export default class BaseSlot {
 	/** rl的权重表 */
-	private rlWeightsMap: PGSlot.RandomWeights;
+	private readonly rlWeightsMap: PGSlot.RandomWeights;
 	/** trl的权重表 */
-	private trlWeightsMap: PGSlot.RandomWeights;
-	/** 用户类型 */
-	private innerUserType?: PGSlot.UserType;
+	private readonly trlWeightsMap: PGSlot.RandomWeights;
+	/** 上一局的游戏信息 */
+	public readonly prevSi?: Record<string, any>;
+	/** 用户信息 */
+	public readonly userType: PGSlot.UserType;
+	/** cs */
+	public readonly cs: number;
+	/** ml */
+	public readonly ml: number;
 	/**
 	 * base slot 构造器
 	 * @param {Object} options - 配置选项
@@ -37,12 +43,24 @@ export default class BaseSlot {
 	constructor({
 		rlWeights,
 		trlWeights,
+		userType,
+		prevSi,
+		cs,
+		ml,
 	}: {
 		rlWeights: PGSlot.RandomWeights;
 		trlWeights: PGSlot.RandomWeights;
+		userType: PGSlot.UserType;
+		prevSi?: Record<string, any>;
+		cs: number;
+		ml: number;
 	}) {
 		this.rlWeightsMap = rlWeights;
 		this.trlWeightsMap = trlWeights;
+		this.userType = userType;
+		this.prevSi = prevSi;
+		this.cs = cs;
+		this.ml = ml;
 	}
 	/**
 	 * rl 的权重表信息
@@ -61,17 +79,6 @@ export default class BaseSlot {
 			throw new Error("请先设置用户类型");
 		}
 		return this.convertWeights(this.trlWeightsMap[this.userType]);
-	}
-	/**
-	 * 设置用户类型
-	 * @param {PGSlot.UserType} type - 用户类型
-	 */
-	public set userType(type: PGSlot.UserType) {
-		this.innerUserType = type;
-	}
-	/** 获取用户类型 */
-	public get userType(): PGSlot.UserType | undefined {
-		return this.innerUserType;
 	}
 	/**
 	 * 随机 rl 中的图标信息
@@ -119,8 +126,8 @@ export default class BaseSlot {
 	 * 上一次是否中奖
 	 * @param preWp 上一次的 wp 信息
 	 */
-	public isPreWin(preWp?: Record<string, number[]> | null): boolean {
-		return !isEmpty(preWp);
+	public get isPreWin(): boolean {
+		return !isEmpty(this.prevSi?.wp);
 	}
 
 	/**
@@ -130,25 +137,20 @@ export default class BaseSlot {
 	 * @param {object} options.preWp - 选填，上一次的 wp 信息
 	 * @returns {boolean|undefined} 是否为夺宝流程
 	 */
-	public isDuoBaoPending({
-		preFs,
-		preWp,
-	}: {
-		preFs?: Record<string, any> | null;
-		preWp?: Record<string, any> | null;
-	}) {
-		if (isEmpty(preFs)) return false;
-		const fs = preFs;
+	public get isDuoBaoPending() {
+		const { fs } = this.prevSi || {};
+		if (isEmpty(fs)) return false;
 		// 如果上一次的 s === fs 并且上一次有中奖，则表示还未进夺宝流程
-		if (fs?.s === fs?.ts && this.isPreWin(preWp)) return false;
+		if (fs?.s === fs?.ts && this.isPreWin) return false;
 		if (isNumber(fs?.s)) {
 			// 上一次中奖... 那么当前就是 free game
-			if (this.isPreWin(preWp)) return true;
+			if (this.isPreWin) return true;
 			// 大于零，表示还有次数
 			if (fs.s > 0) return true;
 			// 如果上一次为 0，并且上一次未中奖，则表示当前这次位夺宝结束后的第一次
 			if (fs.s === 0) return false;
 		}
+		return false;
 	}
 
 	/**
@@ -179,7 +181,6 @@ export default class BaseSlot {
 	 * @param {object} options.preTwp 上一次trl中的中奖信息
 	 * @param {array} options.trns 当前trl的掉落图标信息
 	 * @param {array} options.weights 倍数权重表
-	 * @param {object} options.preWp 上一次rl的中奖信息
 	 * @returns {array} tmd 倍数信息
 	 */
 	public getTmd({
@@ -189,7 +190,6 @@ export default class BaseSlot {
 		preTwp,
 		trns,
 		weights,
-		preWp,
 	}: {
 		icons: number[];
 		gmByIcon: number;
@@ -197,9 +197,8 @@ export default class BaseSlot {
 		preTmd?: [number, number][] | null;
 		preTwp?: Record<string, number[]> | null;
 		trns?: number[] | null;
-		preWp?: Record<string, number[]>;
 	}): [number, number][] | null {
-		if (this.isPreWin(preWp)) {
+		if (this.isPreWin) {
 			// 掉落下的图标倍数信息
 			// 获取删除的位置信息
 			const delPoss = union(flatMapDeep(values(preTwp)));
@@ -366,22 +365,19 @@ export default class BaseSlot {
 	 * @param {Object} options - 配置选项
 	 * @param {Object} options.lw 本次的图标:图标对应中奖金额
 	 * @param {Object} options.wp 本次的中奖图标：对应索引位置
-	 * @param {Object} options.oldWp 上一次次的中奖图标：对应索引位置
 	 * @param {number} options.oldAcw 上一次的中奖金额
 	 */
 	public getAcw({
 		lw,
 		wp,
-		oldWp,
 		oldAcw,
 	}: {
 		lw?: Record<string, number> | null;
-		oldWp?: Record<string, number[]> | null;
 		wp?: Record<string, number[]> | null;
 		oldAcw: number;
 	}): number {
 		let amount = new Decimal(0);
-		if (!this.isPreWin(oldWp)) {
+		if (!this.isPreWin) {
 			//上一次没有中奖的情况下，本次为收费或消耗次数
 			if (isEmpty(wp) || isEmpty(lw)) {
 				//本次也没有中
@@ -442,16 +438,14 @@ export default class BaseSlot {
 	public getCtw({
 		lw,
 		acw,
-		oldWp,
 		tgm,
 	}: {
 		lw?: Record<string, number> | null;
 		acw: number;
-		oldWp?: Record<string, number[]> | null;
 		tgm: number;
 	}): number {
 		let ctw = new Decimal(0);
-		if (isEmpty(oldWp)) {
+		if (!this.isPreWin) {
 			//如果上一次没中, 那么本次中为lw的图标金额的和，否则为0
 			if (isEmpty(lw)) {
 				return ctw.toNumber();

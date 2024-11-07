@@ -2,8 +2,15 @@ import { expect, describe, it } from "bun:test";
 import BaseSlot, { UserType } from "..";
 import { chunk } from "lodash";
 import { RL_WEIGHTS, TRL_WEIGHTS } from "../TetWeights";
-const slot = new BaseSlot({ rlWeights: RL_WEIGHTS, trlWeights: TRL_WEIGHTS });
+
 describe("通用：是否超过15", () => {
+	const slot = new BaseSlot({
+		rlWeights: RL_WEIGHTS,
+		trlWeights: TRL_WEIGHTS,
+		userType: UserType.common,
+		cs: 0,
+		ml: 0,
+	});
 	it("测试边界情况，比如-1,null,undefined,NaN,空字符串", () => {
 		expect(slot.isNotWinOver15(-1)).toBeFalsy();
 		expect(slot.isNotWinOver15(null as never)).toBeFalsy();
@@ -23,50 +30,160 @@ describe("通用：是否超过15", () => {
 });
 describe("通用：上一次是否中奖", () => {
 	it("测试输入空值的情况，比如：{}、null、undefined", () => {
-		expect(slot.isPreWin({})).toBeFalse();
-		expect(slot.isPreWin(null)).toBe(false);
-		expect(slot.isPreWin()).toBeFalse();
+		const slot1 = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: { wp: {} },
+		});
+		const slot2 = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: { wp: null },
+		});
+		const slot3 = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+		});
+		expect(slot1.isPreWin).toBeFalse();
+		expect(slot2.isPreWin).toBe(false);
+		expect(slot3.isPreWin).toBeFalse();
 	});
 	it("测试正常情况", () => {
-		expect(slot.isPreWin({ 1: [1, 2, 3] })).toBeTrue();
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: { wp: { 1: [1, 2, 3] } },
+		});
+		expect(slot.isPreWin).toBeTrue();
 	});
 });
 describe("通用：是否为夺宝流程", () => {
 	it("测试输入空值的情况，比如：{}", () => {
-		expect(slot.isDuoBaoPending({})).toBeFalse();
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: {},
+		});
+		expect(slot.isDuoBaoPending).toBeFalse();
 	});
 	it("次数为0，上一次未中奖的情况", () => {
-		expect(slot.isDuoBaoPending({ preFs: { s: 0, ts: 10 } })).toBeFalse();
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: {
+				fs: { s: 0, ts: 10 },
+			},
+		});
+		expect(slot.isDuoBaoPending).toBeFalse();
 	});
 	it("次数为0，上一次中奖的情况", () => {
-		expect(
-			slot.isDuoBaoPending({ preFs: { s: 0, ts: 10 }, preWp: { 1: [1, 2, 3] } })
-		).toBeTrue();
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: {
+				fs: { s: 0, ts: 10 },
+				wp: { 1: [1, 2, 3] },
+			},
+		});
+		expect(slot.isDuoBaoPending).toBeTrue();
 	});
 	it("次数为空值的情况，上一次未中奖", () => {
-		expect(slot.isDuoBaoPending({ preFs: { s: null } })).toBeUndefined();
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: {
+				fs: null,
+			},
+		});
+		expect(slot.isDuoBaoPending).toBeFalse();
 	});
 	it("次数大于 0，上一次未中奖", () => {
-		expect(slot.isDuoBaoPending({ preFs: { s: 1, ts: 10 } })).toBeTrue();
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: {
+				fs: { s: 1, ts: 10 },
+			},
+		});
+		expect(slot.isDuoBaoPending).toBeTrue();
 	});
 	it("次数和总次数相等，上一次未中奖", () => {
-		expect(slot.isDuoBaoPending({ preFs: { s: 10, ts: 10 } })).toBeTrue();
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: {
+				fs: { s: 10, ts: 10 },
+			},
+		});
+		expect(slot.isDuoBaoPending).toBeTrue();
 	});
 	it("次数大于0小于总次数，上一次中奖", () => {
-		expect(
-			slot.isDuoBaoPending({ preFs: { s: 2, ts: 10 }, preWp: { 1: [1, 2, 3] } })
-		).toBeTrue();
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: {
+				fs: { s: 2, ts: 10 },
+				wp: { 1: [1, 2, 3] },
+			},
+		});
+		expect(slot.isDuoBaoPending).toBeTrue();
 	});
 	it("次数等于总次数，上一次中奖", () => {
-		expect(
-			slot.isDuoBaoPending({
-				preFs: { s: 10, ts: 10 },
-				preWp: { 1: [1, 2, 3] },
-			})
-		).toBeFalse();
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: {
+				fs: { s: 10, ts: 10 },
+				wp: { 1: [1, 2, 3] },
+			},
+		});
+		expect(slot.isDuoBaoPending).toBeFalse();
 	});
 });
 describe("极速：随机tgm倍数", () => {
+	const slot = new BaseSlot({
+		rlWeights: RL_WEIGHTS,
+		trlWeights: TRL_WEIGHTS,
+		userType: UserType.common,
+		cs: 0,
+		ml: 0,
+	});
 	it("随机长度为 1", () => {
 		expect(slot.getRandomTgmByIcon([2])).toBe(2);
 	});
@@ -76,6 +193,14 @@ describe("极速：随机tgm倍数", () => {
 });
 describe("极速：tmd 计算", () => {
 	it("上一次中奖且中奖位置小于倍数图标的位置，本次掉落未出现 2", () => {
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: { wp: { 1: [2] } },
+		});
 		expect(
 			slot.getTmd({
 				icons: [6, 8, 2, 6],
@@ -84,11 +209,18 @@ describe("极速：tmd 计算", () => {
 				trns: [6],
 				gmByIcon: 2,
 				weights: [2, 3],
-				preWp: { 1: [2] },
 			})
 		).toEqual([[2, 2]]);
 	});
 	it("上一次中奖且中奖位置大于倍数图标的位置，本次掉落未出现 2", () => {
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: { wp: { 1: [2] } },
+		});
 		expect(
 			slot.getTmd({
 				icons: [6, 8, 2, 6],
@@ -97,11 +229,18 @@ describe("极速：tmd 计算", () => {
 				trns: [6],
 				gmByIcon: 2,
 				weights: [2, 3],
-				preWp: { 1: [2] },
 			})
 		).toEqual([[2, 2]]);
 	});
 	it("上一次中奖且中奖位置大于倍数图标的位置，本次掉落出现 2", () => {
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: { wp: { 1: [2] } },
+		});
 		expect(
 			slot.getTmd({
 				icons: [2, 6, 4, 6],
@@ -110,7 +249,6 @@ describe("极速：tmd 计算", () => {
 				trns: [2, 2],
 				gmByIcon: 2,
 				weights: [5, 5],
-				preWp: { 1: [2] },
 			})
 		).toEqual([
 			[0, 2],
@@ -119,6 +257,14 @@ describe("极速：tmd 计算", () => {
 		]);
 	});
 	it("上一次中奖且中奖位置小于倍数图标的位置，本次掉落出现 2", () => {
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: { wp: { 1: [2] } },
+		});
 		expect(
 			slot.getTmd({
 				icons: [12, 2, 9, 10],
@@ -126,16 +272,35 @@ describe("极速：tmd 计算", () => {
 				trns: [10],
 				gmByIcon: 2,
 				weights: [2, 2],
-				preWp: { 1: [2, 3, 4] },
 			})
 		).toEqual([[1, 3]]);
 	});
 });
 describe("极速: acw计算", () => {
 	it("输入上一次没中奖，本次也没中奖的情况", () => {
-		expect(slot.getAcw({ lw: null, wp: null, oldWp: null, oldAcw: 0 })).toBe(0);
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: { wp: null },
+		});
+		expect(slot.getAcw({ lw: null, wp: null, oldAcw: 0 })).toBe(0);
 	});
 	it("上一次中奖, 本次也中奖的情况", () => {
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: {
+				wp: {
+					"11": [1, 8, 9, 11],
+				},
+			},
+		});
 		expect(
 			slot.getAcw({
 				lw: {
@@ -144,26 +309,39 @@ describe("极速: acw计算", () => {
 				wp: {
 					"9": [0, 10, 11, 14, 18, 19],
 				},
-				oldWp: {
-					"11": [1, 8, 9, 11],
-				},
 				oldAcw: 0.6,
 			})
 		).toBe(11.4);
 	});
 	it("输入上一次中奖，本次没中奖的情况", () => {
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: {
+				wp: {
+					"10": [0, 5, 6, 13, 14],
+				},
+			},
+		});
 		expect(
 			slot.getAcw({
 				lw: null,
 				wp: null,
-				oldWp: {
-					"10": [0, 5, 6, 13, 14],
-				},
 				oldAcw: 12.6,
 			})
 		).toBe(12.6);
 	});
 	it("输入上一次没中，本次中奖的情况", () => {
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+		});
 		expect(
 			slot.getAcw({
 				lw: {
@@ -172,13 +350,19 @@ describe("极速: acw计算", () => {
 				wp: {
 					"9": [2, 3, 4, 14],
 				},
-				oldWp: null,
 				oldAcw: 169.2,
 			})
 		).toBe(7.2);
 	});
 });
 describe("极速：md 计算", () => {
+	const slot = new BaseSlot({
+		rlWeights: RL_WEIGHTS,
+		trlWeights: TRL_WEIGHTS,
+		userType: UserType.common,
+		cs: 0,
+		ml: 0,
+	});
 	it("上一次未中奖，有图标2", () => {
 		expect(
 			slot.getMd({
@@ -629,49 +813,89 @@ describe("极速：md 计算", () => {
 });
 describe("极速: ctw计算", () => {
 	it("上一次没中奖，本次也没有中奖", () => {
-		expect(slot.getCtw({ lw: null, acw: 0, oldWp: null, tgm: 1 })).toBe(0);
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: { wp: null },
+		});
+		expect(slot.getCtw({ lw: null, acw: 0, tgm: 1 })).toBe(0);
 	});
 	it("上一次没中奖，本次中奖", () => {
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: { wp: null },
+		});
 		expect(
 			slot.getCtw({
 				lw: {
 					"6": 7.2,
 				},
 				acw: 7.2,
-				oldWp: null,
 				tgm: 26,
 			})
 		).toBe(7.2);
 	});
 	it("上一次中奖，本次没有中奖", () => {
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: {
+				wp: {
+					"6": [3, 4, 7, 10, 11],
+				},
+			},
+		});
 		expect(
 			slot.getCtw({
 				lw: null,
 				acw: 7.2,
-				oldWp: {
-					"6": [3, 4, 7, 10, 11],
-				},
 				tgm: 31,
 			})
 		).toBe(216);
 	});
 	it("上一次中奖，本次中奖", () => {
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+			prevSi: {
+				wp: {
+					"5": [3],
+					"9": [4, 9, 14, 17, 18],
+				},
+			},
+		});
 		expect(
 			slot.getCtw({
 				lw: {
 					"11": 1.8,
 				},
 				acw: 14.4,
-				oldWp: {
-					"5": [3],
-					"9": [4, 9, 14, 17, 18],
-				},
 				tgm: 0,
 			})
 		).toBe(1.8);
 	});
 });
 describe("通用：rl 随机图标", () => {
+	const slot = new BaseSlot({
+		rlWeights: RL_WEIGHTS,
+		trlWeights: TRL_WEIGHTS,
+		userType: UserType.common,
+		cs: 0,
+		ml: 0,
+	});
 	it("rl 随机 5 行 6 列", () => {
 		const rl = slot.randomRl(
 			[
@@ -719,6 +943,13 @@ describe("通用：rl 随机图标", () => {
 	});
 });
 describe("通用：trl 随机图标", () => {
+	const slot = new BaseSlot({
+		rlWeights: RL_WEIGHTS,
+		trlWeights: TRL_WEIGHTS,
+		userType: UserType.common,
+		cs: 0,
+		ml: 0,
+	});
 	it("trl 随机 1 行 4 列", () => {
 		const trl = slot.randomTrl([
 			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
@@ -730,6 +961,13 @@ describe("通用：trl 随机图标", () => {
 	});
 });
 describe("通用：trl 随机图标", () => {
+	const slot = new BaseSlot({
+		rlWeights: RL_WEIGHTS,
+		trlWeights: TRL_WEIGHTS,
+		userType: UserType.common,
+		cs: 0,
+		ml: 0,
+	});
 	it("trl 随机 1 行 3 列", () => {
 		const trl = slot.randomTrl([
 			[1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
@@ -745,34 +983,70 @@ describe("通用：trl 随机图标", () => {
 });
 describe("通用：rl 权重表", () => {
 	it("试玩用户的权重表", () => {
-		slot.userType = UserType.trail;
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.trail,
+			cs: 0,
+			ml: 0,
+		});
 		expect(slot.rlTables).toBeArrayOfSize(6);
 		slot.rlTables.forEach((column) => expect(column).toBeArrayOfSize(520));
 	});
 	it("新用户的权重表", () => {
-		slot.userType = UserType.newuser;
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.newuser,
+			cs: 0,
+			ml: 0,
+		});
 		expect(slot.rlTables).toBeArrayOfSize(6);
 		slot.rlTables.forEach((column) => expect(column).toBeArrayOfSize(520));
 	});
 	it("普通用户的权重表", () => {
-		slot.userType = UserType.common;
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+		});
 		expect(slot.rlTables).toBeArrayOfSize(6);
 		slot.rlTables.forEach((column) => expect(column).toBeArrayOfSize(520));
 	});
 });
 describe("通用：trl 权重表", () => {
 	it("试玩用户的权重表", () => {
-		slot.userType = UserType.trail;
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.trail,
+			cs: 0,
+			ml: 0,
+		});
 		expect(slot.trlTables).toBeArrayOfSize(4);
 		slot.trlTables.forEach((column) => expect(column).toBeArrayOfSize(130));
 	});
 	it("新用户的权重表", () => {
-		slot.userType = UserType.newuser;
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.newuser,
+			cs: 0,
+			ml: 0,
+		});
 		expect(slot.trlTables).toBeArrayOfSize(4);
 		slot.trlTables.forEach((column) => expect(column).toBeArrayOfSize(130));
 	});
 	it("普通用户的权重表", () => {
-		slot.userType = UserType.common;
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+		});
 		expect(slot.trlTables).toBeArrayOfSize(4);
 		slot.trlTables.forEach((column) => expect(column).toBeArrayOfSize(130));
 	});

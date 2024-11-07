@@ -31,6 +31,7 @@ describe("随机车的位置: getRR", () => {
 	it("多次循环验证是否为 1 或者 2", () => {
 		const slot = new BaseChicky({
 			...baseParams,
+			ps: GameOperate.left,
 		});
 		for (let i = 0; i < 100; i++) {
 			expect([1, 2]).toContain(slot.getRR());

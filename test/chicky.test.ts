@@ -1,25 +1,37 @@
 import { expect, describe, it, beforeAll, test } from "bun:test";
-import BaseChicky, { UserType } from "../chicky";
+import BaseChicky, {
+	GameOperate,
+	UserType,
+	type BaseChickyParams,
+} from "../chicky";
+const gmMul = {
+	/**档位对应的倍率 */
+	1: 1.92,
+	2: 3.84,
+	3: 7.68,
+	4: 15.36,
+	5: 30.72,
+};
+const baseParams: BaseChickyParams = {
+	cs: 1,
+	ib: false,
+	ml: 1,
+	ps: GameOperate.start_play,
+	gmMul,
+};
 
 describe("随机车的位置: getRR", () => {
 	const slot = new BaseChicky({
-		cs: 1,
-		ib: true,
-		ml: 1,
-		ps: 3,
-		gmMul: {
-			/**档位对应的倍率 */
-			1: 1.92,
-			2: 3.84,
-			3: 7.68,
-			4: 15.36,
-			5: 30.72,
-		},
+		...baseParams,
+		ps: GameOperate.left,
 	});
 	it("验证是否为 1 或者 2", () => {
 		expect([1, 2]).toContain(slot.getRR());
 	});
 	it("多次循环验证是否为 1 或者 2", () => {
+		const slot = new BaseChicky({
+			...baseParams,
+		});
 		for (let i = 0; i < 100; i++) {
 			expect([1, 2]).toContain(slot.getRR());
 		}

@@ -1,5 +1,5 @@
 import { expect, describe, it } from "bun:test";
-import BaseSlot, { UserType } from "..";
+import BaseSlot, { UserType } from "../index";
 import { chunk } from "lodash";
 import { RL_WEIGHTS, TRL_WEIGHTS } from "../TetWeights";
 

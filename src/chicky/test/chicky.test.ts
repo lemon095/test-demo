@@ -3,7 +3,7 @@ import BaseChicky, {
 	GameOperate,
 	UserType,
 	type BaseChickyParams,
-} from "../chicky";
+} from "../index";
 const gmMul = {
 	/**档位对应的倍率 */
 	1: 1.92,

@@ -21,6 +21,23 @@ export enum UserType {
 	common = 2,
 }
 
+export interface BaseSlotOptions {
+	/** rl 权重表配置 */
+	rlWeights: PGSlot.RandomWeights;
+	/** trl 权重表配置 */
+	trlWeights: PGSlot.RandomWeights;
+	/** 用户类型 */
+	userType: PGSlot.UserType;
+	/** 上一局的信息 */
+	prevSi?: Record<string, any>;
+	/** 金额相关 */
+	cs: number;
+	/** 金额相关 */
+	ml: number;
+	/** 基准线 */
+	lineRate?: number;
+}
+
 export default class BaseSlot {
 	/** rl的权重表 */
 	private readonly rlWeightsMap: PGSlot.RandomWeights;
@@ -34,6 +51,10 @@ export default class BaseSlot {
 	public readonly cs: number;
 	/** ml */
 	public readonly ml: number;
+	/** 基准线  */
+	public readonly lineRate: number;
+	/** 总下注 */
+	public readonly totalBet: number;
 	/**
 	 * base slot 构造器
 	 * @param {Object} options - 配置选项
@@ -47,20 +68,16 @@ export default class BaseSlot {
 		prevSi,
 		cs,
 		ml,
-	}: {
-		rlWeights: PGSlot.RandomWeights;
-		trlWeights: PGSlot.RandomWeights;
-		userType: PGSlot.UserType;
-		prevSi?: Record<string, any>;
-		cs: number;
-		ml: number;
-	}) {
+		lineRate = 20,
+	}: BaseSlotOptions) {
 		this.rlWeightsMap = rlWeights;
 		this.trlWeightsMap = trlWeights;
 		this.userType = userType;
 		this.prevSi = prevSi;
 		this.cs = cs;
 		this.ml = ml;
+		this.lineRate = lineRate;
+		this.totalBet = new Decimal(cs).mul(ml).mul(lineRate).toNumber();
 	}
 	/**
 	 * rl 的权重表信息

@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"docs": "bun docs:slot && bun docs:chicky",
-		"docs:slot": "typedoc --out docs/slot ./src/slot/index.ts",
+		"docs:slot": "typedoc --out docs/slot ./src/slot/**.ts",
 		"docs:chicky": "typedoc --out docs/chicky ./src/chicky/index.ts",
 		"test:slot": "bun test src/slot/test",
 		"test:chicky": "bun test src/chicky/test"

@@ -11,15 +11,7 @@ import {
 	values,
 } from "lodash";
 import random from "random";
-
-export enum UserType {
-	/** 试玩 */
-	trail = 0,
-	/** 新用户 */
-	newuser = 1,
-	/** 正常用户 */
-	common = 2,
-}
+import { UserType } from "utils/helper";
 
 export interface BaseSlotOptions {
 	/** rl 权重表配置 */
@@ -485,12 +477,23 @@ export default class BaseSlot {
 
 	/**
 	 * 将权重配置转为权重表
-	 * @param {PGSlot.WeightCfg[][]} weights - 权重配置信息
-	 * @returns 权重表数据
+	 * @param {PGSlot.WeightCfg[][] | PGSlot.WeightCfg[]} weights - 权重配置信息
+	 * @returns { number[] | number[][] } 权重表数据
 	 */
-	public convertWeights(weights: PGSlot.WeightCfg[][]): number[][] {
-		return weights.map((item) =>
-			flatten(item.map((weight) => Array(weight.weight).fill(weight.icon)))
+	public convertWeights(weights: PGSlot.WeightCfg[]): number[];
+	public convertWeights(weights: PGSlot.WeightCfg[][]): number[][];
+	public convertWeights(
+		weights: PGSlot.WeightCfg[][] | PGSlot.WeightCfg[]
+	): number[] | number[][] {
+		if (isArray(weights[0])) {
+			return (weights as PGSlot.WeightCfg[][]).map((item) =>
+				flatten(item.map((weight) => Array(weight.weight).fill(weight.icon)))
+			);
+		}
+		return flatten(
+			(weights as PGSlot.WeightCfg[]).map((weight) =>
+				Array(weight.weight).fill(weight.icon)
+			)
 		);
 	}
 }

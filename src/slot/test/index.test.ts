@@ -1,7 +1,8 @@
 import { expect, describe, it } from "bun:test";
-import BaseSlot, { UserType } from "../index";
+import BaseSlot from "../index";
 import { chunk } from "lodash";
 import { RL_WEIGHTS, TRL_WEIGHTS } from "../TetWeights";
+import { UserType } from "utils/helper";
 
 describe("通用：是否超过15", () => {
 	const slot = new BaseSlot({

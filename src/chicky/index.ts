@@ -2,16 +2,6 @@ import { Decimal } from "decimal.js";
 import { flatMapDeep, isEmpty } from "lodash";
 import random from "random";
 
-/** 用户类型 */
-export enum UserType {
-	/** 试玩 */
-	trail = 0,
-	/** 新用户 */
-	newuser = 1,
-	/** 正常用户 */
-	common = 2,
-}
-
 /** 用户操作 */
 export enum GameOperate {
 	/** 小鸡在左侧 */

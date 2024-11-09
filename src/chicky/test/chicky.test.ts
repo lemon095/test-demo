@@ -1,9 +1,5 @@
-import { expect, describe, it, beforeAll, test } from "bun:test";
-import BaseChicky, {
-	GameOperate,
-	UserType,
-	type BaseChickyParams,
-} from "../index";
+import { expect, describe, it, beforeAll } from "bun:test";
+import BaseChicky, { GameOperate, type BaseChickyParams } from "../index";
 const gmMul = {
 	/**档位对应的倍率 */
 	1: 1.92,

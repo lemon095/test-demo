@@ -1,5 +1,5 @@
 declare namespace PGSlot {
-	type UserType = import(".").UserType;
+	type UserType = import("utils/helper").UserType;
 	type RandomWeights = Record<UserType, WeightCfg[][]>;
 	interface WeightCfg {
 		/** 图标id */

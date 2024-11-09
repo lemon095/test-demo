@@ -1,15 +1,4 @@
-import { flatten } from "lodash";
-import { UserType } from ".";
-
-function sliceAztec(param: { icon: number; weight: number }): number[] {
-	return Array(param.weight).fill(param.icon);
-}
-function fTSlice(param: { icon: number; weight: number }[][]): number[][] {
-	const rsp = param.map((item) => {
-		return flatten(item.map(sliceAztec));
-	});
-	return rsp;
-}
+import { UserType } from "utils/helper";
 
 /** rl 权重表 */
 export const RL_WEIGHTS: PGSlot.RandomWeights = {
@@ -479,3 +468,14 @@ export const TRL_WEIGHTS: PGSlot.RandomWeights = {
 		],
 	],
 };
+
+/** mf 权重表 */
+export const MF_WEIGHTS: PGSlot.WeightCfg[] = [
+	{ icon: 0, weight: 3000 },
+	{ icon: 2, weight: 550 },
+	{ icon: 3, weight: 300 },
+	{ icon: 5, weight: 105 },
+	{ icon: 10, weight: 30 },
+	{ icon: 15, weight: 10 },
+	{ icon: 20, weight: 5 },
+];

@@ -175,4 +175,22 @@ export default class ClassFeatSlot extends BaseSlot {
 		}[mode];
 		return twAdapter();
 	}
+
+	/**
+	 * 墨西哥：ssaw 计算逻辑
+	 * @param {Object} options - 参数对象
+	 * @param {Object} options.lw - 本局中奖图标的基础金额
+	 * @param {number} options.gm - 选填，本局倍率，默认为 1
+	 */
+	public getSsawBy1492288({
+		lw,
+		gm = 1,
+	}: {
+		lw?: Record<string, number> | null;
+		gm?: number;
+	}) {
+		const prevSsaw = this.prevSi?.ssaw || 0;
+		const ctw = BaseSlot._getCtw({ lw, gm });
+		return new Decimal(ctw).sub(prevSsaw).toNumber();
+	}
 }

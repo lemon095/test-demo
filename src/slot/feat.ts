@@ -1,6 +1,6 @@
 import random from "random";
 import BaseSlot, { type BaseSlotOptions } from ".";
-import { keys, toNumber, union } from "lodash";
+import { flatten, isEmpty, keys, toNumber, union } from "lodash";
 
 export default class ClassFeatSlot extends BaseSlot {
 	constructor(options: BaseSlotOptions) {
@@ -45,7 +45,7 @@ export default class ClassFeatSlot extends BaseSlot {
 	 * @param {number[][]} options.rl - 图信息
 	 * @returns {Record<string, number[]>} - 中奖信息(wp)
 	 */
-	getFixedPriceWp({
+	public getFixedPriceWp({
 		fixedRoutes,
 		duoBaoIcon = 1,
 		baiDaIcon = 0,
@@ -98,5 +98,36 @@ export default class ClassFeatSlot extends BaseSlot {
 			}
 		});
 		return wp;
+	}
+
+	/**
+	 * 获取中奖路图标对应的倍率
+	 * @description 目前的游戏第一列不会出现百搭符号，如果有存在第一列有百搭符号的。那么 wp 和 rwsp 的计算都不适用
+	 * @param {Object} options - 参数对象
+	 * @param {Record<string, number[]>} options.wp - 图标的中奖信息
+	 * @param {Record<string, Record<number, number>>} options.iconMul - 图标对应的倍率信息
+	 * @param {number[][]} - 图标数组
+	 * @returns {Record<string, number>} 中奖图标对应的倍数
+	 */
+	public getRwsp({
+		wp,
+		rl,
+		iconMul,
+	}: {
+		wp?: Record<string, number[]>;
+		rl: number[][];
+		iconMul: Record<string, Record<number, number>>;
+	}) {
+		if (isEmpty(wp)) return null;
+		const orl = flatten(rl);
+		return keys(wp).reduce((acc, winId) => {
+			const posArr = wp[winId];
+			const pos = posArr[0];
+			const icon = orl[pos];
+			return {
+				...acc,
+				[winId]: iconMul[icon][posArr.length],
+			};
+		}, {} as Record<string, number>);
 	}
 }

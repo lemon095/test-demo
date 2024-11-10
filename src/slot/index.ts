@@ -11,7 +11,6 @@ import {
 	values,
 } from "lodash";
 import random from "random";
-import { UserType } from "utils/helper";
 
 export interface BaseSlotOptions {
 	/** rl 权重表配置 */

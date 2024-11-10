@@ -1,11 +1,6 @@
 import { expect, describe, it } from "bun:test";
 import BaseSlot from "../feat";
-import {
-	RL_WEIGHTS,
-	TRL_WEIGHTS,
-	MF_WEIGHTS,
-	FIXED_PRICE_ROUTES,
-} from "../TetWeights";
+import { RL_WEIGHTS, TRL_WEIGHTS, FIXED_PRICE_ROUTES } from "../TetWeights";
 import { UserType } from "utils/helper";
 import { chunk, keys, values } from "lodash";
 
@@ -160,7 +155,7 @@ describe("固定中奖路线WP", () => {
 			"13": [2, 6, 11],
 		});
 	});
-	it("验证所有情况下的五连线", () => {
+	it("验证所有的五连线信息", () => {
 		expect(
 			slot.getFixedPriceWp({
 				fixedRoutes: FIXED_PRICE_ROUTES,

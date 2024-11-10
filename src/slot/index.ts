@@ -11,6 +11,7 @@ import {
 	values,
 } from "lodash";
 import random from "random";
+import type { UserType } from "utils/helper";
 
 export interface BaseSlotOptions {
 	/** rl 权重表配置 */
@@ -51,6 +52,11 @@ export default class BaseSlot {
 	 * @param {Object} options - 配置选项
 	 * @param {array} options.rlWeights 必填，rl的权重表
 	 * @param {array} options.trlWeights 必填，trl的权重表
+	 * @param {UserType} options.userType 必填，用户类型
+	 * @param {Object} options.prevSi 必填，上一次的 si
+	 * @param {number} options.cs 必填
+	 * @param {number} options.ml 必填
+	 * @param {number} options.lineRate 选填，基准线 默认 20
 	 */
 	constructor({
 		rlWeights,
@@ -414,33 +420,33 @@ export default class BaseSlot {
 	/**
 	 * 中奖金额
 	 * @param {Object} options - 配置选项
-	 * @param {Object} options.snww 中奖图标图标:路线
-	 * @param {Object} options.rwsp 中奖图标图标:图标对应倍数
-	 * @param {number} options.totalBet 投注金额
+	 * @param {Object} options.snww 选填，中奖线路数
+	 * @description 如果是存在中奖线路数的游戏，snww 必传。
+	 * @param {Object} options.rwsp 选填，中奖线图标倍率
+	 * @returns {Record<string, number>|null} 中奖的基础金额信息
 	 */
 	public getLw({
 		snww,
 		rwsp,
-		totalBet,
 	}: {
-		snww: Record<string, number> | null;
-		rwsp: Record<string, number> | null;
-		totalBet: number;
+		snww?: Record<string, number> | null;
+		rwsp?: Record<string, number> | null;
 	}): Record<string, number> | null {
-		if (isEmpty(snww) || isEmpty(rwsp)) {
+		if (isEmpty(rwsp)) {
 			return null;
 		}
-
-		let lw: Record<number | string, Decimal> = {};
-		keys(snww).forEach((key) => {
-			lw[key] = new Decimal(totalBet).div(20).mul(rwsp[key]).mul(snww[key]);
-		});
-		let newLw: Record<string, number> = {};
-		keys(lw).forEach((key) => {
-			newLw[key] = lw[key].toNumber();
-		});
-
-		return newLw;
+		let lw: Record<number | string, number> = {};
+		return keys(rwsp).reduce((acc, winId) => {
+			const winCount = isEmpty(snww) ? 1 : snww[winId];
+			return {
+				...acc,
+				[winId]: new Decimal(this.totalBet)
+					.div(this.lineRate)
+					.mul(rwsp[winId])
+					.mul(winCount)
+					.toNumber(),
+			};
+		}, lw);
 	}
 
 	public getCtw({

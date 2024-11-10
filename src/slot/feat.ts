@@ -1,6 +1,8 @@
 import random from "random";
 import BaseSlot, { type BaseSlotOptions } from ".";
 import { flatten, isEmpty, keys, toNumber, union } from "lodash";
+import { TwCalculateType } from "utils/helper";
+import Decimal from "decimal.js";
 
 export default class ClassFeatSlot extends BaseSlot {
 	constructor(options: BaseSlotOptions) {
@@ -129,5 +131,48 @@ export default class ClassFeatSlot extends BaseSlot {
 				[winId]: iconMul[icon][posArr.length],
 			};
 		}, {} as Record<string, number>);
+	}
+
+	/**
+	 * 通用 tw 计算
+	 * @description 目前接触到几个游戏中，tw 有两种计算方式，如果有累计倍数的逻辑则走 累计模式，否则走通用模式
+	 * @param {Object} options - 参数对象
+	 * @param {Object} options.lw - 本局中奖图标的基础金额
+	 * @param {Number} options.gm - 选填，本局倍率或者累计倍率，默认为 1
+	 * @param {Number} options.totalPrice - 选填，累计的总金额，只会在累计倍率的模式下使用，默认为 0
+	 * @param {Boolean} options.isCurrentWinner - 选填，当前是否中奖
+	 * @param {TwCalculateType} options.mode - tw 计算方式
+	 * @returns {Number} tw 金额
+	 */
+	public getTw({
+		lw,
+		gm = 1,
+		totalPrice = 0,
+		isCurrentWinner,
+		mode,
+	}: {
+		lw?: Record<string, number> | null;
+		gm?: number;
+		totalPrice?: number;
+		isCurrentWinner?: boolean;
+		mode: TwCalculateType;
+	}): number {
+		// 使用适配器设计模式思想用于处理复杂业务下的 tw 计算方式
+		const twAdapter = {
+			[TwCalculateType.common]: (): number => {
+				if (isEmpty(lw)) return 0;
+				const ctw = BaseSlot._getCtw({ lw, gm });
+				return new Decimal(gm).mul(ctw).toNumber();
+			},
+			[TwCalculateType.grandTotal]: (): number => {
+				// 如果上一次赢了，本次没赢（那么说明是掉落的最后一次），则直接返回累计金额 * 累计倍数
+				if (this.isPreWin && !isCurrentWinner) {
+					return new Decimal(totalPrice).mul(gm).toNumber();
+				}
+				// 否则直接返回 0
+				return 0;
+			},
+		}[mode];
+		return twAdapter();
 	}
 }

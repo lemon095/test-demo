@@ -450,17 +450,11 @@ export default class BaseSlot {
 	}
 
 	/**
-	 * 计算本局中奖金额 - ctw
-	 * @description 在某些场景下 tw = ctw，这时候 tw 通常会乘以本局的倍率信息
-	 * @description 在某些场景下 tw = 0，则 ctw 通常是 lw 中中奖图标的基础价格总计。在整个中奖流程中，掉落的最后一次通常会计算累计中奖金额乘以累计倍率信息，ctw = tw，不过也有其他例外的情况。
-	 * @description 那么在基础类目前只做最基本的逻辑运算，即 tw = lw price total * gm；如果 gm 没有则默认为 1
-	 * @description 目前几个游戏 ctw 基本都为 lw 中奖金额的总计 * 倍数。极速和墨西哥除外。
-	 * @param { Object } options - 配置信息
-	 * @param { Record<string, number> |null } options.lw - 选填，中奖图标的基础价值
-	 * @param { number } options.gm - 选填，图标的倍率信息，默认为 1
+	 * 静态方法 计算本局中奖金额 - ctw
+	 * @description 使用静态方法是不想外部子类 改最基本的 ctw 的逻辑，因为其他方法也会调用这段逻辑
 	 * @returns { number } 中奖金额
 	 */
-	public getCtw({
+	public static _getCtw({
 		lw,
 		gm = 1,
 	}: {
@@ -472,6 +466,24 @@ export default class BaseSlot {
 			return acc.add(lw[key]);
 		}, new Decimal(0));
 		return ctw.mul(gm).toNumber();
+	}
+
+	/**
+	 * 计算本局中奖金额 - ctw
+	 * @description 在某些场景下 tw = ctw，这时候 tw 通常会乘以本局的倍率信息
+	 * @description 在某些场景下 tw = 0，则 ctw 通常是 lw 中中奖图标的基础价格总计。在整个中奖流程中，掉落的最后一次通常会计算累计中奖金额乘以累计倍率信息，ctw = tw，不过也有其他例外的情况。
+	 * @description 目前几个游戏 ctw 基本都为 lw 中奖金额的总计 * 倍数。极速和墨西哥除外。
+	 * @description 那么在基础类目前只做最基本的逻辑运算，即静态方法 _getCtw 内实现的逻辑；如果 gm 没有则默认为 1
+	 * @param { Object } options - 配置信息
+	 * @param { Record<string, number> |null } options.lw - 选填，中奖图标的基础价值
+	 * @param { number } options.gm - 选填，图标的倍率信息，默认为 1
+	 * @returns { number } 中奖金额
+	 */
+	public getCtw(params: {
+		lw?: Record<string, number> | null;
+		gm?: number;
+	}): number {
+		return BaseSlot._getCtw(params);
 	}
 
 	/**

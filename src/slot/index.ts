@@ -449,35 +449,29 @@ export default class BaseSlot {
 		}, lw);
 	}
 
+	/**
+	 * 计算本局中奖金额 - ctw
+	 * @description 在某些场景下 tw = ctw，这时候 tw 通常会乘以本局的倍率信息
+	 * @description 在某些场景下 tw = 0，则 ctw 通常是 lw 中中奖图标的基础价格总计。在整个中奖流程中，掉落的最后一次通常会计算累计中奖金额乘以累计倍率信息，ctw = tw，不过也有其他例外的情况。
+	 * @description 那么在基础类目前只做最基本的逻辑运算，即 tw = lw price total * gm；如果 gm 没有则默认为 1
+	 * @description 目前几个游戏 ctw 基本都为 lw 中奖金额的总计 * 倍数。极速除外，墨西哥狂欢的ctw计算和极速一致。
+	 * @param { Object } options - 配置信息
+	 * @param { Record<string, number> |null } options.lw - 选填，中奖图标的基础价值
+	 * @param { number } options.gm - 选填，图标的倍率信息，默认为 1
+	 * @returns { number } 中奖金额
+	 */
 	public getCtw({
 		lw,
-		acw,
-		tgm,
+		gm = 1,
 	}: {
 		lw?: Record<string, number> | null;
-		acw: number;
-		tgm: number;
+		gm?: number;
 	}): number {
-		let ctw = new Decimal(0);
-		if (!this.isPreWin) {
-			//如果上一次没中, 那么本次中为lw的图标金额的和，否则为0
-			if (isEmpty(lw)) {
-				return ctw.toNumber();
-			}
-			keys(lw).forEach((key) => {
-				ctw = ctw.add(lw[key]);
-			});
-			return ctw.toNumber();
-		}
-		//如果上一次中, 本次没有中
-		if (isEmpty(lw)) {
-			return new Decimal(acw).mul(tgm).sub(acw).toNumber();
-		}
-		//上一次中, 本次中
-		keys(lw).forEach((key) => {
-			ctw = ctw.add(lw[key]);
-		});
-		return ctw.toNumber();
+		if (isEmpty(lw)) return 0;
+		const ctw = keys(lw).reduce((acc, key) => {
+			return acc.add(lw[key]);
+		}, new Decimal(0));
+		return ctw.mul(gm).toNumber();
 	}
 
 	/**

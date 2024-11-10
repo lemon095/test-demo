@@ -812,81 +812,67 @@ describe("极速：md 计算", () => {
 		]);
 	});
 });
-describe("极速: ctw计算", () => {
-	it("上一次没中奖，本次也没有中奖", () => {
+describe("通用: ctw计算", () => {
+	it("本次没有中奖", () => {
 		const slot = new BaseSlot({
 			rlWeights: RL_WEIGHTS,
 			trlWeights: TRL_WEIGHTS,
 			userType: UserType.common,
 			cs: 0,
 			ml: 0,
-			prevSi: { wp: null },
 		});
-		expect(slot.getCtw({ lw: null, acw: 0, tgm: 1 })).toBe(0);
+		expect(slot.getCtw({ lw: null })).toBe(0);
 	});
-	it("上一次没中奖，本次中奖", () => {
+	it("本次单个图标中奖", () => {
 		const slot = new BaseSlot({
 			rlWeights: RL_WEIGHTS,
 			trlWeights: TRL_WEIGHTS,
 			userType: UserType.common,
 			cs: 0,
 			ml: 0,
-			prevSi: { wp: null },
 		});
 		expect(
 			slot.getCtw({
 				lw: {
 					"6": 7.2,
 				},
-				acw: 7.2,
-				tgm: 26,
 			})
 		).toBe(7.2);
 	});
-	it("上一次中奖，本次没有中奖", () => {
+	it("多个图标中奖", () => {
 		const slot = new BaseSlot({
 			rlWeights: RL_WEIGHTS,
 			trlWeights: TRL_WEIGHTS,
 			userType: UserType.common,
 			cs: 0,
 			ml: 0,
-			prevSi: {
-				wp: {
-					"6": [3, 4, 7, 10, 11],
-				},
-			},
-		});
-		expect(
-			slot.getCtw({
-				lw: null,
-				acw: 7.2,
-				tgm: 31,
-			})
-		).toBe(216);
-	});
-	it("上一次中奖，本次中奖", () => {
-		const slot = new BaseSlot({
-			rlWeights: RL_WEIGHTS,
-			trlWeights: TRL_WEIGHTS,
-			userType: UserType.common,
-			cs: 0,
-			ml: 0,
-			prevSi: {
-				wp: {
-					"5": [3],
-					"9": [4, 9, 14, 17, 18],
-				},
-			},
 		});
 		expect(
 			slot.getCtw({
 				lw: {
-					"11": 1.8,
+					"6": 7.2,
+					8: 7.2,
 				},
-				acw: 14.4,
-				tgm: 0,
 			})
-		).toBe(1.8);
+		).toBe(14.4);
+	});
+	it("多个图标中奖，且倍数为 3", () => {
+		const slot = new BaseSlot({
+			rlWeights: RL_WEIGHTS,
+			trlWeights: TRL_WEIGHTS,
+			userType: UserType.common,
+			cs: 0,
+			ml: 0,
+		});
+		expect(
+			slot.getCtw({
+				lw: {
+					"6": 7.2,
+					8: 7.2,
+				},
+				gm: 3,
+			})
+		).toBe(43.2);
 	});
 });
 describe("通用：rl 随机图标", () => {

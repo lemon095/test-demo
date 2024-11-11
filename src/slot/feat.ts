@@ -276,4 +276,34 @@ export default class ClassFeatSlot extends BaseSlot {
 		}
 		return count;
 	}
+
+	/**
+	 * 获取下一局游戏状态
+	 * @param {Object} options - 参数对象
+	 * @param {number} options.sc - 夺宝数量
+	 * @param {Object} options.fs - 夺宝模式下的数据
+	 * @param {Object} options.currentWp - 当前中奖图标信息
+	 * @returns {number} 下一局游戏状态 1|4|21|22
+	 */
+	public getNst({
+		sc = 0,
+		fs,
+		currentWp,
+	}: {
+		currentWp?: Record<string, any> | null;
+		sc?: number;
+		fs?: Record<string, any> | null;
+	}): number {
+		if (this.isDuoBaoPending) {
+			// 当前为夺宝的最后一次
+			if (this.isLastDuoBao({ crrFs: fs, currentWp })) return 1;
+			// 当前未中奖
+			if (isEmpty(currentWp)) return 21;
+			// 当前中奖
+			return 22;
+		}
+		if (sc > 3 && isEmpty(currentWp)) return 21;
+		if (isEmpty(currentWp)) return 1;
+		return 4;
+	}
 }

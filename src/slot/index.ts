@@ -177,8 +177,8 @@ export default class BaseSlot {
 		currentWp,
 		crrFs,
 	}: {
-		currentWp: Record<string, number[]>;
-		crrFs: Record<string, any>;
+		currentWp?: Record<string, number[]> | null;
+		crrFs?: Record<string, any> | null;
 	}): boolean {
 		if (crrFs?.s === 0 && isEmpty(currentWp)) {
 			return true;

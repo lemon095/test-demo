@@ -38,8 +38,8 @@ export default class ClassFeatSlot extends BaseSlot {
 	}: {
 		gsp: number[];
 		wp?: Record<string, any> | null;
-	}) {
-		if (isEmpty(wp)) return [];
+	}): number[] | null {
+		if (isEmpty(wp)) return null;
 		const innerWp = cloneDeep(wp);
 		const wpValues = flattenDeep(values(innerWp));
 		return wpValues.filter((v) => !gsp.includes(v));
@@ -54,8 +54,8 @@ export default class ClassFeatSlot extends BaseSlot {
 	}: {
 		gsp: number[];
 		wp?: Record<string, number[]> | null;
-	}): number[] {
-		if (isEmpty(wp)) return [];
+	}): number[] | null {
+		if (isEmpty(wp)) return null;
 		const innerWp = cloneDeep(wp);
 		const wpValues = flattenDeep(values(innerWp));
 		return wpValues.filter((v) => gsp.includes(v));

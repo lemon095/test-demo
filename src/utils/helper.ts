@@ -15,3 +15,31 @@ export enum TwCalculateType {
 	/** 累计的倍数模式：本次中奖为 0，掉落的最后一次为累计金额 * 累计倍率 */
 	grandTotal = 1,
 }
+
+/**
+ * 给定 key 和 value，返回 key:value
+ * @param {string[]} keys
+ * @param {any} value
+ * @returns {Record<string, any>} { [key]: value }
+ */
+export function toOutputVal<K extends string, V extends any>(
+	keys: string[],
+	val: V
+) {
+	return keys.reduce((acc, cur) => {
+		acc[cur as K] = val;
+		return acc;
+	}, {} as Record<K, V>);
+}
+
+/**
+ * 输出给定字段的值都为 null
+ * @param {string[]} keys
+ */
+export function toBeNull<K extends string>(keys: string[]) {
+	return toOutputVal<K, null>(keys, null);
+}
+
+export function toBeZero<K extends string>(keys: string[]) {
+	return toOutputVal<K, 0>(keys, 0);
+}

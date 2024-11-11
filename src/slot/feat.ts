@@ -1,6 +1,17 @@
 import random from "random";
 import BaseSlot, { type BaseSlotOptions } from ".";
-import { flatten, isEmpty, keys, toNumber, union } from "lodash";
+import {
+	flatMapDeep,
+	flatten,
+	isArray,
+	isEmpty,
+	isObject,
+	keys,
+	last,
+	toNumber,
+	union,
+	values,
+} from "lodash";
 import { TwCalculateType } from "utils/helper";
 import Decimal from "decimal.js";
 
@@ -192,5 +203,77 @@ export default class ClassFeatSlot extends BaseSlot {
 		const prevSsaw = this.prevSi?.ssaw || 0;
 		const ctw = BaseSlot._getCtw({ lw, gm });
 		return new Decimal(ctw).add(prevSsaw).toNumber();
+	}
+
+	/** 墨西哥：aw 计算 */
+	public getAwBy1492288({ tw }: { tw: number }) {
+		if (this.isDuoBaoPending) {
+			const prevAw = this.prevSi?.aw || 0;
+			return new Decimal(prevAw).add(tw);
+		}
+		return tw;
+	}
+	/**
+	 * 判断夺宝的数量
+	 * @description 有些游戏的每一列图标是会合并的。所以需要用到合并框的信息（ebb）
+	 * @description 有些游戏会跳过某一行的信息，比如墨西哥。那么需要传入跳过行的信息
+	 * @param {Object} options - 参数对象
+	 * @param {number[][]} options.rl - 下方图信息
+	 * @param {number[]} options.trl - 选填，上方图信息。如果不填则是空数组
+	 * @param {Record<string, number[]>} options.esb - 选填，如果存在图标合并成框的信息，那么需要用到这个参数
+	 * @param {number} options.duobaoIcon - 选填，夺宝图标的id，默认为 1
+	 * @param {number} options.skipRow - 选填，需要跳过的行数 (从 1 开始数)
+	 * @returns {number} 夺宝图标的数量
+	 */
+	public getSc({
+		rl,
+		trl = [],
+		duobaoIcon = 1,
+		esb = {},
+		skipRow = 0,
+	}: {
+		rl: number[][];
+		trl?: number[];
+		esb?: Record<string, number[]> | null;
+		duobaoIcon?: number;
+		skipRow?: number;
+	}): number {
+		if (!isArray(trl) || !isArray(rl))
+			throw new Error("trl 或 rl 参数数据格式错误");
+		if (!isObject(esb)) throw new Error("esb 参数数据格式错误");
+		const esbValues = values(esb);
+		const colLength = rl[0].length;
+		const _rl = flatMapDeep([...rl]);
+		let count = trl.reduce((acc, crrIcon) => {
+			if (crrIcon === duobaoIcon) {
+				return acc + 1;
+			}
+			return acc;
+		}, 0);
+		for (let iconPos = 0; iconPos < _rl.length; iconPos++) {
+			// 需要跳过某个位置的图标，比如墨西哥需要跳过第一行的图标信息
+			const skipPos = skipRow * (iconPos / colLength);
+			if (skipRow && new Decimal(skipPos).isInt()) {
+				continue;
+			}
+			if (_rl[iconPos] !== 1) {
+				continue;
+			}
+			const duobaos = esbValues.filter((idxArr) =>
+				idxArr.some((pos) => pos === iconPos)
+			);
+			if (duobaos.length) {
+				for (let d = 0; d < duobaos.length; d++) {
+					const lastIdx = last(duobaos[d]) || -1;
+					if (lastIdx !== iconPos) {
+						continue;
+					}
+					count += 1;
+				}
+			} else {
+				count += 1;
+			}
+		}
+		return count;
 	}
 }

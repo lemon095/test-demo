@@ -334,6 +334,20 @@ export default class ClassFeatSlot extends BaseSlot {
 	}
 
 	/**
+	 * 当前盈利
+	 * @param { number } tw 盈利金额
+	 */
+	public getNp(tw: number): number {
+		if (this.isDuoBaoPending) {
+			return tw;
+		}
+		if (this.isPreWin) {
+			return tw;
+		}
+		return new Decimal(tw).minus(this.totalBet).toNumber();
+	}
+
+	/**
 	 * 获取 gwt
 	 * @description 位置含义的参数，所以计算逻辑只是按照当初的理解来写的
 	 * @param {number} aw - aw

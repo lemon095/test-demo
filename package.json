@@ -7,7 +7,8 @@
 		"docs:slot": "typedoc --out docs/slot ./src/slot/**.ts",
 		"docs:chicky": "typedoc --out docs/chicky ./src/chicky/index.ts",
 		"test:slot": "bun test src/slot/test",
-		"test:chicky": "bun test src/chicky/test"
+		"test:chicky": "bun test src/chicky/test",
+		"build": "bun scripts/clearComments.ts"
 	},
 	"devDependencies": {
 		"@types/bun": "latest",
@@ -21,6 +22,7 @@
 	"dependencies": {
 		"decimal.js": "^10.4.3",
 		"lodash": "^4.17.21",
-		"random": "^5.1.1"
+		"random": "^5.1.1",
+		"strip-json-comments": "^5.0.1"
 	}
 }

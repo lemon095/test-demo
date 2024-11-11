@@ -177,3 +177,7 @@ dist
 .vscode
 
 docs
+
+src/**/output.ts
+src/**/chicky.ts
+src/**/baseSlot.ts

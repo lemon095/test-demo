@@ -348,6 +348,23 @@ export default class ClassFeatSlot extends BaseSlot {
 	}
 
 	/**
+	 * 通用逻辑：cwc 中奖流程中的累计次数
+	 * @param {Object} wp - 中奖图标信息
+	 * @returns {number} 中奖流程中的累计次数
+	 */
+	public getCwc(wp?: Record<string, any> | null) {
+		let cwc = 0;
+		const isWin = !isEmpty(wp);
+		if (isWin) {
+			cwc = 1;
+			if (this.isPreWin) {
+				cwc += this.prevSi?.cwc || 0;
+			}
+		}
+		return cwc;
+	}
+
+	/**
 	 * 获取 gwt
 	 * @description 位置含义的参数，所以计算逻辑只是按照当初的理解来写的
 	 * @param {number} aw - aw

@@ -283,7 +283,7 @@ export default class ClassFeatSlot extends BaseSlot {
 	 * @param {number} options.sc - 夺宝数量
 	 * @param {Object} options.fs - 夺宝模式下的数据
 	 * @param {Object} options.currentWp - 当前中奖图标信息
-	 * @returns {number} 下一局游戏状态 1|4|21|22
+	 * @returns {number} 当前游戏状态 1|4|21|22
 	 */
 	public getNst({
 		sc = 0,
@@ -305,5 +305,12 @@ export default class ClassFeatSlot extends BaseSlot {
 		if (sc > 3 && isEmpty(currentWp)) return 21;
 		if (isEmpty(currentWp)) return 1;
 		return 4;
+	}
+	/**
+	 * 获取当前局游戏状态
+	 * @returns {number} 当前游戏状态 1|4|21|22
+	 */
+	public getSt() {
+		return this.prevSi?.nst ?? 1;
 	}
 }

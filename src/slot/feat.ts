@@ -320,4 +320,36 @@ export default class ClassFeatSlot extends BaseSlot {
 	public orl(rl: number[][]) {
 		return flattenDeep(cloneDeep(rl));
 	}
+
+	/** tbb 每一局的投注额 */
+	public get tbb(): number {
+		return this.totalBet;
+	}
+
+	/** tb 本局的投注额 free game 模式下为 0 */
+	public get tb(): number {
+		if (this.isPreWin) return 0;
+		if (this.isDuoBaoPending) return 0;
+		return this.totalBet;
+	}
+
+	/**
+	 * 获取 gwt
+	 * @description 位置含义的参数，所以计算逻辑只是按照当初的理解来写的
+	 * @param {number} aw - aw
+	 */
+	public getGwt(aw: number) {
+		let gwt = -1;
+		const gwtDiff = aw / this.tbb;
+		if (gwtDiff > 0 && gwtDiff < 5) {
+			gwt = 1;
+		} else if (gwtDiff >= 5 && gwtDiff < 15) {
+			gwt = 2;
+		} else if (gwtDiff >= 15 && gwtDiff < 35) {
+			gwt = 3;
+		} else if (gwtDiff > 35) {
+			gwt = 4;
+		}
+		return gwt;
+	}
 }

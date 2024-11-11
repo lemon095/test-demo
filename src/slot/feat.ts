@@ -1,8 +1,10 @@
 import random from "random";
 import BaseSlot, { type BaseSlotOptions } from ".";
 import {
+	cloneDeep,
 	flatMapDeep,
 	flatten,
+	flattenDeep,
 	isArray,
 	isEmpty,
 	isObject,
@@ -312,5 +314,10 @@ export default class ClassFeatSlot extends BaseSlot {
 	 */
 	public getSt() {
 		return this.prevSi?.nst ?? 1;
+	}
+
+	/** 当局游戏的原始 rl 数据 */
+	public orl(rl: number[][]) {
+		return flattenDeep(cloneDeep(rl));
 	}
 }

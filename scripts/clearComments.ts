@@ -5,7 +5,7 @@ import stripJsonComments from "strip-json-comments";
 function clearBaseSlot() {
 	// 读取带注释的文件
 	const inputFilePath = path.join(import.meta.dir, "../src/slot/index.ts");
-	const outputFilePath = path.join(import.meta.dir, "../src/slot/baseSlot.ts");
+	const outputFilePath = path.join(import.meta.dir, "../src/slot/BaseSlot.ts");
 	readFile(inputFilePath, "utf8", (err, data) => {
 		if (err) {
 			console.error("Error reading file:", err);
@@ -29,7 +29,7 @@ function clearBaseSlot() {
 function clearChikcy() {
 	// 读取带注释的文件
 	const inputFilePath = path.join(import.meta.dir, "../src/chicky/index.ts");
-	const outputFilePath = path.join(import.meta.dir, "../src/chicky/chicky.ts");
+	const outputFilePath = path.join(import.meta.dir, "../src/chicky/Chicky.ts");
 	readFile(inputFilePath, "utf8", (err, data) => {
 		if (err) {
 			console.error("Error reading file:", err);

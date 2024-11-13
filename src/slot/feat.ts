@@ -120,4 +120,44 @@ export default class ClassFeatSlot extends BaseSlot {
 		}
 		return [1, 11];
 	}
+
+	/**
+	 * 通用：fstc 游戏模式的累计中奖信息
+	 * @returns {Object|null}
+	 */
+	public getFstc(): Record<string, number> | null {
+		const prevFstc = this.prevSi?.fstc || {};
+		// 处理夺宝流程
+		if (this.isDuoBaoPending) {
+			const prev22 = prevFstc[22] || 0;
+			const prev21 = prevFstc[21] || 0;
+			return {
+				...prevFstc,
+				21: prev21 + (this.isPreWin ? 0 : 1),
+				22: prev22 + (this.isPreWin ? 1 : 0),
+			};
+		}
+		// 处理非夺宝流程
+		if (this.isPreWin) {
+			const prev4 = prevFstc[4] || 0;
+			return {
+				4: prev4 + 1,
+			};
+		}
+		return null;
+	}
+
+	/**
+	 * 墨西哥：倍率处理
+	 * @param {number} cgm - 本局的倍率信息，没有则为 0
+	 * @returns {number} 默认为 1 倍
+	 */
+	public getGmBy1492288(cgm: number) {
+		if (this.isDuoBaoPending) {
+			const prevGm = this.prevSi?.gm;
+			return cgm + prevGm || 1;
+		}
+		const prevGm = this.isPreWin ? this.prevSi?.gm || 0 : 0;
+		return cgm + prevGm || 1;
+	}
 }

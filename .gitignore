@@ -179,5 +179,7 @@ dist
 docs
 
 src/**/output.ts
+src/**/Chicky.ts
+src/**/BaseSlot.ts
 src/**/chicky.ts
 src/**/baseSlot.ts

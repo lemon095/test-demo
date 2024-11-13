@@ -160,4 +160,57 @@ export default class ClassFeatSlot extends BaseSlot {
 		const prevGm = this.isPreWin ? this.prevSi?.gm || 0 : 0;
 		return cgm + prevGm || 1;
 	}
+
+	/**
+	 * 通用：获取夺宝模式下的基础信息
+	 * @param {Object} options - 配置项
+	 * @param {number} options.sc - 夺宝数量
+	 * @param {number} options.scRadix - 夺宝基数
+	 * @param {number} options.scGm - 选填，减去夺宝基础后，没多一个夺宝需要多加几次免费游戏次数，默认为 1
+	 * @param {number} options.playCount - 选填，夺宝模式下，起步的免费游玩次数，默认 0
+	 * @param {number} options.tw 本局中奖金额
+	 * @returns {Object | null}
+	 */
+	public getFs({
+		sc,
+		scRadix,
+		scGm = 1,
+		playCount = 0,
+		tw,
+	}: {
+		sc: number;
+		scRadix: number;
+		tw: number;
+		scGm?: number;
+		playCount?: number;
+	}): { s: number; ts: number; aw: number } | null {
+		// 触发夺宝
+		if (sc > 3) {
+			// 计算当前夺宝流程下的次数
+			const currentS = (sc - scRadix) * scGm + playCount;
+			return {
+				s: currentS,
+				ts: currentS,
+				aw: 0,
+			};
+		}
+		// 如果是夺宝流程
+		if (this.isDuoBaoPending) {
+			const prevFs = this.prevSi?.fs as { s: number; ts: number; aw: number };
+			const aw = new Decimal(tw).add(prevFs.aw).toNumber();
+			if (this.isPreWin) {
+				return {
+					...prevFs,
+					// 只统计夺宝流程下的中奖金额，免费掉落的夺宝也是一样的
+					aw,
+				};
+			}
+			return {
+				...prevFs,
+				s: prevFs.s - 1,
+				aw,
+			};
+		}
+		return null;
+	}
 }

@@ -33,6 +33,10 @@ export interface BaseSlotOptions {
 	ml: number;
 	/** 基准线 */
 	lineRate?: number;
+	/** 购买的夺宝模式 */
+	isFb?: boolean;
+	/** 用多少倍来购买的夺宝 */
+	gmFb?: number;
 }
 
 export default class BaseSlot {
@@ -74,6 +78,8 @@ export default class BaseSlot {
 		prevSi,
 		cs,
 		ml,
+		isFb,
+		gmFb,
 		lineRate = 20,
 	}: BaseSlotOptions) {
 		this.rlWeightsMap = rlWeights;
@@ -84,6 +90,9 @@ export default class BaseSlot {
 		this.ml = ml;
 		this.lineRate = lineRate;
 		this.totalBet = new Decimal(cs).mul(ml).mul(lineRate).toNumber();
+		if (isFb && gmFb) {
+			this.totalBet = new Decimal(this.totalBet).mul(gmFb).toNumber();
+		}
 	}
 	/**
 	 * rl 的权重表信息

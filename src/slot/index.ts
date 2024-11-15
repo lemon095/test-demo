@@ -52,6 +52,10 @@ export default class BaseSlot {
 	public readonly lineRate: number;
 	/** 总下注 */
 	public readonly totalBet: number;
+	/** 阈值：多少次不赢，默认为 15 */
+	public notWinnerTotal = 15;
+	/** 累计多少次不赢，默认为 0 */
+	public notWinnerCount = 0;
 	/**
 	 * base slot 构造器
 	 * @param {Object} options - 配置选项
@@ -138,11 +142,12 @@ export default class BaseSlot {
 	}
 	/**
 	 * 是否大于等于某个次数，默认值为 15
-	 * @param count 当前次数
-	 * @param total 总数，默认值为 15
+	 * @param { number } this.notWinnerCount 当前次数
+	 * @param { number }this.notWinnerTotal 总数，默认值为 15
+	 * @return {boolean}
 	 */
-	public isNotWinOver15(count: number, total = 15) {
-		return count >= total;
+	public get isNotWinOver15(): boolean {
+		return this.notWinnerCount >= this.notWinnerTotal;
 	}
 	/**
 	 * 上一次是否中奖

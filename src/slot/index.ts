@@ -22,7 +22,7 @@ export interface BaseSlotOptions {
 	/** rl 权重表配置 */
 	rlWeights: PGSlot.RandomWeights;
 	/** trl 权重表配置 */
-	trlWeights: PGSlot.RandomWeights;
+	trlWeights?: PGSlot.RandomWeights;
 	/** 用户类型 */
 	userType: PGSlot.UserType;
 	/** 上一局的信息 */
@@ -39,7 +39,7 @@ export default class BaseSlot {
 	/** rl的权重表 */
 	private readonly rlWeightsMap: PGSlot.RandomWeights;
 	/** trl的权重表 */
-	private readonly trlWeightsMap: PGSlot.RandomWeights;
+	private readonly trlWeightsMap?: PGSlot.RandomWeights;
 	/** 上一局的游戏信息 */
 	public readonly prevSi?: Record<string, any>;
 	/** 用户信息 */
@@ -96,6 +96,9 @@ export default class BaseSlot {
 	public get trlTables(): number[][] {
 		if (isUndefined(this.userType)) {
 			throw new Error("请先设置用户类型");
+		}
+		if (isEmpty(this.trlWeightsMap)) {
+			throw new Error("trlWeightsMap 为空");
 		}
 		return this.convertWeights(this.trlWeightsMap[this.userType]);
 	}

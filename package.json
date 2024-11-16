@@ -8,7 +8,7 @@
 		"docs:chicky": "typedoc --out docs/chicky ./src/chicky/index.ts",
 		"test:slot": "bun test src/slot/test",
 		"test:chicky": "bun test src/chicky/test",
-		"build": "bun scripts/clearComments.ts"
+		"b": "bun run scripts/clearComments.ts"
 	},
 	"devDependencies": {
 		"@types/bun": "latest",

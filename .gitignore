@@ -183,3 +183,4 @@ src/**/Chicky.ts
 src/**/BaseSlot.ts
 src/**/chicky.ts
 src/**/baseSlot.ts
+src/**/output/**

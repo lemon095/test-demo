@@ -60,6 +60,7 @@ export default class BaseSlot {
 	public notWinnerTotal = 15;
 	/** 累计多少次不赢，默认为 0 */
 	public notWinnerCount = 0;
+	public readonly isFb?: boolean;
 	/**
 	 * base slot 构造器
 	 * @param {Object} options - 配置选项
@@ -92,7 +93,13 @@ export default class BaseSlot {
 		this.totalBet = new Decimal(cs).mul(ml).mul(lineRate).toNumber();
 		if (isFb && gmFb) {
 			this.totalBet = new Decimal(this.totalBet).mul(gmFb).toNumber();
+			this.isFb = isFb;
 		}
+	}
+
+	/** 当前是否为购买触发的夺宝 */
+	public get isBuyDuoBao(): boolean {
+		return this.isFb || false;
 	}
 	/**
 	 * rl 的权重表信息
@@ -1083,5 +1090,11 @@ export default class BaseSlot {
 			};
 		}
 		return null;
+	}
+	/** 获取 tb，free game 的情况下是 0 */
+	public getTb() {
+		if (this.isPreWin) return 0;
+		if (this.isDuoBaoPending) return 0;
+		return this.totalBet;
 	}
 }

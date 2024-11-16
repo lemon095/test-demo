@@ -16,7 +16,7 @@ import {
 	values,
 } from "lodash";
 import random from "random";
-import { TwCalculateType, type UserType } from "utils/helper";
+import { TwCalculateType } from "utils/helper";
 
 export interface BaseSlotOptions {
 	/** rl 权重表配置 */
@@ -688,12 +688,12 @@ export default class BaseSlot {
 	}): number {
 		// 使用适配器设计模式思想用于处理复杂业务下的 tw 计算方式
 		const twAdapter = {
-			[TwCalculateType.common]: (): number => {
+			[TwCalculateType.TW通用]: (): number => {
 				if (isEmpty(lw)) return 0;
 				const ctw = BaseSlot._getCtw({ lw, gm });
 				return new Decimal(gm).mul(ctw).toNumber();
 			},
-			[TwCalculateType.grandTotal]: (): number => {
+			[TwCalculateType.TW累计]: (): number => {
 				// 如果上一次赢了，本次没赢（那么说明是掉落的最后一次），则直接返回累计金额 * 累计倍数
 				if (this.isPreWin && !isCurrentWinner) {
 					return new Decimal(totalPrice).mul(gm).toNumber();

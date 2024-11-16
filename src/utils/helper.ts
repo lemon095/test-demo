@@ -16,6 +16,17 @@ export enum TwCalculateType {
 	TW累计 = 1,
 }
 
+/** 掉落（rns）计算方式 */
+export enum RnsCalculateType {
+	/** 正常模式：纯随机，不控制是否中奖 */
+	RNS随机 = 1,
+	/**
+	 * 强控模式：强制控制不中奖，即第一列和第二列互斥。
+	 * 这种强控模式下，并不能保证百分百不中。因为上一局未中奖的图标掉落也会导致这一句中奖。
+	 */
+	RNS强控不中奖 = 2,
+}
+
 /**
  * 给定 key 和 value，返回 key:value
  * @param {string[]} keys

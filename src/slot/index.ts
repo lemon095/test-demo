@@ -17,6 +17,7 @@ import {
 } from "lodash";
 import random from "random";
 import { TwCalculateType } from "utils/helper";
+import RnsAdapter, { type RnsAdapterOptions } from "./RnsAdapter";
 
 export interface BaseSlotOptions {
 	/** rl 权重表配置 */
@@ -1096,5 +1097,11 @@ export default class BaseSlot {
 		if (this.isPreWin) return 0;
 		if (this.isDuoBaoPending) return 0;
 		return this.totalBet;
+	}
+
+	/** 计算 rns 掉落 */
+	public getRns(params: RnsAdapterOptions) {
+		const rns = new RnsAdapter(params);
+		return rns;
 	}
 }

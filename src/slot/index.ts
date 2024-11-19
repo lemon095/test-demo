@@ -724,11 +724,16 @@ export default class BaseSlot {
 		return new Decimal(ctw).add(prevSsaw).toNumber();
 	}
 
-	/** 墨西哥：aw 计算 */
+	/**
+	 * 墨西哥：aw 计算
+	 * @param {Object} options - 参数对象
+	 * @param {number} options.tw - 当前的 tw 金额
+	 * @returns {number} 累计的中奖接你
+	 */
 	public getAwBy1492288({ tw }: { tw: number }) {
 		if (this.isDuoBaoPending) {
 			const prevAw = this.prevSi?.aw || 0;
-			return new Decimal(prevAw).add(tw);
+			return new Decimal(prevAw).add(tw).toNumber();
 		}
 		return tw;
 	}
@@ -902,7 +907,8 @@ export default class BaseSlot {
 	}
 
 	/**
-	 * 墨西哥：get ir 中奖时为 true，未中奖为 false
+	 * 墨西哥：get ir
+	 * @returns {boolean} 中奖时为 true，未中奖为 false
 	 */
 	public getIr() {
 		return this.isPreWin;
@@ -910,6 +916,10 @@ export default class BaseSlot {
 
 	/**
 	 * 墨西哥 ptr: 获取非金框下的数值
+	 * @param {Object} options - 参数对象
+	 * @param {number[]} options.gsp - 金框位置
+	 * @param {Object} options.wp - 当前中奖图标信息
+	 * @return {number[]|null} 非金框下的数值
 	 */
 	public getPtrBy1492288({
 		wp,
@@ -926,6 +936,10 @@ export default class BaseSlot {
 
 	/**
 	 * 墨西哥 wsp: 获取金框下的数值
+	 * @param {Object} options - 参数对象
+	 * @param {number[]} options.gsp - 金框位置
+	 * @param {Object} options.wp - 当前中奖图标信息
+	 * @returns {number | null} 获取金框下的数值
 	 */
 	public getWspBy1492288({
 		gsp,

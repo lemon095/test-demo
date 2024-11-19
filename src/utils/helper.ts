@@ -27,6 +27,14 @@ export enum RnsCalculateType {
 	RNS强控不中奖 = 2,
 }
 
+/** pcwc 计算方式 */
+export enum PcwcCalculateType {
+	/** 任何模式下都为 0  */
+	Zero = 0,
+	/** 收费或消耗次数中奖时为1，其他情况下为 0 */
+	WinnerOne = 1,
+}
+
 /**
  * 给定 key 和 value，返回 key:value
  * @param {string[]} keys

@@ -50,6 +50,7 @@ export default class ClassFeatSlot extends BaseSlot {
 				return 0;
 			case PcwcCalculateType.WinnerOne:
 				if (this.isPreWin) return 0;
+				if (this.isDuoBaoPending) return 0;
 				if (!isEmpty(wp)) return 1;
 				return 0;
 			default:

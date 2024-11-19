@@ -31,7 +31,7 @@ export enum RnsCalculateType {
 export enum PcwcCalculateType {
 	/** 任何模式下都为 0  */
 	Zero = 0,
-	/** 收费或消耗次数中奖时为1，其他情况下为 0 */
+	/** 收费中奖时为1，其他情况下为 0. 夺宝流程中一直为 0 */
 	WinnerOne = 1,
 }
 

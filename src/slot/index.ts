@@ -1235,7 +1235,7 @@ export default class BaseSlot {
     colLength,
   }: {
     rns: number[][] | null;
-    rate: number;
+    rate: number[];
     colLength: number;
   }): number[] | null {
     if (!this.isPreWin || rns === null) {
@@ -1247,7 +1247,7 @@ export default class BaseSlot {
       item.forEach((i, iIndex) => {
         const pos = colLength * index + iIndex;
         const randomNumber = Math.random();
-        if (randomNumber < rate && i != 0 && i != 1) {
+        if (randomNumber < rate[index] && i != 0 && i != 1) {
           gspResult.push(pos);
         }
       });

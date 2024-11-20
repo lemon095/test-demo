@@ -1204,19 +1204,18 @@ export default class BaseSlot {
     const newpreOrl = chunk(preOrl, colLength);
     let cgsp: number[][] = [];
     newpreOrl.forEach((item, index) => {
-      preGsp.forEach((value, pIndex) => {
+      preGsp.forEach((value) => {
         const posStart = item.length * index;
-        const posCur = posStart + pIndex;
         const posEnd = item.length - 1 + index * colLength;
-        if (posStart <= posCur && posEnd >= posCur && preOrl[posCur] != 0) {
+        if (posStart <= value && posEnd >= value && preOrl[value] != 0) {
           let posi = 0;
           prePtr.forEach((p) => {
-            if (p > posCur && p <= posEnd) {
+            if (p > value && p <= posEnd) {
               posi += 1;
             }
           });
           if (posi > 0) {
-            cgsp.push([posCur, posCur + posi]);
+            cgsp.push([value, value + posi]);
           }
         }
       });

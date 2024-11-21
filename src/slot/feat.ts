@@ -212,7 +212,7 @@ export default class ClassFeatSlot extends BaseSlot {
 		});
 		return {
 			wp: winnerPosition,
-			twp: topWinnerPosition,
+			twp: isHaveTrl ? topWinnerPosition : null,
 		};
 	}
 

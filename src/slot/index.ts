@@ -646,7 +646,7 @@ export default class BaseSlot {
 		rl,
 		iconMul,
 	}: {
-		wp?: Record<string, number[]>;
+		wp?: Record<string, number[]> | null;
 		rl: number[][];
 		iconMul: Record<string, Record<number, number>>;
 	}) {

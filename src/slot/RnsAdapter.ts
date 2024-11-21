@@ -35,10 +35,11 @@ export default class RnsAdapter {
 	}
 
 	private adapterHandle(options: Omit<RnsAdapterOptions, "mode" | "rl">) {
-		return {
-			[RnsCalculateType.RNS强控不中奖]: this.rnsNotWinner(options),
-			[RnsCalculateType.RNS随机]: this.rnsRadom(options),
+		const adapterFn = {
+			[RnsCalculateType.RNS强控不中奖]: this.rnsNotWinner.bind(this),
+			[RnsCalculateType.RNS随机]: this.rnsRadom.bind(this),
 		}[this.mode];
+		return adapterFn(options);
 	}
 
 	private rnsNotWinner({
@@ -55,7 +56,7 @@ export default class RnsAdapter {
 		preRlColumn2.push(...prevTrl);
 		// 拿到第一列可以随机的图标信息
 		const col1ByIcons = difference(icons, uniq(preRlColumn2));
-		//  获取第一列消失的图标信息
+		// 获取第一列消失的图标信息
 		const delInColumn1 = prevWinPos.filter((idx) => idx < colLength);
 		// 随机新的图标，填充第一列
 		for (let row = 0; row < delInColumn1.length; row++) {

@@ -228,4 +228,73 @@ export default class ClassFeatSlot extends BaseSlot {
 		}, [] as number[]);
 		return union(tptbr);
 	}
+
+	/**
+	 * 计算中奖线路数
+	 * @param {Object} options - 配置参数
+	 * @param {Object|null} options.bwp - rl 的中奖位置信息
+	 * @param {Object|null} options.twp - twp 的中奖位置信息
+	 * @param {number} options.colLength - 列长度
+	 * @returns {Object|null} 中奖线数量信息
+	 */
+	public getSnww({
+		bwp,
+		twp,
+		colLength,
+	}: {
+		twp?: Record<string, number[]> | null;
+		bwp: Record<string, number[][]> | null;
+		colLength: number;
+	}): Record<string, number> | null {
+		if (isEmpty(bwp)) return null;
+		const result: Record<string, number[]> = {};
+		const wpKeys = keys(bwp);
+
+		wpKeys.reduce((acc, iconId) => {
+			const currentValue = bwp[iconId];
+			const crrentTwp = twp?.[iconId] || [];
+			acc[iconId] = [];
+
+			// 先统计头部四个图标的中奖信息
+			crrentTwp.forEach((pos) => {
+				const colIndex = pos + 1;
+				const count = acc[iconId][colIndex] || 0;
+				acc[iconId][colIndex] = count + 1;
+			});
+
+			currentValue.forEach((item) => {
+				const first = item[0];
+				const last = item[item.length - 1];
+				// todo: 计算 first 和 last 在第几列
+				// todo: 需要获取总共有多少列的信息？
+				if (first >= 0 && last <= 4) {
+					const count = acc[iconId][0] || 0;
+					acc[iconId][0] = count + 1;
+				} else if (first >= 5 && last <= 9) {
+					const count = acc[iconId][1] || 0;
+					acc[iconId][1] = count + 1;
+				} else if (first >= 10 && last <= 14) {
+					const count = acc[iconId][2] || 0;
+					acc[iconId][2] = count + 1;
+				} else if (first >= 15 && last <= 19) {
+					const count = acc[iconId][3] || 0;
+					acc[iconId][3] = count + 1;
+				} else if (first >= 20 && last <= 24) {
+					const count = acc[iconId][4] || 0;
+					acc[iconId][4] = count + 1;
+				} else {
+					const count = acc[iconId][5] || 0;
+					acc[iconId][5] = count + 1;
+				}
+			});
+			return acc;
+		}, result);
+
+		return keys(result).reduce((acc, iconId) => {
+			acc[iconId] = result[iconId].reduce((count, nextCount) => {
+				return count * nextCount;
+			}, 1);
+			return acc;
+		}, {} as Record<string, number>);
+	}
 }

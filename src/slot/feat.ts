@@ -147,9 +147,9 @@ export default class ClassFeatSlot extends BaseSlot {
 			const trlWinnerPos = ClassFeatSlot._findWinnerIconPosition<true>({
 				icons: trl,
 				targetIcon: icon,
-				colLength,
-				// trl 一般都是从第二列开始
-				colIndex: 1,
+				// trl 的中奖位置是从 0 开始数，所以列长度和列索引都为 0
+				colLength: 0,
+				colIndex: 0,
 				baiDaIcon,
 				// null 填充信息
 				nullIcon: true,
@@ -158,8 +158,8 @@ export default class ClassFeatSlot extends BaseSlot {
 				ClassFeatSlot._findWinnerIconPosition({
 					icons: col,
 					targetIcon: icon,
-					colLength: 1,
-					// trl 一般都是从第二列开始
+					colLength,
+					// 因为从第二列开始截取，所以要加1
 					colIndex: index + 1,
 					baiDaIcon,
 				})

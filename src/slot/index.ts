@@ -553,8 +553,29 @@ export default class BaseSlot {
 	}: {
 		gmTables: { icon: number; weight: number }[];
 		gsp?: number[];
+		cgsp?: number[][];
 		prevMf?: Record<string, number>;
 	}): Record<string, number> {
+		/**
+     * mf:{
+        "10": 3,
+        "15": 0
+      },
+      pre "gsp": [
+        10,
+        15
+      ],
+      "gsp": [
+        11,
+        15
+      ],
+      "cgsp": [
+        [
+          10,
+          11
+        ]
+      ]
+     */
 		const prevPos = keys(prevMf).map(toNumber);
 		const currentPos = union(gsp, prevPos);
 		return currentPos.reduce((acc, key) => {

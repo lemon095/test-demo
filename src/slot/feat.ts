@@ -215,4 +215,17 @@ export default class ClassFeatSlot extends BaseSlot {
 			twp: topWinnerPosition,
 		};
 	}
+
+	/**
+	 * 获取 top rl 中奖的位置信息（去重）
+	 * @param {Record<string, number[]>|null} twp - twp 中奖数据
+	 * @returns {number[]|null} top rl 中奖的位置信息（去重）
+	 */
+	public getTptbr(twp?: Record<string, number[]> | null): number[] | null {
+		if (isEmpty(twp)) return null;
+		const tptbr = keys(twp).reduce((acc, key) => {
+			return acc.concat(twp[key]);
+		}, [] as number[]);
+		return union(tptbr);
+	}
 }

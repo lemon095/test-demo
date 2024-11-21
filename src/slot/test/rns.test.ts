@@ -22,6 +22,7 @@ describe("固定中奖路线: rns", () => {
 			prevWinPos: [2],
 			colLength: 4,
 			prevRl: [7, 4, 9, 4, 10, 9, 6, 6, 7, 7, 9, 5, 1, 5, 8, 3, 9, 1, 10, 5],
+			iconIds: [2, 3, 4, 5, 6, 7, 8, 9, 10],
 		});
 		expect(rns.rns).toEqual([[4], [], [], [], []]);
 		expect(slot.getMf({ gmTables: MF_WEIGHTS, gsp: [2, 5, 7] })).toBeObject();

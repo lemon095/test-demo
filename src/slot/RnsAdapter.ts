@@ -15,6 +15,8 @@ export interface RnsAdapterOptions {
 	prevRl: number[];
 	/** 上一局的 trl 数据, 不传默认为空数组 */
 	prevTrl?: number[];
+	/** 强控不中奖需要用到的 图标 id 信息 */
+	iconIds: number[];
 }
 
 export default class RnsAdapter {
@@ -47,8 +49,9 @@ export default class RnsAdapter {
 		colLength,
 		prevWinPos,
 		prevTrl = [],
+		iconIds,
 	}: Omit<RnsAdapterOptions, "mode" | "rl">) {
-		const icons = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+		const icons = iconIds;
 		const oldRl: number[][] = chunk(prevRl, colLength);
 		// 拿到 old rl 的第二列。先不过滤掉中奖的图标了
 		const preRlColumn2 = [...oldRl[1]];

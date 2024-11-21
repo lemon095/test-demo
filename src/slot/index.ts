@@ -590,14 +590,13 @@ export default class BaseSlot {
 		duoBaoIcon?: number;
 		baiDaIcon?: number;
 		baseCount?: number;
-	}) {
+	}): Record<string, number[]> | null {
 		// 需要考虑的条件：1. 夺宝不能中奖 2. 百搭可以搭配任意字符
 		const wp = {};
 		const colLength = rl[0].length;
 		fixedRoutes.forEach((route, winId) => {
 			let prevIcon = baiDaIcon;
 			const posArr: number[] = [];
-
 			// 待验证的 icon 列表
 			const validIcons = route.map((iconPos, routeIndex) => {
 				const col = rl[routeIndex];
@@ -630,7 +629,7 @@ export default class BaseSlot {
 				});
 			}
 		});
-		return wp;
+		return isEmpty(wp) ? null : wp;
 	}
 
 	/**

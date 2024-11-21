@@ -1148,7 +1148,7 @@ export default class BaseSlot {
 			rl.forEach((value, index) => {
 				value.forEach((item, itemIndex) => {
 					const pos = value.length * index + itemIndex;
-					const randomNumber = Math.random();
+					const randomNumber = Math.random() * 100;
 					if (randomNumber < rate[index] && item != 0 && item != 1) {
 						gspResult.push(pos);
 					}
@@ -1245,7 +1245,7 @@ export default class BaseSlot {
 		rns.forEach((item, index) => {
 			item.forEach((i, iIndex) => {
 				const pos = colLength * index + iIndex;
-				const randomNumber = Math.random();
+				const randomNumber = Math.random() * 100;
 				if (randomNumber < rate[index] && i != 0 && i != 1) {
 					gspResult.push(pos);
 				}

@@ -1175,7 +1175,6 @@ export default class BaseSlot {
           }
         });
       });
-      console.log("gspResult:", gspResult);
       return gspResult;
     }
 
@@ -1196,7 +1195,6 @@ export default class BaseSlot {
         gspResult.push(f[g]);
       }
     });
-    console.log("gspResult: ", gspResult);
     return gspResult;
   }
 

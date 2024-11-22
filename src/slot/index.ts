@@ -852,6 +852,7 @@ export default class BaseSlot {
 	 * @param {Object} options - 参数对象
 	 * @param {number} options.sc - 夺宝数量
 	 * @param {Object} options.fs - 夺宝模式下的数据
+	 * @param {Object} options.scRadix - 需要进入夺宝模式下的夺宝基数
 	 * @param {Object} options.currentWp - 当前中奖图标信息
 	 * @returns {number} 当前游戏状态 1|4|21|22
 	 */
@@ -859,10 +860,12 @@ export default class BaseSlot {
 		sc = 0,
 		fs,
 		currentWp,
+		scRadix,
 	}: {
 		currentWp?: Record<string, any> | null;
 		sc?: number;
 		fs?: Record<string, any> | null;
+		scRadix: number;
 	}): number {
 		if (this.isDuoBaoPending) {
 			// 当前为夺宝的最后一次
@@ -872,7 +875,7 @@ export default class BaseSlot {
 			// 当前中奖
 			return 22;
 		}
-		if (sc > 3 && isEmpty(currentWp)) return 21;
+		if (sc >= scRadix && isEmpty(currentWp)) return 21;
 		if (isEmpty(currentWp)) return 1;
 		return 4;
 	}
@@ -1007,22 +1010,22 @@ export default class BaseSlot {
 	 * @param {Object|null} options.wp - 中奖图标信息
 	 * @param {Object|null} options.wsp - 中奖图标的金框位置
 	 * @param {Object|null} options.mf - 金框对应的倍率信息
-	 * @param {number} options.st - 当前游戏的模式
-	 * @param {number} options.scRadix - 夺宝的基数
+	 * @param {number} options.nst - 下一次游戏的模式信息
+	 * @param {number} options.mode - 非夺宝模式下中奖模式的 st 信息，默认值为 4
 	 * @return {number[]} 游戏模式信息
 	 */
 	public getGeBy1492288({
 		wsp,
 		mf,
-		st,
+		nst,
 		wp,
-		scRadix,
+		mode = 4,
 	}: {
-		st: number;
+		nst: number;
 		wp?: Record<string, number[]> | null;
 		wsp?: number[] | null;
 		mf?: Record<string, number> | null;
-		scRadix: number;
+		mode?: number;
 	}): number[] {
 		const ge = [11];
 		// 是否存在消除的金框倍率信息
@@ -1032,7 +1035,7 @@ export default class BaseSlot {
 			(item: number) => item === 3
 		);
 		// 夺宝模式
-		if (st >= scRadix) {
+		if (nst > mode) {
 			if (isGlod || prevGlod) {
 				ge.push(3);
 			}
@@ -1054,12 +1057,12 @@ export default class BaseSlot {
 	/**
 	 * 通用 ge 计算方式
 	 * @param {Object} options - 参数对象
-	 * @param {number} options.st 当前游戏的模式信息
+	 * @param {number} options.nst 下一次游戏的模式信息
 	 * @param {number} options.mode 非夺宝模式下中奖模式的 st 信息，默认值为 4
 	 * @returns {number[]} 当前游戏的模式信息
 	 */
-	public getGe({ st, mode = 4 }: { st: number; mode: number }): number[] {
-		if (st > mode) {
+	public getGe({ nst, mode = 4 }: { nst: number; mode: number }): number[] {
+		if (nst > mode) {
 			return [2, 11];
 		}
 		return [1, 11];

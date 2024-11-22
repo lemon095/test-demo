@@ -137,7 +137,7 @@ describe("固定中奖路线WP", () => {
 					4
 				),
 			})
-		).toEqual({});
+		).toEqual(null);
 	});
 	it("验证百搭开头的情况", () => {
 		expect(

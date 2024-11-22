@@ -1124,7 +1124,7 @@ export default class BaseSlot {
 		playCount?: number;
 	}): { s: number; ts: number; aw: number } | null {
 		// 触发夺宝
-		if (sc > 3) {
+		if (sc >= scRadix) {
 			// 计算当前夺宝流程下的次数
 			const currentS = (sc - scRadix) * scGm + playCount;
 			return {

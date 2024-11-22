@@ -1008,6 +1008,7 @@ export default class BaseSlot {
 	 * @param {Object|null} options.wsp - 中奖图标的金框位置
 	 * @param {Object|null} options.mf - 金框对应的倍率信息
 	 * @param {number} options.st - 当前游戏的模式
+	 * @param {number} options.scRadix - 夺宝的基数
 	 * @return {number[]} 游戏模式信息
 	 */
 	public getGeBy1492288({
@@ -1015,11 +1016,13 @@ export default class BaseSlot {
 		mf,
 		st,
 		wp,
+		scRadix,
 	}: {
 		st: number;
 		wp?: Record<string, number[]> | null;
 		wsp?: number[] | null;
 		mf?: Record<string, number> | null;
+		scRadix: number;
 	}): number[] {
 		const ge = [11];
 		// 是否存在消除的金框倍率信息
@@ -1029,7 +1032,7 @@ export default class BaseSlot {
 			(item: number) => item === 3
 		);
 		// 夺宝模式
-		if (st > 4) {
+		if (st >= scRadix) {
 			if (isGlod || prevGlod) {
 				ge.push(3);
 			}
@@ -1050,11 +1053,13 @@ export default class BaseSlot {
 
 	/**
 	 * 通用 ge 计算方式
-	 * @param {number} st 当前游戏的模式信息
+	 * @param {Object} options - 参数对象
+	 * @param {number} options.st 当前游戏的模式信息
+	 * @param {number} options.mode 非夺宝模式下中奖模式的 st 信息，默认值为 4
 	 * @returns {number[]} 当前游戏的模式信息
 	 */
-	public getGe(st: number): number[] {
-		if (st > 4) {
+	public getGe({ st, mode = 4 }: { st: number; mode: number }): number[] {
+		if (st > mode) {
 			return [2, 11];
 		}
 		return [1, 11];

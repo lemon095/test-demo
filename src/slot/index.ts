@@ -557,29 +557,9 @@ export default class BaseSlot {
 	}: {
 		gmTables: { icon: number; weight: number }[];
 		gsp?: number[];
-		cgsp?: number[][];
+		cgsp?: number[][] | null;
 		prevMf?: Record<string, number>;
 	}): Record<string, number> {
-		/**
-     * mf:{
-        "10": 3,
-        "15": 0
-      },
-      pre "gsp": [
-        10,
-        15
-      ],
-      "gsp": [
-        11,
-        15
-      ],
-      "cgsp": [
-        [
-          10,
-          11
-        ]
-      ]
-     */
 		const innerCgsp = isArray(cgsp) ? cgsp : [];
 		const currentMfKeys: number[] = [];
 		// 获取下落的 mf
@@ -1101,11 +1081,18 @@ export default class BaseSlot {
 	 */
 	public getGmBy1492288(cgm: number) {
 		if (this.isDuoBaoPending) {
-			const prevGm = this.prevSi?.gm;
-			return cgm + prevGm || 1;
+			let prevGm = 0;
+			// s === ts 表示触发夺宝
+			if (
+				!isEmpty(this.prevSi?.fs) &&
+				this.prevSi?.fs.s !== this.prevSi?.fs.ts
+			) {
+				prevGm = this.prevSi?.gm || 0;
+			}
+			return cgm + prevGm;
 		}
-		const prevGm = this.isPreWin ? this.prevSi?.gm || 0 : 0;
-		return cgm + prevGm || 1;
+		const prevGm: number = this.isPreWin ? this.prevSi?.gm || 0 : 0;
+		return cgm + prevGm;
 	}
 
 	/**

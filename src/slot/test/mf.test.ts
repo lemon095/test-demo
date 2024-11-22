@@ -79,4 +79,14 @@ describe("墨西哥: mf金框倍率信息", () => {
 		expect(mf[11]).toEqual(3);
 		expect(mf[15]).toEqual(0);
 	});
+	// it("mf 问题数据", () => {
+	// 	const gsp = [8, 14];
+	// 	const mf = slot.getMf({
+	// 		gmTables: MF_WEIGHTS,
+	// 		gsp: gsp,
+	// 		cgsp: null,
+	// 		prevMf: {},
+	// 	});
+	// 	expect(mf).toEqual({});
+	// });
 });

@@ -765,7 +765,7 @@ export default class BaseSlot {
 		lw?: Record<string, number> | null;
 		gm?: number;
 	}) {
-		const prevSsaw = this.prevSi?.ssaw || 0;
+		const prevSsaw = this.isPreWin ? this.prevSi?.ssaw || 0 : 0;
 		const ctw = BaseSlot._getCtw({ lw, gm });
 		return new Decimal(ctw).add(prevSsaw).toNumber();
 	}

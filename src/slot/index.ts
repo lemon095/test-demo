@@ -953,14 +953,18 @@ export default class BaseSlot {
 	public getPtrBy1492288({
 		wp,
 		gsp,
+		rl,
 	}: {
 		gsp: number[];
 		wp?: Record<string, any> | null;
+		rl: number[][];
 	}): number[] | null {
 		if (isEmpty(wp)) return null;
+		const rlList = flattenDeep(rl);
+		const realGsp = gsp.filter((pos) => rlList[pos] !== 0);
 		const innerWp = cloneDeep(wp);
 		const wpValues = flattenDeep(values(innerWp));
-		return union(wpValues.filter((v) => !gsp.includes(v)));
+		return union(wpValues.filter((v) => !realGsp.includes(v)));
 	}
 
 	/**
@@ -973,14 +977,18 @@ export default class BaseSlot {
 	public getWspBy1492288({
 		gsp,
 		wp,
+		rl,
 	}: {
 		gsp: number[];
 		wp?: Record<string, number[]> | null;
+		rl: number[][];
 	}): number[] | null {
 		if (isEmpty(wp)) return null;
+		const rlList = flattenDeep(rl);
+		const realGsp = gsp.filter((pos) => rlList[pos] !== 0);
 		const innerWp = cloneDeep(wp);
 		const wpValues = flattenDeep(values(innerWp));
-		return wpValues.filter((v) => gsp.includes(v));
+		return wpValues.filter((v) => realGsp.includes(v));
 	}
 
 	/**

@@ -1277,18 +1277,27 @@ export default class BaseSlot {
 	/**
 	 * ngsp 掉落出现的金框索引位置
 	 * @param {Object} options -配置信息
-	 * @param {Array} options.gsp 金框或金框变百搭元素的位置
+	 * @param {Array} options.rns 掉落下的图标信息
+	 * @param {Array} options.rate 每一列的金框概率
+	 * @param {Number} options.colLength 列的长度
+	 * @param {number} options.baiDaIcon 百搭图标的 id
+	 * @param {number} options.duobaoIcon 夺宝图标的 id
+	 * @returns {number[]|null} 掉落图标的金框概率
 	 */
 	public getNgsp({
 		rns,
 		rate,
 		colLength,
+		baiDaIcon = 0,
+		duobaoIcon = 1,
 	}: {
-		rns: number[][] | null;
+		rns?: number[][] | null;
 		rate: number[];
 		colLength: number;
+		baiDaIcon?: number;
+		duobaoIcon?: number;
 	}): number[] | null {
-		if (!this.isPreWin || rns === null) {
+		if (!this.isPreWin || !isArray(rns)) {
 			return null;
 		}
 		let gspResult: number[] = [];
@@ -1297,7 +1306,7 @@ export default class BaseSlot {
 			item.forEach((i, iIndex) => {
 				const pos = colLength * index + iIndex;
 				const randomNumber = Math.random() * 100;
-				if (randomNumber < rate[index] && i != 0 && i != 1) {
+				if (randomNumber < rate[index] && i != baiDaIcon && i != duobaoIcon) {
 					gspResult.push(pos);
 				}
 			});

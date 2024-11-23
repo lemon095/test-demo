@@ -964,7 +964,9 @@ export default class BaseSlot {
 		const realGsp = gsp.filter((pos) => rlList[pos] !== 0);
 		const innerWp = cloneDeep(wp);
 		const wpValues = flattenDeep(values(innerWp));
-		return union(wpValues.filter((v) => !realGsp.includes(v)));
+		return union(wpValues.filter((v) => !realGsp.includes(v))).sort(
+			(a, b) => a - b
+		);
 	}
 
 	/**
@@ -988,7 +990,9 @@ export default class BaseSlot {
 		const realGsp = gsp.filter((pos) => rlList[pos] !== 0);
 		const innerWp = cloneDeep(wp);
 		const wpValues = flattenDeep(values(innerWp));
-		return wpValues.filter((v) => realGsp.includes(v));
+		return union(wpValues.filter((v) => realGsp.includes(v))).sort(
+			(a, b) => a - b
+		);
 	}
 
 	/**

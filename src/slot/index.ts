@@ -1232,10 +1232,11 @@ export default class BaseSlot {
 
 	/**
 	 * cgsp 金框元素下落信息
-	 *@param {Object} options - 配置信息
-	 *@param {Array} options.preGsp
-	 *@param {Array} options.prePtr
-	 *@param {Number} options.colLength
+	 * @param {Object} options - 配置信息
+	 * @param {Array} options.preGsp - 上一次金框的位置信息
+	 * @param {Array} options.prePtr - 上一次普通框消失的位置信息
+	 * @param {Number} options.colLength- 列的长度
+	 * @param {Array} options.preOrl - 上一次的随机数信息
 	 */
 	public getCgsp({
 		preOrl,
@@ -1256,7 +1257,8 @@ export default class BaseSlot {
 		newpreOrl.forEach((item, index) => {
 			preGsp.forEach((value) => {
 				const posStart = item.length * index;
-				const posEnd = item.length - 1 + index * colLength;
+				// const posEnd = item.length - 1 + index * colLength;
+				const posEnd = posStart + item.length - 1;
 				if (posStart <= value && posEnd >= value && preOrl[value] != 0) {
 					let posi = 0;
 					prePtr.forEach((p) => {

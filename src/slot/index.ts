@@ -1179,6 +1179,7 @@ export default class BaseSlot {
 	 * @param {Array|null} options.ngsp 掉落出现的金框元素位置信息
 	 * @param {Number} options.rate 金框的概率
 	 * @param {Array} options.preGsp 上一次的金框信息
+	 * @param {Array} options.rl - 随机数列表
 	 */
 	public getGsp({
 		rl,
@@ -1193,11 +1194,8 @@ export default class BaseSlot {
 		preGsp: number[];
 		rate: number[];
 	}): number[] {
-		let gspResult: number[] = [];
-		if (ngsp != null) {
-			gspResult.push(...ngsp);
-		}
 		if (!this.isPreWin) {
+			const gspResult: number[] = [];
 			rl.forEach((value, index) => {
 				value.forEach((item, itemIndex) => {
 					const pos = value.length * index + itemIndex;
@@ -1210,24 +1208,27 @@ export default class BaseSlot {
 			return gspResult;
 		}
 
-		if (isEmpty(cgsp) || cgsp === null) {
-			gspResult.push(...preGsp);
-			return gspResult;
-		}
+		const _ngsp = isArray(ngsp) ? ngsp : [];
+		const _cgsp = isArray(cgsp) ? cgsp : [];
+		// 需要删除的 gsp 集合
+		const diff_gsp: number[] = [];
+		// 需要更新位置的 gsp 集合
+		const move_gsp: number[] = [];
 
-		let cgspList: number[] = [];
-		let f: Record<number, number> = {};
-		cgsp.forEach((c) => {
-			cgspList.push(c[0]);
-			f[c[0]] = c[1];
-		});
-
-		preGsp.forEach((g) => {
-			if (cgspList.includes(g)) {
-				gspResult.push(f[g]);
+		for (let i = 0; i < _cgsp.length; i++) {
+			const [preGsp, curGsp] = _cgsp[i];
+			if (isNumber(+preGsp)) {
+				diff_gsp.push(preGsp);
 			}
-		});
-		return gspResult;
+			if (isNumber(+curGsp)) {
+				move_gsp.push(curGsp);
+			}
+		}
+		const gsp: number[] = difference(
+			[..._ngsp, ...move_gsp, ...preGsp],
+			diff_gsp
+		);
+		return gsp;
 	}
 
 	/**

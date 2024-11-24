@@ -1099,11 +1099,19 @@ export default class BaseSlot {
 				!isEmpty(this.prevSi?.fs) &&
 				this.prevSi?.fs.s !== this.prevSi?.fs.ts
 			) {
-				prevGm = this.prevSi?.gm || 0;
+				prevGm = this.prevSi?.gm || 1;
+			}
+			// 如果为 1，则返回 cgm
+			if (prevGm === 1) {
+				return cgm || 1;
 			}
 			return cgm + prevGm;
 		}
-		const prevGm: number = this.isPreWin ? this.prevSi?.gm || 0 : 0;
+		const prevGm: number = this.isPreWin ? this.prevSi?.gm || 1 : 1;
+		// 如果为 1，则返回 cgm
+		if (prevGm === 1) {
+			return cgm || 1;
+		}
 		return cgm + prevGm;
 	}
 

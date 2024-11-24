@@ -964,7 +964,7 @@ export default class BaseSlot {
 	}): number[] | null {
 		if (isEmpty(wp)) return null;
 		const rlList = flattenDeep(rl);
-		const realGsp = gsp.filter((pos) => rlList[pos] !== 0);
+		const realGsp = gsp.filter((pos) => rlList[pos] !== baiDaIcon);
 		const innerWp = cloneDeep(wp);
 		const wpValues = flattenDeep(values(innerWp));
 		return union(wpValues.filter((v) => !realGsp.includes(v))).sort(

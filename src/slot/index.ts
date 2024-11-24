@@ -948,16 +948,19 @@ export default class BaseSlot {
 	 * @param {Object} options - 参数对象
 	 * @param {number[]} options.gsp - 金框位置
 	 * @param {Object} options.wp - 当前中奖图标信息
+	 * @param {number} options.baiDaIcon - 百搭图标 id,默认 0
 	 * @return {number[]|null} 非金框下的数值
 	 */
 	public getPtrBy1492288({
 		wp,
 		gsp,
 		rl,
+		baiDaIcon = 0,
 	}: {
 		gsp: number[];
 		wp?: Record<string, any> | null;
 		rl: number[][];
+		baiDaIcon?: number;
 	}): number[] | null {
 		if (isEmpty(wp)) return null;
 		const rlList = flattenDeep(rl);
@@ -1188,6 +1191,9 @@ export default class BaseSlot {
 	 * @param {Number} options.rate 金框的概率
 	 * @param {Array} options.preGsp 上一次的金框信息
 	 * @param {Array} options.rl - 随机数列表
+	 * @param {Array} options.preRl - 上一次的随机数列表
+	 * @param {number} options.baiDaIcon - 百搭图标的 id,默认为 0
+	 * @returns { number }
 	 */
 	public getGsp({
 		rl,
@@ -1195,12 +1201,16 @@ export default class BaseSlot {
 		ngsp,
 		preGsp,
 		rate,
+		preRl,
+		baiDaIcon = 0,
 	}: {
 		rl: number[][];
 		cgsp: number[][] | null;
 		ngsp: number[] | null;
 		preGsp: number[];
 		rate: number[];
+		preRl?: number[];
+		baiDaIcon?: number;
 	}): number[] {
 		if (!this.isPreWin) {
 			const gspResult: number[] = [];
@@ -1215,16 +1225,24 @@ export default class BaseSlot {
 			});
 			return gspResult;
 		}
-
 		const _ngsp = isArray(ngsp) ? ngsp : [];
 		const _cgsp = isArray(cgsp) ? cgsp : [];
 		// 需要删除的 gsp 集合
 		const diff_gsp: number[] = [];
 		// 需要更新位置的 gsp 集合
 		const move_gsp: number[] = [];
+		// 收集百搭图标的 gsp 信息
+		const gsp_baida = preGsp.filter((gsp) => preRl?.[gsp] === baiDaIcon);
+		// 删除百搭图标的 gsp
+		const _prev_gsp: number[] = preGsp.filter((gsp) => {
+			return preRl?.[gsp] !== baiDaIcon;
+		});
 
 		for (let i = 0; i < _cgsp.length; i++) {
 			const [preGsp, curGsp] = _cgsp[i];
+			if (gsp_baida.includes(preGsp)) {
+				continue;
+			}
 			if (isNumber(+preGsp)) {
 				diff_gsp.push(preGsp);
 			}
@@ -1233,7 +1251,7 @@ export default class BaseSlot {
 			}
 		}
 		const gsp: number[] = difference(
-			[..._ngsp, ...move_gsp, ...preGsp],
+			[..._ngsp, ...move_gsp, ..._prev_gsp],
 			diff_gsp
 		);
 		return gsp;
@@ -1246,17 +1264,21 @@ export default class BaseSlot {
 	 * @param {Array} options.prePtr - 上一次普通框消失的位置信息
 	 * @param {Number} options.colLength- 列的长度
 	 * @param {Array} options.preOrl - 上一次的随机数信息
+	 * @param {number} options.baiDaIcon - 百搭图标的 id,默认为 0
+	 * @returns {number[][] | null}
 	 */
 	public getCgsp({
 		preOrl,
 		preGsp,
 		prePtr,
 		colLength,
+		baiDaIcon = 0,
 	}: {
 		preOrl: number[];
 		preGsp: number[];
 		prePtr: number[];
 		colLength: number;
+		baiDaIcon?: number;
 	}): number[][] | null {
 		if (!this.isPreWin || preGsp.length === 0) {
 			return null;
@@ -1266,12 +1288,15 @@ export default class BaseSlot {
 		newpreOrl.forEach((item, index) => {
 			preGsp.forEach((value) => {
 				const posStart = item.length * index;
-				// const posEnd = item.length - 1 + index * colLength;
 				const posEnd = posStart + item.length - 1;
-				if (posStart <= value && posEnd >= value && preOrl[value] != 0) {
+				if (
+					posStart <= value &&
+					posEnd >= value &&
+					preOrl[value] !== baiDaIcon
+				) {
 					let posi = 0;
 					prePtr.forEach((p) => {
-						if (p > value && p <= posEnd) {
+						if (p > value && p < posEnd) {
 							posi += 1;
 						}
 					});

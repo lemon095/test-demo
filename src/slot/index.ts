@@ -1295,8 +1295,8 @@ export default class BaseSlot {
 					preOrl[value] !== baiDaIcon
 				) {
 					let posi = 0;
-					prePtr.forEach((p) => {
-						if (p > value && p < posEnd) {
+					prePtr.forEach((prePos) => {
+						if (prePos > value && prePos <= posEnd) {
 							posi += 1;
 						}
 					});

@@ -1105,14 +1105,14 @@ export default class BaseSlot {
 			if (prevGm === 1) {
 				return cgm || 1;
 			}
-			return cgm + prevGm;
+			return cgm + prevGm || 1;
 		}
 		const prevGm: number = this.isPreWin ? this.prevSi?.gm || 1 : 1;
 		// 如果为 1，则返回 cgm
 		if (prevGm === 1) {
 			return cgm || 1;
 		}
-		return cgm + prevGm;
+		return cgm + prevGm || 1;
 	}
 
 	/**

@@ -446,4 +446,27 @@ export default class ClassFeatSlot extends BaseSlot {
 		});
 		return result;
 	}
+
+	/**
+	 * 计算每框中每一个图标的位置信息 (获取 esb 和 es 信息)
+	 * @description 这两个字段的输入和输出一致
+	 * @param {Object} record - 框合并的信息
+	 * @returns {Object} 合并框中的每一个图标位置信息
+	 */
+	public getEsbAndEs(
+		record: Record<string, PGSlot.Ebb>
+	): Record<string, number[]> {
+		return keys(record).reduce((esb, crrKey) => {
+			const pos = record[crrKey];
+			const len = pos.lp - pos.fp;
+			const posArr: number[] = [];
+			for (let i = 0; i <= len; i++) {
+				posArr.push(pos.fp + i);
+			}
+			return {
+				...esb,
+				[crrKey]: posArr,
+			};
+		}, {} as Record<string, number[]>);
+	}
 }

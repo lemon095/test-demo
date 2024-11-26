@@ -8,6 +8,7 @@ import {
 	flatMapDeep,
 	flatten,
 	flattenDeep,
+	initial,
 	isArray,
 	isEmpty,
 	isFunction,
@@ -16,6 +17,7 @@ import {
 	isObject,
 	keys,
 	last,
+	tail,
 	toNumber,
 	union,
 	uniq,
@@ -365,5 +367,83 @@ export default class ClassFeatSlot extends BaseSlot {
 			ptbr: uniq(ptbr).sort((a, b) => a - b),
 			ptbrp: uniq(ptbrp).sort((a, b) => a - b),
 		};
+	}
+
+	/**
+	 * 计算总的中奖路数
+	 * @param {number[]|null} nowpr - 每一列的单元格数量
+	 * @returns {number} 总的中奖路数
+	 */
+	public getNow(nowpr?: number[] | null): number {
+		if (isEmpty(nowpr) || !nowpr?.length) return 0;
+		return nowpr.reduce((acc: number, crr: number) => {
+			return acc * crr;
+		}, 1);
+	}
+
+	/**
+	 * 计算本局中有多少个单元格数量
+	 * @description 鉴于目前一些游戏的 trl 都一样，所以 trl中的数据会默认当做 1 个单元格来计算，没有 trl信息，传入 0 即可
+	 * @description 方法内部已根据 rl 数据自动获取到了 行长度和列长度信息。
+	 * @description rl 收尾两列的图标默认不参与合并逻辑，所以每一个图标都算是一个单独的单元格
+	 * @param {Object} options - 配置参数
+	 * @param {Object} options.esb - 单元格合并的信息
+	 * @param {number[][]} options.rl - 随机数信息
+	 * @param {number} options.trlCellCount - 选填，trl 默认的单元格数量，默认为1，没有传入 0
+	 * @returns {number[]} nowpr - 每一列的单元格数量
+	 */
+	public getNowpr({
+		esb,
+		rl,
+		trlCellCount = 1,
+	}: {
+		esb: Record<string, number[]>;
+		rl: number[][];
+		trlCellCount?: number;
+	}): number[] {
+		const rowLength = rl.length;
+		const colLength = rl[0].length;
+		const result: number[] = [];
+		for (let rowIndex = 0; rowIndex < rowLength; rowIndex++) {
+			if (rowIndex === 0 || rowIndex === rowLength - 1) {
+				result[rowIndex] = colLength;
+			}
+			result[rowIndex] = trlCellCount;
+		}
+		// 将 esb 的 value 信息拍成一维数组
+		const esbValues = flatten(values(esb));
+		// 转数组下标
+		const rlArr = flatten(initial(tail(rl))).map((_, idx) => idx + colLength);
+		// 对 rlArr数组中的内容做去重操作
+		const filterRl = difference(rlArr, esbValues);
+
+		// 先累加 rl 中未组合的情况
+		filterRl.forEach((idx) => {
+			// 跳过第一列和最后一列
+			for (let rowIndex = 1; rowIndex < rowLength - 1; rowIndex++) {
+				// 计算每一列的起始位置
+				const start = rowIndex * colLength;
+				// 每一列的结束位置
+				const end = start + colLength - 1;
+				if (idx >= start && idx <= end) {
+					result[rowIndex] = result[rowIndex] + 1;
+				}
+			}
+		});
+		// 累加 esb 中组合图标的操作
+		values(esb).forEach((item) => {
+			const lastIdx = last(item) || -1;
+			// 跳过第一列和最后一列
+			for (let rowIndex = 1; rowIndex < rowLength - 1; rowIndex++) {
+				// 计算每一列的起始位置
+				const start = rowIndex * colLength;
+				// 每一列的结束位置
+				const end = start + colLength - 1;
+				if (lastIdx >= start && lastIdx <= end) {
+					result[rowIndex] = result[rowIndex] + 1;
+				}
+			}
+		});
+		return result;
 	}
 }

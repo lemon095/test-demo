@@ -534,4 +534,255 @@ export default class ClassFeatSlot extends BaseSlot {
 			};
 		}, {} as Record<string, PGSlot.Ebb>);
 	}
+
+	/**
+	 * 计算当前框合并信息（ebb）
+	 * @param {Object} options - 配置参数
+	 * @param {Object|null} options.rs - 掉落的信息
+	 * @param {number[][]} options.rl - 随机数信息
+	 * @param {number[][]} options.mergeWeights - 框合并的权重表
+	 * @param {number[]} options.iconIds - 排除百搭和夺宝图标 id的其他都有图标 id
+	 * @param {number} options.maxCountByDuobao - 选填，夺宝最多占据几格，默认最多占据两格
+	 * @param {number} options.buyCountByDuoBao - 选填，购买夺宝的个数，默认为4
+	 * @param {number} options.duobaoIcon - 选填，夺宝图标 id，默认为 1
+	 * @param {number} options.baiDaIcon - 选填，百搭图标 id，默认为 0
+	 * @param {number} options.maxCountByBaiDa - 选填，百搭最多占据几格，默认最多占据两格
+	 * @param {Object} options.silverWeights - 银框权重表
+	 * @returns {Object} - 返回 Ebb 信息
+	 */
+	public getEbb({
+		rl,
+		rs,
+		mergeWeights,
+		maxCountByDuobao = 2,
+		buyCountByDuoBao = 4,
+		maxCountByBaiDa = 2,
+		duobaoIcon = 1,
+		baiDaIcon = 0,
+		iconIds,
+		silverWeights,
+	}: {
+		rl: number[][];
+		rs?: PGSlot.RS | null;
+		silverWeights?: Record<string, (0 | 1)[]>;
+		mergeWeights: number[][];
+		maxCountByDuobao?: number;
+		buyCountByDuoBao?: number;
+		duobaoIcon?: number;
+		baiDaIcon?: number;
+		maxCountByBaiDa?: number;
+		iconIds: number[];
+	}): [Record<string, PGSlot.Ebb>, number[][]] {
+		if (this.isPreWin) {
+			if (isEmpty(rs)) {
+				throw new Error("rs is null in prewin");
+			}
+			if (isEmpty(this.prevSi?.eb)) {
+				throw new Error("eb is null in prewin");
+			}
+			const ebb = cloneDeep(this.prevSi!.eb);
+			// 如果 esst 没有信息，则不会进行框的颜色变更操作. 比如极速游戏
+			keys(rs.esst || {}).forEach((keyIdx) => {
+				const isBaiDa = rs.esst[keyIdx].ns === baiDaIcon;
+				const bt = isBaiDa ? 2 : 1;
+				const ls = isBaiDa ? 1 : 1;
+				ebb[keyIdx] = {
+					...ebb[keyIdx],
+					bt,
+					ls,
+				};
+			});
+			keys(rs.espt).forEach((keyIdx) => {
+				ebb[keyIdx].fp = rs.espt[keyIdx].np[0];
+				ebb[keyIdx].lp = rs.espt[keyIdx].np[1];
+			});
+			return [ebb, rl];
+		}
+		const rowLength = rl.length;
+		const colLength = rl[0].length;
+		const info: number[][] = [];
+		const newRl = flattenDeep(rl);
+		const prePosResult = this.getEbbPosition({
+			rl: newRl,
+			rowLength,
+			colLength,
+			weights: mergeWeights,
+			maxCountByBaiDa,
+			maxCountByDuobao,
+			buyCountByDuoBao,
+			duobaoIcon,
+			baiDaIcon,
+			iconIds,
+		});
+		const posResult: [number, number, number][] = [];
+		prePosResult.forEach(({ fp, lp, icon }) => {
+			if (isNumber(fp) && isNumber(lp)) {
+				posResult.push([fp, lp, icon]);
+			}
+		});
+		posResult.forEach((item) => {
+			const [fp, lp, icon] = item;
+			// 暂时只有银框和普通框的逻辑
+			let bt: number;
+			let ls: number;
+			if (+icon === baiDaIcon || isEmpty(silverWeights)) {
+				bt = 2;
+				ls = 1;
+			} else {
+				const weights = silverWeights[icon];
+				const isSilver = random.int(0, weights.length - 1) === 1;
+				bt = isSilver ? 1 : 2;
+				ls = isSilver ? 2 : 1;
+			}
+			info.push([fp, lp, bt, ls]);
+		});
+		const ebb = info
+			.sort((a, b) => a[0] - b[0])
+			.reduce((acc, crr, crrIdx) => {
+				const [fp, lp, bt, ls] = crr;
+				return {
+					...acc,
+					[crrIdx + 1]: {
+						fp,
+						lp,
+						bt,
+						ls,
+					},
+				};
+			}, {} as Record<string, PGSlot.Ebb>);
+		return [ebb, chunk(newRl, colLength)];
+	}
+
+	/**
+	 * 获取 本局Ebb 的框信息
+	 * @param {Object} options - 配置参数
+	 * @param {number[]} options.rl - 随机数信息
+	 * @param {number[][]} options.weights - 框合并的权重表
+	 * @param {number} options.colLength - 列长度
+	 * @param {number} options.rowLength - 行长度
+	 * @param {number[]} options.iconIds - 排除百搭和夺宝图标 id的其他都有图标 id
+	 * @param {number} options.maxCountByDuobao - 选填，夺宝最多占据几格，默认最多占据两格
+	 * @param {number} options.buyCountByDuoBao - 选填，购买夺宝的个数，默认为4
+	 * @param {number} options.duobaoIcon - 选填，夺宝图标 id，默认为 1
+	 * @param {number} options.baiDaIcon - 选填，百搭图标 id，默认为 0
+	 * @param {number} options.maxCountByBaiDa - 选填，百搭最多占据几格，默认最多占据两格
+	 * @returns {Object} - 返回 Ebb 信息
+	 */
+	private getEbbPosition({
+		rl,
+		weights,
+		maxCountByDuobao = 2,
+		buyCountByDuoBao = 4,
+		maxCountByBaiDa = 2,
+		colLength,
+		rowLength,
+		duobaoIcon = 1,
+		baiDaIcon = 0,
+		iconIds,
+	}: {
+		rl: number[];
+		weights: number[][];
+		maxCountByDuobao?: number;
+		buyCountByDuoBao?: number;
+		colLength: number;
+		rowLength: number;
+		duobaoIcon?: number;
+		baiDaIcon?: number;
+		maxCountByBaiDa?: number;
+		iconIds: number[];
+	}): { fp: number; lp: number; icon: number }[] {
+		let result: { fp: number; lp: number; icon: number }[] = [];
+		let count: number = colLength;
+		let duobaoPoss: { fp: number; lp: number; icon: number }[] = [];
+		// 去掉头尾，只循环中间列信息
+		const rowLen = rowLength - 2;
+		for (let i = 1; i <= rowLen; i++) {
+			let randomIndex = random.int(0, weights.length - 1);
+			let randomSubArray = weights[randomIndex];
+			randomSubArray.forEach((value) => {
+				// 夺宝最多占据几格
+				if (value <= maxCountByDuobao) {
+					// 给购买夺宝用的数据
+					duobaoPoss.push({
+						fp: count,
+						lp: count + value - 1,
+						icon: rl[count],
+					});
+				}
+				if (value > 1) {
+					let newIcon = rl[count];
+					if (value > maxCountByDuobao && rl[count] == duobaoIcon) {
+						// 从 rl中找一个既不是夺宝也不是百搭
+						for (let l = count; l <= count + value - 1; l++) {
+							if (rl[count] !== duobaoIcon && rl[count] != baiDaIcon) {
+								newIcon = rl[count];
+								break;
+							}
+						}
+						// 如果找不到，则从图标列表中随机一个非百搭和夺宝的图标
+						if (newIcon == duobaoIcon || newIcon == baiDaIcon) {
+							const randIcon: number[] = iconIds;
+							let iconPos = random.int(0, randIcon.length - 1);
+							newIcon = randIcon[iconPos];
+						}
+					}
+
+					if (value > maxCountByBaiDa && rl[count] == baiDaIcon) {
+						for (let l = count; l <= count + value - 1; l++) {
+							// 从 rl中找一个既不是夺宝也不是百搭
+							if (rl[count] != duobaoIcon && rl[count] != baiDaIcon) {
+								newIcon = rl[count];
+								break;
+							}
+						}
+						// 如果找不到，则从图标列表中随机一个非百搭和夺宝的图标
+						if (newIcon == baiDaIcon) {
+							const randIcon: number[] = iconIds;
+							let randomIconIndex = Math.floor(Math.random() * randIcon.length);
+							newIcon = randIcon[randomIconIndex];
+						}
+					}
+
+					result.push({ fp: count, lp: count + value - 1, icon: newIcon });
+					for (let l = count; l <= count + value - 1; l++) {
+						rl[l] = newIcon;
+					}
+				}
+				count += value;
+			});
+		}
+		// 如果是购买的夺宝
+		if (this.isBuyDuoBao) {
+			// 默认的夺宝数量
+			let duobaoCount: number = 2;
+			// 计算第一列的夺宝位置
+			const firstColDuobaoPos = random.int(0, colLength - 1);
+			rl[firstColDuobaoPos] = duobaoIcon;
+			// 计算最后一列的夺宝位置
+			const lastColDuobaoPos = random.int(
+				(rowLength - 1) * colLength,
+				rowLength * colLength - 1
+			);
+			rl[lastColDuobaoPos] = duobaoIcon;
+
+			//在1-4随机两列放入两个夺宝
+			duobaoPoss.forEach(({ fp, lp }) => {
+				if (duobaoCount >= buyCountByDuoBao) {
+					return;
+				}
+				for (let i = fp; i <= lp; i++) {
+					rl[i] = duobaoIcon;
+				}
+
+				result.forEach((item) => {
+					if (item.fp === fp && item.lp === lp) {
+						item.icon = duobaoIcon;
+					}
+				});
+				duobaoCount += 1;
+			});
+		}
+
+		return result;
+	}
 }

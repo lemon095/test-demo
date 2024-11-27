@@ -15,4 +15,12 @@ declare namespace PGSlot {
 		bt: number;
 		ls: number;
 	}
+
+	interface RS {
+		espt: Record<string, { op: number[]; np: number[] }>;
+		esst: Record<string, { os: number; ns: number }>;
+		rns: number[][];
+		trns: number[];
+		bewb: Record<string, Ebb>;
+	}
 }

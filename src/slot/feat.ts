@@ -297,14 +297,16 @@ export default class ClassFeatSlot extends BaseSlot {
 	/**
 	 * 计算 ebb 中框的信息
 	 */
-	public getEbbBorderColor(info: PGSlot.Ebb, type: "金" | "银" | "普通") {
+	public getEbbBorderColor({ bt, ls }: PGSlot.Ebb, type: "金" | "银" | "普通") {
 		switch (type) {
 			case "金":
-				return info.bt === 1 && info.ls === 1;
+				return bt === 1 && ls === 1;
 			case "银":
-				return info.bt === 1 && info.ls === 2;
+				return bt === 1 && ls === 2;
 			case "普通":
-				return info.bt === 2 && info.ls === 1;
+				return bt === 2 && ls === 1;
+			default:
+				return false;
 		}
 	}
 

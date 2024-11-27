@@ -785,4 +785,38 @@ export default class ClassFeatSlot extends BaseSlot {
 
 		return result;
 	}
+
+	/**
+	 * 处理 bwp 信息
+	 * @param {Object} options - 配置参数
+	 * @param {Object} options.wp - 中奖信息
+	 * @param {Object} options.esb - 框合并信息
+	 * @returns {Object} - bwp 中奖信息
+	 */
+	public getBwp({
+		wp,
+		esb,
+	}: {
+		wp?: Record<string, number[]> | null;
+		esb: Record<string, number[]>;
+	}): Record<string, number[][]> | null {
+		if (isEmpty(wp)) return null;
+		return keys(wp).reduce((bwp, crrKey) => {
+			const bwpValue: number[][] = [];
+			const wpValue = wp[crrKey];
+			const posArrSet = values(esb);
+			wpValue.forEach((item) => {
+				const posArr = posArrSet.find((posArr) => posArr.includes(item));
+				if (posArr) {
+					bwpValue.push(posArr);
+				} else {
+					bwpValue.push([item]);
+				}
+			});
+			return {
+				...bwp,
+				[crrKey]: uniq(bwpValue),
+			};
+		}, {} as Record<string, number[][]>);
+	}
 }

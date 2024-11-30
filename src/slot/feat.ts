@@ -21,6 +21,7 @@ import {
 	toNumber,
 	union,
 	uniq,
+	uniqBy,
 	values,
 } from "lodash";
 import {
@@ -818,5 +819,399 @@ export default class ClassFeatSlot extends BaseSlot {
 				[crrKey]: uniq(bwpValue),
 			};
 		}, {} as Record<string, number[][]>);
+	}
+
+	/**
+	 * 掉落下非普通框的图标变换
+	 * @param {Object} options - 配置参数
+	 * @param {Object} options.prevBwp - 上一次的 bwp 信息
+	 * @param {Object} options.prevEbb - 上一次的 ebb 信息
+	 * @param {PGSlot.WeightCfg[]} options.goldWeights - 金框图标的权重表
+	 * @param {number} options.baiDaIcon - 百搭图标 id，默认为 0
+	 * @returns {Object} 金框权重
+	 */
+	public getRsEsst({
+		prevBwp,
+		prevEbb,
+		goldWeights,
+		baiDaIcon = 0,
+	}: {
+		prevBwp?: Record<string, number[][]> | null;
+		prevEbb: Record<string, PGSlot.Ebb>;
+		goldWeights: PGSlot.WeightCfg[];
+		baiDaIcon?: number;
+	}): {
+		esst: Record<
+			string,
+			{
+				os: number;
+				ns: number;
+			}
+		>;
+		bweb: Record<string, PGSlot.Ebb>;
+	} {
+		if (isEmpty(prevBwp)) {
+			return { esst: {}, bweb: {} };
+		}
+		const esst: Record<
+			string,
+			{
+				os: number;
+				ns: number;
+			}
+		> = {};
+		const bweb: Record<string, PGSlot.Ebb> = {};
+		const weights = this.convertWeights(goldWeights);
+		keys(prevBwp).forEach((icon) => {
+			prevBwp[icon].forEach((pos) => {
+				if (pos.length < 2) {
+					return;
+				}
+				// 寻找合并的图案
+				const fp = pos[0];
+				const lp = pos[pos.length - 1];
+				keys(prevBwp).forEach((index) => {
+					if (prevEbb[index].fp === fp && prevEbb[index].lp === lp) {
+						// 银变金
+						if (this.getEbbBorderColor(prevEbb[index], "银")) {
+							// if (oldEbb[index].bt === 1 && oldEbb[index].ls === 2) {
+							const idx = random.int(0, weights.length - 1);
+							esst[index] = { os: +icon, ns: weights[idx] };
+						}
+						// 金变百搭
+						if (this.getEbbBorderColor(prevEbb[index], "金")) {
+							// if (oldEbb[index].bt === 1 && oldEbb[index].ls === 1) {
+							esst[index] = { os: +icon, ns: baiDaIcon };
+							bweb[index] = { fp: fp, lp: lp, ls: 0, bt: 1 };
+						}
+					}
+				});
+			});
+		});
+
+		return { esst, bweb };
+	}
+
+	/**
+	 * 掉落情况下的 espt 逻辑处理
+	 * @param {Object} options - 配置参数
+	 * @param {Object} options.preBwp - 上一次的 bwp
+	 * @param {Object} options.preEbb - 上一次的 ebb
+	 * @param {[number, number][]} options.col2to5 - 列的信息
+	 * @param {number} options.baiDaIcon - 百搭图标 id，默认为 0
+	 * @returns {Object} espt 的信息
+	 */
+	public getRsEspt({
+		preBwp,
+		preEbb,
+		baiDaIcon = 0,
+		col2to5,
+	}: {
+		preBwp: Record<string, number[][]> | null;
+		preEbb: Record<string, PGSlot.Ebb>;
+		baiDaIcon?: number;
+		col2to5: [number, number][];
+	}): Record<
+		string,
+		{
+			op: number[];
+			np: number[];
+		}
+	> {
+		if (isEmpty(preBwp)) return {};
+		// const col2to5 = [
+		// 	[5, 9],
+		// 	[10, 14],
+		// 	[15, 19],
+		// 	[20, 24],
+		// ];
+		const preEbbKeys = keys(preEbb);
+		// 删除的框的信息集合，单图标消失也算框
+		const removeBordereds: { fp: number; lp: number }[] = [];
+		// 不删的框的信息集合
+		const remainBordereds: {
+			fp: number;
+			lp: number;
+			key: string;
+			bt: number;
+			ls: number;
+		}[] = [];
+		// 获取 bwp 中 长度大于等于 2 的框
+		const winPosBordered: { pos: number[]; icon: string | number }[] = [];
+		keys(preBwp).forEach((icon) => {
+			const winPos = preBwp[icon];
+			// 如果是百搭
+			for (let i = 0; i < winPos.length; i++) {
+				if (winPos[i].length < 2) {
+					removeBordereds.push({ fp: winPos[i][0], lp: winPos[i][0] });
+					continue;
+				}
+				winPosBordered.push({ pos: winPos[i], icon: icon });
+			}
+		});
+		preEbbKeys.forEach((ebbKey) => {
+			const ebb = preEbb[ebbKey];
+			const haveWin = winPosBordered.find(
+				(pos) => ebb.fp === pos.pos[0] && ebb.lp == pos.pos[pos.pos.length - 1]
+			);
+			if (haveWin) {
+				// 如果是普通框
+				const isBaiDa = +haveWin.icon === baiDaIcon;
+				// const isNormalBordered = ebb.bt === 2 && ebb.ls === 1;
+				const isNormalBordered = this.getEbbBorderColor(ebb, "普通");
+				if (isNormalBordered || isBaiDa) {
+					// 消框
+					removeBordereds.push({ fp: ebb.fp, lp: ebb.lp });
+				} else {
+					// 保留框
+					remainBordereds.push({
+						fp: ebb.fp,
+						lp: ebb.lp,
+						key: ebbKey,
+						bt: ebb.bt,
+						ls: ebb.ls,
+					});
+				}
+			} else {
+				// 保留框
+				remainBordereds.push({
+					fp: ebb.fp,
+					lp: ebb.lp,
+					key: ebbKey,
+					bt: ebb.bt,
+					ls: ebb.ls,
+				});
+			}
+		});
+		const espt = remainBordereds.reduce(
+			(espt, bordered) => {
+				col2to5.forEach((item) => {
+					esptHandle({ col: item, espt, bordered });
+				});
+				return espt;
+			},
+			{} as Record<
+				string,
+				{
+					op: number[];
+					np: number[];
+				}
+			>
+		);
+
+		function esptHandle({
+			col: [start, end],
+			bordered,
+			espt,
+		}: {
+			col: number[];
+			bordered: { fp: number; lp: number; key: string; bt: number; ls: number };
+			espt: Record<
+				string,
+				{
+					op: number[];
+					np: number[];
+				}
+			>;
+		}) {
+			if (bordered.fp >= start && bordered.lp <= end) {
+				// 获取每列被删除的信息
+				const removeColInfo = uniqBy(removeBordereds, "fp").filter(
+					(remove) => remove.fp >= start && remove.lp <= end
+				);
+				removeColInfo.forEach((colBordered) => {
+					if (colBordered.lp > bordered.lp) {
+						// 删除框的长度
+						const removeLen = colBordered.lp - colBordered.fp + 1;
+						const preFp = espt[bordered.key]?.np?.[0] || bordered.fp;
+						const preLp = espt[bordered.key]?.np?.[1] || bordered.lp;
+						espt[bordered.key] = {
+							op: [bordered.fp, bordered.lp],
+							np: [preFp + removeLen, preLp + removeLen],
+						};
+					}
+				});
+			}
+		}
+		return espt;
+	}
+
+	/**
+	 * 获取掉落下的 trns
+	 * @param {Object} options - 配置参数
+	 * @param {number[]} options.trl - trl 随机数列表
+	 * @param {'noPrize' | undefined} options.mode - 模式，noPrize 表示没有中奖
+	 * @param {number[]} options.icons - 图标列表
+	 * @param {number[]} options.prevTptbr - 上一次的 tptbr
+	 * @param {number} options.trlLength - trl 长度，默认为 4
+	 * @returns {number[]} trl 的掉落图标列表
+	 */
+	public getRsTrns({
+		trl,
+		prevTptbr,
+		mode,
+		icons,
+		trlLength = 4,
+	}: {
+		trl: number[];
+		trlLength?: number;
+		prevTptbr: number[];
+		mode?: "noPrize";
+		icons: number[];
+	}): number[] {
+		let newTrl: number[] = [];
+		if (mode === "noPrize") {
+			for (let i = 0; i < trlLength; i++) {
+				const idx = random.int(0, icons.length - 1);
+				newTrl.push(icons[idx]);
+			}
+		} else {
+			newTrl = trl;
+		}
+		return prevTptbr.map((index) => {
+			return newTrl[index];
+		});
+	}
+
+	/**
+	 * 获取掉落流程下的 trl 信息
+	 * @param {Object} options - 配置参数
+	 * @param {number[]} options.prevTrl - 上一次的trl 随机数列表
+	 * @param {number[]} options.prevTptbr - 上一次 trl 中的中奖信息
+	 * @param {number[]} options.trns - 本局会掉落的 trl 图标
+	 * @returns {number[]} trl 的信息
+	 */
+	public getRsTrl({
+		prevTptbr,
+		prevTrl,
+		trns,
+	}: {
+		prevTrl?: number[] | null;
+		prevTptbr?: number[] | null;
+		trns: number[];
+	}): number[] {
+		if (isEmpty(prevTrl) || isEmpty(prevTptbr)) {
+			return prevTrl || [];
+		}
+		let filtertRl: number[] = [];
+		// 去除上一轮中奖的图标
+		prevTrl!.forEach((element, index) => {
+			if (!prevTptbr?.includes(index)) {
+				filtertRl.push(element);
+			}
+		});
+
+		return [...filtertRl, ...trns];
+	}
+
+	/**
+	 * 掉落流程下的 rl 数据
+	 * @param {Object} options - 配置参数
+	 * @param {number[]} options.prevRl - 上一次的 rl 随机数列表
+	 * @param {Object} options.prevBwp - 上一次的中奖信息
+	 * @param {Object} options.prevEbb - 上一次的框合并信息
+	 * @param {number[][]} options.rns - 本局掉落的 rl 图标列表
+	 * @param {Object} options.esst - 本局掉落下需要变化图标的信息
+	 * @param {number} options.colLength - 列长度
+	 */
+	public getRsRl({
+		prevRl,
+		prevBwp,
+		prevEbb,
+		rns,
+		esst,
+		colLength,
+	}: {
+		prevRl: number[];
+		prevBwp: Record<string, number[][]> | null;
+		prevEbb: Record<string, PGSlot.Ebb> | null;
+		rns: number[][];
+		esst: Record<
+			string,
+			{
+				os: number;
+				ns: number;
+			}
+		>;
+		colLength: number;
+	}): number[][] {
+		const prevRlArr = chunk(prevRl, colLength);
+		const rowLength = prevRlArr.length;
+		const replaceIndex: number[][] = Array(rowLength).fill([]);
+		function delBorderIcons({
+			posIdxs,
+			col,
+		}: {
+			posIdxs: number[];
+			col: number;
+		}) {
+			// 添加删除或替换的 icon
+			posIdxs.forEach((idx) => {
+				replaceIndex[col].push(idx - col * colLength);
+			});
+		}
+		// 先找 oldRl 中要删除或者要替换的 icon
+		keys(prevBwp).forEach((icon) => {
+			const oldWinPos = prevBwp![icon];
+			oldWinPos.forEach((posIdxs) => {
+				const first = posIdxs[0];
+				const last = posIdxs[posIdxs.length - 1];
+				for (let rowIndex = 0; rowIndex < rowLength; rowIndex++) {
+					// 计算每一列的起始索引
+					const start = rowIndex * colLength;
+					// 计算每一列的结束索引
+					const end = start + colLength - 1;
+					// 判断中奖位置在那一列，进行列的中奖次数统计
+					if (first >= start && last <= end) {
+						delBorderIcons({ posIdxs, col: rowIndex });
+					}
+				}
+			});
+		});
+		// 获取替换的 icon和替换的位置
+		const esstPos: {
+			start: number;
+			end: number;
+			icon: number;
+			col: number;
+		}[][] = Array(rowLength).fill([]);
+		keys(esst).forEach((keyIdx) => {
+			if (isEmpty(prevEbb)) {
+				return;
+			}
+			const oldEbbVal = prevEbb[keyIdx];
+			const [start, end] = [oldEbbVal.fp, oldEbbVal.lp];
+			let col = Math.floor(end / colLength);
+			esstPos[col].push({ start, end, icon: esst[keyIdx].ns, col });
+		});
+		// 先替换 icon 和删除 需要消失的 icon
+		const newRl = prevRlArr.map((icons, col) => {
+			const removeIdxs = replaceIndex[col];
+			const replaceIcon = esstPos[col];
+			return icons
+				.map((icon, iconIdx) => {
+					const isReplace = replaceIcon.find((pos) => {
+						const rlIconIdx = iconIdx + col * colLength;
+						return rlIconIdx >= pos.start && rlIconIdx <= pos.end;
+					});
+					// 是否需要替换的图标
+					if (isReplace) {
+						return isReplace.icon;
+					} else if (removeIdxs.includes(iconIdx)) {
+						// 删除
+						return null;
+					} else {
+						// 既不删除也不替换
+						return icon;
+					}
+				})
+				.filter((icon) => isNumber(icon)) as number[];
+		});
+
+		return newRl.map((icons, col) => {
+			const newIcons = rns[col];
+			// 掉落新的 icon
+			return [...newIcons, ...icons];
+		});
 	}
 }

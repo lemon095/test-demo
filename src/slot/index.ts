@@ -136,14 +136,29 @@ export default class BaseSlot {
 	 * @param count - 每一列的图标数量
 	 * @returns rl的随机信息
 	 */
-	public randomRl(weights: number[][], count: number) {
+	public randomRl(weights: number[][], count: number, duobaoIcon: number = 1) {
 		let result: number[][] = [];
 		for (let i = 0; i < weights.length; i++) {
 			const row: number[] = [];
 			const colWeight = weights[i];
+			let duobaoCount = 0;
 			for (let j = 0; j < count; j++) {
-				const idx = random.int(0, colWeight.length - 1);
-				row.push(colWeight[idx]);
+				// 是否为起始位置
+				const isStartPos = i === 0 && j === 0;
+				// 第一列只能有一个夺宝图标
+				const isFirstCol = i === 0 && duobaoCount > 0;
+				if (isStartPos || isFirstCol) {
+					const iconWeights = colWeight.filter((item) => item !== duobaoIcon);
+					const idx = random.int(0, iconWeights.length - 1);
+					row.push(iconWeights[idx]);
+				} else {
+					const idx = random.int(0, colWeight.length - 1);
+					const icon = colWeight[idx];
+					if (icon === duobaoIcon) {
+						duobaoCount++;
+					}
+					row.push(colWeight[idx]);
+				}
 			}
 			result.push(row as number[]);
 		}

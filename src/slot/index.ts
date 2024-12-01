@@ -1841,7 +1841,7 @@ export default class BaseSlot {
 		ebb,
 		vanishFn,
 	}: {
-		wp?: Record<string, number[]>;
+		wp?: Record<string, number[]> | null;
 		ebb: Record<string, PGSlot.Ebb>;
 		vanishFn?: (info: PGSlot.Ebb) => boolean;
 	}): Record<string, PGSlot.Ebb> {

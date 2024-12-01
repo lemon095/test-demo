@@ -1765,8 +1765,9 @@ export default class BaseSlot {
 		for (let rowIndex = 0; rowIndex < rowLength; rowIndex++) {
 			if (rowIndex === 0 || rowIndex === rowLength - 1) {
 				result[rowIndex] = colLength;
+			} else {
+				result[rowIndex] = trlCellCount;
 			}
-			result[rowIndex] = trlCellCount;
 		}
 		// 将 esb 的 value 信息拍成一维数组
 		const esbValues = flatten(values(esb));

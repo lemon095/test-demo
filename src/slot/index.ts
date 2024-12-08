@@ -26,7 +26,7 @@ import random from "random";
 import { PcwcCalculateType, TwCalculateType } from "utils/helper";
 import RnsAdapter, { type RnsAdapterOptions } from "./RnsAdapter";
 
-export interface BaseSlotOptions {
+export interface BaseSlotOptions<T extends Record<string, any>> {
 	/** rl 权重表配置 */
 	rlWeights: PGSlot.RandomWeights;
 	/** trl 权重表配置 */
@@ -34,7 +34,7 @@ export interface BaseSlotOptions {
 	/** 用户类型 */
 	userType: PGSlot.UserType;
 	/** 上一局的信息 */
-	prevSi?: Record<string, any>;
+	prevSi?: T;
 	/** 金额相关 */
 	cs: number;
 	/** 金额相关 */
@@ -47,13 +47,13 @@ export interface BaseSlotOptions {
 	gmFb?: number;
 }
 
-export default class BaseSlot {
+export default class BaseSlot<T extends Record<string, any>> {
 	/** rl的权重表 */
 	private readonly rlWeightsMap: PGSlot.RandomWeights;
 	/** trl的权重表 */
 	private readonly trlWeightsMap?: PGSlot.RandomWeights;
 	/** 上一局的游戏信息 */
-	public readonly prevSi?: Record<string, any>;
+	public readonly prevSi?: T;
 	/** 用户信息 */
 	public readonly userType: PGSlot.UserType;
 	/** cs */
@@ -64,11 +64,14 @@ export default class BaseSlot {
 	public readonly lineRate: number;
 	/** 总下注 */
 	public readonly totalBet: number;
+	/** 总下注 - 安全值 */
+	public readonly safeTotalBet: number;
 	/** 阈值：多少次不赢，默认为 15 */
 	public notWinnerTotal = 15;
 	/** 累计多少次不赢，默认为 0 */
 	public notWinnerCount = 0;
 	public readonly isFb?: boolean;
+	protected spinResult: T[] = [];
 	/**
 	 * base slot 构造器
 	 * @param {Object} options - 配置选项
@@ -90,7 +93,7 @@ export default class BaseSlot {
 		isFb,
 		gmFb,
 		lineRate = 20,
-	}: BaseSlotOptions) {
+	}: BaseSlotOptions<T>) {
 		this.rlWeightsMap = rlWeights;
 		this.trlWeightsMap = trlWeights;
 		this.userType = userType;
@@ -99,6 +102,7 @@ export default class BaseSlot {
 		this.ml = ml;
 		this.lineRate = lineRate;
 		this.totalBet = new Decimal(cs).mul(ml).mul(lineRate).toNumber();
+		this.safeTotalBet = new Decimal(cs).mul(ml).mul(lineRate).toNumber();
 		if (isFb && gmFb) {
 			this.totalBet = new Decimal(this.totalBet).mul(gmFb).toNumber();
 			this.isFb = isFb;
@@ -193,6 +197,12 @@ export default class BaseSlot {
 	 * @param preWp 上一次的 wp 信息
 	 */
 	public get isPreWin(): boolean {
+		// 先判断是否存在预测行为
+		if (isArray(this.spinResult) && !isEmpty(this.spinResult)) {
+			const prevSpin = this.spinResult[this.spinResult.length - 1];
+			return !isEmpty(prevSpin?.wp);
+		}
+		// 在判断上一次是否中奖
 		return !isEmpty(this.prevSi?.wp);
 	}
 
@@ -204,7 +214,7 @@ export default class BaseSlot {
 	 * @returns {boolean|undefined} 是否为夺宝流程
 	 */
 	public get isDuoBaoPending() {
-		const { fs } = this.prevSi || {};
+		const { fs } = this.prevSi || ({} as any);
 		if (isEmpty(fs)) return false;
 		// 如果上一次的 s === fs 并且上一次有中奖，则表示还未进夺宝流程
 		if (fs?.s === fs?.ts && this.isPreWin) return false;
@@ -492,7 +502,7 @@ export default class BaseSlot {
 			const winCount = isEmpty(snww) ? 1 : snww[winId];
 			return {
 				...acc,
-				[winId]: new Decimal(this.totalBet)
+				[winId]: new Decimal(this.safeTotalBet)
 					.div(this.lineRate)
 					.mul(rwsp[winId])
 					.mul(winCount)
@@ -574,8 +584,12 @@ export default class BaseSlot {
 		prevMf,
 		gmTables,
 		cgsp,
+		iconIds,
+		maxGMByIconIds,
 	}: {
 		gmTables: { icon: number; weight: number }[];
+		iconIds: number[];
+		maxGMByIconIds: number;
 		gsp?: number[];
 		cgsp?: number[][] | null;
 		prevMf?: Record<string, number>;
@@ -601,6 +615,9 @@ export default class BaseSlot {
 			gms = this.convertWeights(gmTables);
 		}
 		const currentMf = newGsp.reduce((acc, key) => {
+			if (iconIds.includes(+key)) {
+				gms = gms.filter((gm) => gm <= maxGMByIconIds);
+			}
 			const gmPos = random.int(0, gms.length - 1);
 			const gm = prevMf?.[key] ?? gms[gmPos];
 			return {
@@ -915,7 +932,7 @@ export default class BaseSlot {
 		if (this.isPreWin) {
 			return tw;
 		}
-		return new Decimal(tw).minus(this.totalBet).toNumber();
+		return new Decimal(tw).minus(this.safeTotalBet).toNumber();
 	}
 
 	/**

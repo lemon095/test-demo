@@ -45,6 +45,8 @@ export interface BaseSlotOptions<T extends Record<string, any>> {
 	isFb?: boolean;
 	/** 用多少倍来购买的夺宝 */
 	gmFb?: number;
+	/** 是否启用安全值，默认启用 */
+	useSafeBet?: boolean;
 }
 
 export default class BaseSlot<T extends Record<string, any>> {
@@ -52,6 +54,8 @@ export default class BaseSlot<T extends Record<string, any>> {
 	private readonly rlWeightsMap: PGSlot.RandomWeights;
 	/** trl的权重表 */
 	private readonly trlWeightsMap?: PGSlot.RandomWeights;
+	/** 是否启用安全值 */
+	private readonly useSafeBet: boolean;
 	/** 上一局的游戏信息 */
 	public readonly prevSi?: T;
 	/** 用户信息 */
@@ -93,9 +97,11 @@ export default class BaseSlot<T extends Record<string, any>> {
 		isFb,
 		gmFb,
 		lineRate = 20,
+		useSafeBet = true,
 	}: BaseSlotOptions<T>) {
 		this.rlWeightsMap = rlWeights;
 		this.trlWeightsMap = trlWeights;
+		this.useSafeBet = useSafeBet;
 		this.userType = userType;
 		this.prevSi = prevSi;
 		this.cs = cs;
@@ -498,11 +504,12 @@ export default class BaseSlot<T extends Record<string, any>> {
 			return null;
 		}
 		let lw: Record<number | string, number> = {};
+		const totalBet = this.useSafeBet ? this.safeTotalBet : this.totalBet;
 		return keys(rwsp).reduce((acc, winId) => {
 			const winCount = isEmpty(snww) ? 1 : snww[winId];
 			return {
 				...acc,
-				[winId]: new Decimal(this.safeTotalBet)
+				[winId]: new Decimal(totalBet)
 					.div(this.lineRate)
 					.mul(rwsp[winId])
 					.mul(winCount)

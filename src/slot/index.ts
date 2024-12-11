@@ -2616,4 +2616,16 @@ export default class BaseSlot<T extends Record<string, any>> {
 			return [...newIcons, ...icons];
 		});
 	}
+
+	public getMaxPrice(maxAmount = 20000) {
+		const maxPrice = Math.min(
+			this.safeTotalBet * 100 - this.safeTotalBet,
+			maxAmount
+		);
+		if (this.isDuoBaoPending) {
+			const prevAw = this.prevSi?.aw || 0;
+			return maxPrice - prevAw;
+		}
+		return maxPrice;
+	}
 }

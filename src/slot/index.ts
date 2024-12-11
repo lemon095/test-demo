@@ -907,8 +907,8 @@ export default class BaseSlot<T extends Record<string, any>> {
 	 * 获取当前局游戏状态
 	 * @returns {number} 当前游戏状态 1|4|21|22
 	 */
-	public getSt() {
-		return this.prevSi?.nst ?? 1;
+	public getSt(prevNst?: number) {
+		return prevNst ?? 1;
 	}
 
 	/** 当局游戏的原始 rl 数据 */
@@ -948,13 +948,19 @@ export default class BaseSlot<T extends Record<string, any>> {
 	 * @param {Object} wp - 中奖图标信息
 	 * @returns {number} 中奖流程中的累计次数
 	 */
-	public getCwc(wp?: Record<string, any> | null) {
+	public getCwc({
+		wp,
+		prevCwc,
+	}: {
+		wp?: Record<string, any> | null;
+		prevCwc?: number;
+	}) {
 		let cwc = 0;
 		const isWin = !isEmpty(wp);
 		if (isWin) {
 			cwc = 1;
 			if (this.isPreWin) {
-				cwc += this.prevSi?.cwc || 0;
+				cwc += prevCwc || 0;
 			}
 		}
 		return cwc;
@@ -1101,7 +1107,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 	 * @param {number} options.mode 非夺宝模式下中奖模式的 st 信息，默认值为 4
 	 * @returns {number[]} 当前游戏的模式信息
 	 */
-	public getGe({ nst, mode = 4 }: { nst: number; mode: number }): number[] {
+	public getGe({ nst, mode = 4 }: { nst: number; mode?: number }): number[] {
 		if (nst > mode) {
 			return [2, 11];
 		}
@@ -1112,8 +1118,10 @@ export default class BaseSlot<T extends Record<string, any>> {
 	 * 通用：fstc 游戏模式的累计中奖信息
 	 * @returns {Object|null}
 	 */
-	public getFstc(): Record<string, number> | null {
-		const prevFstc = this.prevSi?.fstc || {};
+	public getFstc(
+		prevFstc: Record<string, number> | null
+	): Record<string, number> | null {
+		prevFstc = prevFstc || {};
 		// 处理夺宝流程
 		if (this.isDuoBaoPending) {
 			const prev22 = prevFstc[22] || 0;
@@ -1179,12 +1187,14 @@ export default class BaseSlot<T extends Record<string, any>> {
 		scGm = 1,
 		playCount = 0,
 		tw,
+		prevFs,
 	}: {
 		sc: number;
 		scRadix: number;
 		tw: number;
 		scGm?: number;
 		playCount?: number;
+		prevFs?: Record<string, any> | null;
 	}): { s: number; ts: number; aw: number } | null {
 		// 触发夺宝
 		if (sc >= scRadix) {
@@ -1198,18 +1208,18 @@ export default class BaseSlot<T extends Record<string, any>> {
 		}
 		// 如果是夺宝流程
 		if (this.isDuoBaoPending) {
-			const prevFs = this.prevSi?.fs as { s: number; ts: number; aw: number };
-			const aw = new Decimal(tw).add(prevFs.aw).toNumber();
+			const prev_fs = prevFs as { s: number; ts: number; aw: number };
+			const aw = new Decimal(tw).add(prev_fs.aw).toNumber();
 			if (this.isPreWin) {
 				return {
-					...prevFs,
+					...prev_fs!,
 					// 只统计夺宝流程下的中奖金额，免费掉落的夺宝也是一样的
 					aw,
 				};
 			}
 			return {
-				...prevFs,
-				s: prevFs.s - 1,
+				...prev_fs!,
+				s: prev_fs!.s - 1,
 				aw,
 			};
 		}
@@ -1948,6 +1958,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 		baiDaIcon = 0,
 		iconIds,
 		silverWeights,
+		prevEb,
 	}: {
 		rl: number[][];
 		rs?: PGSlot.RS | null;
@@ -1959,15 +1970,16 @@ export default class BaseSlot<T extends Record<string, any>> {
 		baiDaIcon?: number;
 		maxCountByBaiDa?: number;
 		iconIds: number[];
+		prevEb?: Record<string, PGSlot.Ebb> | null;
 	}): [Record<string, PGSlot.Ebb>, number[][]] {
 		if (this.isPreWin) {
 			if (isEmpty(rs)) {
 				throw new Error("rs is null in prewin");
 			}
-			if (isEmpty(this.prevSi?.eb)) {
-				throw new Error("eb is null in prewin");
-			}
-			const ebb = cloneDeep(this.prevSi!.eb);
+			// if (isEmpty(prevEb)) {
+			// 	throw new Error("eb is null in prewin");
+			// }
+			const ebb = cloneDeep(prevEb || {});
 			// 如果 esst 没有信息，则不会进行框的颜色变更操作. 比如极速游戏
 			keys(rs.esst || {}).forEach((keyIdx) => {
 				const isBaiDa = rs.esst[keyIdx].ns === baiDaIcon;
@@ -2223,7 +2235,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 		baiDaIcon = 0,
 	}: {
 		prevBwp?: Record<string, number[][]> | null;
-		prevEbb: Record<string, PGSlot.Ebb>;
+		prevEbb: Record<string, PGSlot.Ebb> | null;
 		goldWeights: PGSlot.WeightCfg[];
 		baiDaIcon?: number;
 	}): {
@@ -2234,10 +2246,10 @@ export default class BaseSlot<T extends Record<string, any>> {
 				ns: number;
 			}
 		>;
-		bweb: Record<string, PGSlot.Ebb>;
+		bewb: Record<string, PGSlot.Ebb>;
 	} {
 		if (isEmpty(prevBwp)) {
-			return { esst: {}, bweb: {} };
+			return { esst: {}, bewb: {} };
 		}
 		const esst: Record<
 			string,
@@ -2246,7 +2258,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 				ns: number;
 			}
 		> = {};
-		const bweb: Record<string, PGSlot.Ebb> = {};
+		const bewb: Record<string, PGSlot.Ebb> = {};
 		const weights = this.convertWeights(goldWeights);
 		keys(prevBwp).forEach((icon) => {
 			prevBwp[icon].forEach((pos) => {
@@ -2257,7 +2269,11 @@ export default class BaseSlot<T extends Record<string, any>> {
 				const fp = pos[0];
 				const lp = pos[pos.length - 1];
 				keys(prevBwp).forEach((index) => {
-					if (prevEbb[index].fp === fp && prevEbb[index].lp === lp) {
+					if (
+						!isEmpty(prevEbb) &&
+						prevEbb[index].fp === fp &&
+						prevEbb[index].lp === lp
+					) {
 						// 银变金
 						if (this.getEbbBorderColor(prevEbb[index], "银")) {
 							// if (oldEbb[index].bt === 1 && oldEbb[index].ls === 2) {
@@ -2268,14 +2284,14 @@ export default class BaseSlot<T extends Record<string, any>> {
 						if (this.getEbbBorderColor(prevEbb[index], "金")) {
 							// if (oldEbb[index].bt === 1 && oldEbb[index].ls === 1) {
 							esst[index] = { os: +icon, ns: baiDaIcon };
-							bweb[index] = { fp: fp, lp: lp, ls: 0, bt: 1 };
+							bewb[index] = { fp: fp, lp: lp, ls: 0, bt: 1 };
 						}
 					}
 				});
 			});
 		});
 
-		return { esst, bweb };
+		return { esst, bewb };
 	}
 
 	/**
@@ -2294,7 +2310,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 		col2to5,
 	}: {
 		preBwp: Record<string, number[][]> | null;
-		preEbb: Record<string, PGSlot.Ebb>;
+		preEbb: Record<string, PGSlot.Ebb> | null;
 		baiDaIcon?: number;
 		col2to5: [number, number][];
 	}): Record<
@@ -2336,7 +2352,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 			}
 		});
 		preEbbKeys.forEach((ebbKey) => {
-			const ebb = preEbb[ebbKey];
+			const ebb = preEbb?.[ebbKey] || ({} as any);
 			const haveWin = winPosBordered.find(
 				(pos) => ebb.fp === pos.pos[0] && ebb.lp == pos.pos[pos.pos.length - 1]
 			);

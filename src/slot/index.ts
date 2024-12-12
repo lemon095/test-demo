@@ -1749,7 +1749,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 		}
 		keys(bwp).forEach((item) => {
 			bwp[item].forEach((posIndex) => {
-				if (posIndex.length < mergeCount && isEmptyEbb) {
+				if (posIndex.length < mergeCount) {
 					// 放入ptbr
 					ptbr.push(posIndex[0]);
 					return;

@@ -199,14 +199,24 @@ describe("相邻中奖路线: rns", () => {
 			],
 			5
 		);
-		const rns = slot.getRns({
-			rl,
-			prevRl: prevSi.rl,
-			prevWinPos: prevSi.ptbr || [],
-			colLength: rl[0].length,
-			iconIds: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-			mode: RnsCalculateType.RNS随机,
+		const { esst, bewb } = slot.getRsEsst({
+			prevBwp: prevSi.bwp,
+			prevEbb: prevSi.ebb,
+			goldWeights: [
+				{ weight: 1, icon: 2 },
+				{ weight: 2, icon: 3 },
+				{ weight: 3, icon: 4 },
+				{ weight: 4, icon: 5 },
+				{ weight: 8, icon: 6 },
+				{ weight: 10, icon: 7 },
+				{ weight: 6, icon: 8 },
+				{ weight: 5, icon: 9 },
+				{ weight: 4, icon: 10 },
+				{ weight: 4, icon: 11 },
+				{ weight: 4, icon: 12 },
+			],
 		});
-		console.log("rns", rns.rns);
+		console.log("esst", esst);
+		console.log("bewb", bewb);
 	});
 });

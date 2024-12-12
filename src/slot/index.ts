@@ -2539,20 +2539,11 @@ export default class BaseSlot<T extends Record<string, any>> {
 	}): number[][] {
 		const prevRlArr = chunk(prevRl, colLength);
 		const rowLength = prevRlArr.length;
-		const replaceIndex: number[][] = Array(rowLength).fill([]);
-		function delBorderIcons({
-			posIdxs,
-			col,
-		}: {
-			posIdxs: number[];
-			col: number;
-		}) {
-			// 添加删除或替换的 icon
-			posIdxs.forEach((idx) => {
-				replaceIndex[col].push(idx - col * colLength);
-			});
-		}
-		// 先找 oldRl 中要删除或者要替换的 icon
+		const replaceIndex: number[][] = Array.from(
+			{ length: rowLength },
+			() => []
+		);
+
 		keys(prevBwp).forEach((icon) => {
 			const oldWinPos = prevBwp![icon];
 			oldWinPos.forEach((posIdxs) => {
@@ -2563,9 +2554,11 @@ export default class BaseSlot<T extends Record<string, any>> {
 					const start = rowIndex * colLength;
 					// 计算每一列的结束索引
 					const end = start + colLength - 1;
-					// 判断中奖位置在那一列，进行列的中奖次数统计
 					if (first >= start && last <= end) {
-						delBorderIcons({ posIdxs, col: rowIndex });
+						posIdxs.forEach((idx) => {
+							replaceIndex[rowIndex].push(idx - rowIndex * colLength);
+						});
+						break;
 					}
 				}
 			});
@@ -2576,7 +2569,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 			end: number;
 			icon: number;
 			col: number;
-		}[][] = Array(rowLength).fill([]);
+		}[][] = Array.from({ length: rowLength }, () => []);
 		keys(esst).forEach((keyIdx) => {
 			if (isEmpty(prevEbb)) {
 				return;

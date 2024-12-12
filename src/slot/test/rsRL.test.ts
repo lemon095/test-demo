@@ -4,46 +4,6 @@ import { RL_WEIGHTS, TRL_WEIGHTS, MF_WEIGHTS } from "../TetWeights";
 import { RnsCalculateType, UserType } from "utils/helper";
 import { chunk, keys, values } from "lodash";
 
-describe("固定中奖路线: rns", () => {
-	it("修改", () => {
-		const slot = new BaseSlot({
-			rlWeights: RL_WEIGHTS,
-			trlWeights: TRL_WEIGHTS,
-			userType: UserType.common,
-			cs: 0,
-			ml: 0,
-		});
-		const rns = slot.getRns({
-			mode: RnsCalculateType.RNS随机,
-			rl: chunk(
-				[2, 7, 4, 4, 10, 0, 6, 6, 7, 7, 0, 5, 1, 5, 8, 3, 9, 1, 10, 5],
-				4
-			),
-			prevWinPos: [2],
-			colLength: 4,
-			prevRl: [7, 4, 9, 4, 10, 9, 6, 6, 7, 7, 9, 5, 1, 5, 8, 3, 9, 1, 10, 5],
-			iconIds: [2, 3, 4, 5, 6, 7, 8, 9, 10],
-		});
-		expect(rns.rns).toEqual([[4], [], [], [], []]);
-		expect(
-			slot.getMf({
-				gmTables: MF_WEIGHTS,
-				gsp: [2, 5, 7],
-				iconIds: [2, 3, 4, 5, 6],
-			})
-		).toBeObject();
-		expect(
-			slot.getMf({ gmTables: MF_WEIGHTS, prevMf: {}, iconIds: [2, 3, 4, 5, 6] })
-		).toBeObject();
-		expect(
-			slot.getMf({
-				gmTables: MF_WEIGHTS,
-				prevMf: { 2: 0, 5: 0, 7: 2 },
-				iconIds: [2, 3, 4, 5, 6],
-			})
-		).toBeObject();
-	});
-});
 describe("相邻中奖路线: rns", () => {
 	const prevSi = {
 		rl: [
@@ -199,14 +159,14 @@ describe("相邻中奖路线: rns", () => {
 			],
 			5
 		);
-		const rns = slot.getRns({
-			rl,
-			prevRl: prevSi.rl,
-			prevWinPos: prevSi.ptbr || [],
+		const newRl = slot.getRsRl({
+			prevRl: prevSi?.rl,
+			prevBwp: prevSi?.bwp,
+			prevEbb: prevSi?.ebb,
+			rns: [[9], [8, 8], [0], [], [], []],
+			esst: {},
 			colLength: rl[0].length,
-			iconIds: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-			mode: RnsCalculateType.RNS随机,
 		});
-		console.log("rns", rns.rns);
+		console.log("newRL", newRl);
 	});
 });

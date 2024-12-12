@@ -13,13 +13,23 @@ const slot = new BaseSlot({
 });
 describe("墨西哥: mf金框倍率信息", () => {
 	it("根据不同的入参判断返回值是否为 object", () => {
-		expect(slot.getMf({ gmTables: MF_WEIGHTS })).toEqual({});
 		expect(
-			slot.getMf({ gmTables: MF_WEIGHTS, prevMf: { 2: 0, 5: 0, 7: 2 } })
+			slot.getMf({ gmTables: MF_WEIGHTS, iconIds: [2, 3, 4, 5, 6] })
+		).toEqual({});
+		expect(
+			slot.getMf({
+				gmTables: MF_WEIGHTS,
+				prevMf: { 2: 0, 5: 0, 7: 2 },
+				iconIds: [2, 3, 4, 5, 6],
+			})
 		).toEqual({});
 	});
 	it("验证mf 的 key 是否为给定 gsp 的 值", () => {
-		const mf = slot.getMf({ gmTables: MF_WEIGHTS, gsp: [2, 5, 7] });
+		const mf = slot.getMf({
+			gmTables: MF_WEIGHTS,
+			gsp: [2, 5, 7],
+			iconIds: [2, 3, 4, 5, 6],
+		});
 		expect(keys(mf).map(toNumber)).toEqual([2, 5, 7]);
 	});
 	it("prev mf 和 gsp 索引相同，判断值是否为 prev mf 的值", () => {
@@ -28,6 +38,7 @@ describe("墨西哥: mf金框倍率信息", () => {
 				gmTables: MF_WEIGHTS,
 				prevMf: { 2: 0, 5: 0, 7: 2 },
 				gsp: [2, 5, 7],
+				iconIds: [2, 3, 4, 5, 6],
 			})
 		).toEqual({
 			2: 0,
@@ -38,7 +49,11 @@ describe("墨西哥: mf金框倍率信息", () => {
 	it("不存在 prev mf, 判断当前的 mf 的倍率信息是否正确", () => {
 		const gsp = [2, 5, 7];
 		for (let i = 0; i < 1000; i++) {
-			const mf = slot.getMf({ gmTables: MF_WEIGHTS, gsp });
+			const mf = slot.getMf({
+				gmTables: MF_WEIGHTS,
+				gsp,
+				iconIds: [2, 3, 4, 5, 6],
+			});
 			for (let j = 0; j < gsp.length; j++) {
 				const key = gsp[j];
 				expect(Object.keys(mf).length).toEqual(gsp.length);
@@ -55,6 +70,7 @@ describe("墨西哥: mf金框倍率信息", () => {
 				"10": 3,
 				"15": 0,
 			},
+			iconIds: [2, 3, 4, 5, 6],
 		});
 		expect(mf).toEqual({ 11: 3, 15: 0 });
 	});
@@ -68,6 +84,7 @@ describe("墨西哥: mf金框倍率信息", () => {
 				"10": 3,
 				"15": 0,
 			},
+			iconIds: [2, 3, 4, 5, 6],
 		});
 		// 验证 keys 是否相等
 		expect(keys(mf).map(toNumber)).toEqual([11, 15, 17]);

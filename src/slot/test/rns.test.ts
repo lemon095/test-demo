@@ -25,10 +25,22 @@ describe("固定中奖路线: rns", () => {
 			iconIds: [2, 3, 4, 5, 6, 7, 8, 9, 10],
 		});
 		expect(rns.rns).toEqual([[4], [], [], [], []]);
-		expect(slot.getMf({ gmTables: MF_WEIGHTS, gsp: [2, 5, 7] })).toBeObject();
-		expect(slot.getMf({ gmTables: MF_WEIGHTS, prevMf: {} })).toBeObject();
 		expect(
-			slot.getMf({ gmTables: MF_WEIGHTS, prevMf: { 2: 0, 5: 0, 7: 2 } })
+			slot.getMf({
+				gmTables: MF_WEIGHTS,
+				gsp: [2, 5, 7],
+				iconIds: [2, 3, 4, 5, 6],
+			})
+		).toBeObject();
+		expect(
+			slot.getMf({ gmTables: MF_WEIGHTS, prevMf: {}, iconIds: [2, 3, 4, 5, 6] })
+		).toBeObject();
+		expect(
+			slot.getMf({
+				gmTables: MF_WEIGHTS,
+				prevMf: { 2: 0, 5: 0, 7: 2 },
+				iconIds: [2, 3, 4, 5, 6],
+			})
 		).toBeObject();
 	});
 });

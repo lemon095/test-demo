@@ -592,11 +592,11 @@ export default class BaseSlot<T extends Record<string, any>> {
 		gmTables,
 		cgsp,
 		iconIds,
-		maxGMByIconIds,
+		maxGMByIconIds = 5,
 	}: {
 		gmTables: { icon: number; weight: number }[];
 		iconIds: number[];
-		maxGMByIconIds: number;
+		maxGMByIconIds?: number;
 		gsp?: number[];
 		cgsp?: number[][] | null;
 		prevMf?: Record<string, number>;

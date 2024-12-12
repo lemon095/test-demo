@@ -13,7 +13,7 @@ const slot = new BaseSlot({
 	rlWeights: RL_WEIGHTS,
 	trlWeights: TRL_WEIGHTS,
 	userType: UserType.common,
-	cs: 2,
+	cs: 0.02,
 	ml: 1,
 });
 describe("lw 基础中奖金额", () => {
@@ -28,21 +28,21 @@ describe("lw 基础中奖金额", () => {
 				},
 			})
 		).toEqual({
-			3: 100,
+			3: 1,
 		});
 	});
 	it("存在 rwsp 信息和 snww信息", () => {
 		expect(
 			slot.getLw({
 				rwsp: {
-					"9": 4,
+					"4": 25,
 				},
 				snww: {
-					"9": 4,
+					"4": 1,
 				},
 			})
 		).toEqual({
-			9: 32,
+			4: 0.5,
 		});
 	});
 });

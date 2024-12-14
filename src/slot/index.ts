@@ -2292,12 +2292,9 @@ export default class BaseSlot<T extends Record<string, any>> {
 				// 寻找合并的图案
 				const fp = pos[0];
 				const lp = pos[pos.length - 1];
-				keys(prevBwp).forEach((index) => {
-					if (
-						!isEmpty(prevEbb) &&
-						prevEbb[index].fp === fp &&
-						prevEbb[index].lp === lp
-					) {
+				keys(prevEbb).forEach((index) => {
+					if (isEmpty(prevEbb)) return;
+					if (prevEbb[index].fp === fp && prevEbb[index].lp === lp) {
 						// 银变金
 						if (this.getEbbBorderColor(prevEbb[index], "银")) {
 							// if (oldEbb[index].bt === 1 && oldEbb[index].ls === 2) {

@@ -639,7 +639,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 	}
 
 	/**
-	 * 固定中奖路线的wp计算
+	 * 固定中奖路线的wp计算 - (不包含列合并情况的计算，如遇到类似的游戏需要重写)
 	 * @param { Object } options - 配置信息
 	 * @param { number[][] } options.fixedRoutes - 固定中奖路线
 	 * @param { number } options.duoBaoIcon - 选填，夺宝的图标 ID 信息
@@ -708,27 +708,36 @@ export default class BaseSlot<T extends Record<string, any>> {
 	 * @param {Object} options - 参数对象
 	 * @param {Record<string, number[]>} options.wp - 图标的中奖信息
 	 * @param {Record<string, Record<number, number>>} options.iconMul - 图标对应的倍率信息
-	 * @param {number[][]} - 图标数组
+	 * @param {number[][]} options.rl - 本次中奖的图标数组
+	 * @param {number} options.winnerLineCount - 中奖奖信息，如果 3 列中奖则 是 3 连线
 	 * @returns {Record<string, number>} 中奖图标对应的倍数
 	 */
 	public getRwsp({
 		wp,
 		rl,
+		winnerLineCount,
 		iconMul,
 	}: {
 		wp?: Record<string, number[]> | null;
 		rl: number[][];
+		winnerLineCount?: Record<string, number> | null;
 		iconMul: Record<string, Record<number, number>>;
 	}) {
 		if (isEmpty(wp)) return null;
+		if (isEmpty(winnerLineCount)) {
+			throw new Error("winnerLineCount is required");
+		}
 		const orl = flatten(rl);
 		return keys(wp).reduce((acc, winId) => {
+			// 固定中奖线的游戏，winId 不是游戏图标 id，而是中奖线 id。
 			const posArr = wp[winId];
 			const pos = posArr[0];
+			// 兼容固定中奖线的情况，所以从 rl 中重新获取下中奖图标的信息
 			const icon = orl[pos];
+			const lineCount = winnerLineCount[winId];
 			return {
 				...acc,
-				[winId]: iconMul[icon][posArr.length],
+				[winId]: iconMul[icon][lineCount],
 			};
 		}, {} as Record<string, number>);
 	}
@@ -1526,6 +1535,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 	}): {
 		wp: Record<string, number[]> | null;
 		twp: Record<string, number[]> | null;
+		winnerLineCount: Record<string, number> | null;
 	} {
 		const firstCol = rl[0];
 		// 拿到列的长度
@@ -1535,6 +1545,9 @@ export default class BaseSlot<T extends Record<string, any>> {
 		// 中奖信息
 		const winnerPosition: Record<string, number[]> = {};
 		const topWinnerPosition: Record<string, number[]> = {};
+		const winnerLineCount: Record<string, number> = {};
+		// 连线信息，3 列相邻中奖就是 3 连。
+		// let lineCount = 0;
 		// trl 是否成立
 		const isHaveTrl = isArray(trl) && trl.length > 0;
 		for (let i = 0; i < firstCol.length; i++) {
@@ -1576,6 +1589,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 			if (notWinner) {
 				continue;
 			}
+			winnerLineCount[icon] = winCount;
 			// 已经出现最低中奖路径
 			winnerPosition[icon] = [...(winnerPosition[icon] || []), i];
 			if (isHaveTrl) {
@@ -1597,21 +1611,31 @@ export default class BaseSlot<T extends Record<string, any>> {
 				if (colWp.length === 0 && isNull(trlIcon)) break;
 				// 添加中奖信息
 				winnerPosition[icon].push(...colWp);
+				winnerLineCount[icon] = winnerLineCount[icon] + 1;
 				if (isNumber(trlIcon)) {
 					topWinnerPosition[icon].push(trlIcon);
 				}
 			}
 		}
-		if (isEmpty(winnerPosition)) return { wp: null, twp: null };
+		if (isEmpty(winnerPosition))
+			return { wp: null, twp: null, winnerLineCount: null };
 		// 中奖路数据进行排序
 		keys(winnerPosition).forEach((key) => {
 			winnerPosition[key] = uniq(winnerPosition[key]).sort(function (a, b) {
 				return a - b;
 			});
 		});
+		const twp = keys(topWinnerPosition).reduce((acc, key) => {
+			if (isEmpty(topWinnerPosition[key])) return acc;
+			return {
+				...acc,
+				[key]: topWinnerPosition[key],
+			};
+		}, {} as Record<string, number[]>);
 		return {
 			wp: winnerPosition,
-			twp: isHaveTrl ? topWinnerPosition : null,
+			twp: isEmpty(twp) ? null : twp,
+			winnerLineCount,
 		};
 	}
 

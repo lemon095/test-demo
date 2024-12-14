@@ -704,13 +704,13 @@ export default class BaseSlot<T extends Record<string, any>> {
 
 	/**
 	 * 获取中奖路图标对应的倍率
-	 * @description 目前的游戏第一列不会出现百搭符号，如果有存在第一列有百搭符号的。那么 wp 和 rwsp 的计算都不适用
 	 * @param {Object} options - 参数对象
 	 * @param {Record<string, number[]>} options.wp - 图标的中奖信息
 	 * @param {Record<string, Record<number, number>>} options.iconMul - 图标对应的倍率信息
 	 * @param {number[][]} options.rl - 本次中奖的图标数组
 	 * @param {number} options.winnerLineCount - 中奖奖信息，如果 3 列中奖则 是 3 连线
 	 * @returns {Record<string, number>} 中奖图标对应的倍数
+	 * @description 目前的游戏第一列不会出现百搭符号，如果有存在第一列有百搭符号的。那么 wp 和 rwsp 的计算都不适用
 	 */
 	public getRwsp({
 		wp,

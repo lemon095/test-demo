@@ -489,9 +489,9 @@ export default class BaseSlot<T extends Record<string, any>> {
 	 * 中奖金额
 	 * @param {Object} options - 配置选项
 	 * @param {Object} options.snww 选填，中奖线路数
-	 * @description 如果是存在中奖线路数的游戏，snww 必传。
 	 * @param {Object} options.rwsp 选填，中奖线图标倍率
 	 * @returns {Record<string, number>|null} 中奖的基础金额信息
+	 * @description 如果是存在中奖线路数的游戏，snww 必传。
 	 */
 	public getLw({
 		snww,
@@ -520,8 +520,8 @@ export default class BaseSlot<T extends Record<string, any>> {
 
 	/**
 	 * 静态方法 计算本局中奖金额 - ctw
-	 * @description 使用静态方法是不想外部子类 改最基本的 ctw 的逻辑，因为其他方法也会调用这段逻辑
 	 * @returns { number } 中奖金额
+	 * @description 使用静态方法是不想外部子类 改最基本的 ctw 的逻辑，因为其他方法也会调用这段逻辑
 	 */
 	public static _getCtw({
 		lw,
@@ -539,14 +539,14 @@ export default class BaseSlot<T extends Record<string, any>> {
 
 	/**
 	 * 计算本局中奖金额 - ctw
-	 * @description 在某些场景下 tw = ctw，这时候 tw 通常会乘以本局的倍率信息
-	 * @description 在某些场景下 tw = 0，则 ctw 通常是 lw 中中奖图标的基础价格总计。在整个中奖流程中，掉落的最后一次通常会计算累计中奖金额乘以累计倍率信息，ctw = tw，不过也有其他例外的情况。
-	 * @description 目前几个游戏 ctw 基本都为 lw 中奖金额的总计 * 倍数。极速和墨西哥除外。
-	 * @description 那么在基础类目前只做最基本的逻辑运算，即静态方法 _getCtw 内实现的逻辑；如果 gm 没有则默认为 1
 	 * @param { Object } options - 配置信息
 	 * @param { Record<string, number> |null } options.lw - 选填，中奖图标的基础价值
 	 * @param { number } options.gm - 选填，图标的倍率信息，默认为 1
 	 * @returns { number } 中奖金额
+	 * @description 在某些场景下 tw = ctw，这时候 tw 通常会乘以本局的倍率信息
+	 * @description 在某些场景下 tw = 0，则 ctw 通常是 lw 中中奖图标的基础价格总计。在整个中奖流程中，掉落的最后一次通常会计算累计中奖金额乘以累计倍率信息，ctw = tw，不过也有其他例外的情况。
+	 * @description 目前几个游戏 ctw 基本都为 lw 中奖金额的总计 * 倍数。极速和墨西哥除外。
+	 * @description 那么在基础类目前只做最基本的逻辑运算，即静态方法 _getCtw 内实现的逻辑；如果 gm 没有则默认为 1
 	 */
 	public getCtw(params: {
 		lw?: Record<string, number> | null;
@@ -744,7 +744,6 @@ export default class BaseSlot<T extends Record<string, any>> {
 
 	/**
 	 * 通用 tw 计算
-	 * @description 目前接触到几个游戏中，tw 有两种计算方式，如果有累计倍数的逻辑则走 累计模式，否则走通用模式
 	 * @param {Object} options - 参数对象
 	 * @param {Object} options.lw - 本局中奖图标的基础金额
 	 * @param {Number} options.gm - 选填，本局倍率或者累计倍率，默认为 1
@@ -752,6 +751,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 	 * @param {Boolean} options.isCurrentWinner - 选填，当前是否中奖
 	 * @param {TwCalculateType} options.mode - tw 计算方式
 	 * @returns {Number} tw 金额
+	 * @description 目前接触到几个游戏中，tw 有两种计算方式，如果有累计倍数的逻辑则走 累计模式，否则走通用模式
 	 */
 	public getTw({
 		lw,
@@ -818,8 +818,6 @@ export default class BaseSlot<T extends Record<string, any>> {
 	}
 	/**
 	 * 判断夺宝的数量
-	 * @description 有些游戏的每一列图标是会合并的。所以需要用到合并框的信息（ebb）
-	 * @description 有些游戏会跳过某一行的信息，比如墨西哥。那么需要传入跳过行的信息
 	 * @param {Object} options - 参数对象
 	 * @param {number[][]} options.rl - 下方图信息
 	 * @param {number[]} options.trl - 选填，上方图信息。如果不填则是空数组
@@ -827,6 +825,8 @@ export default class BaseSlot<T extends Record<string, any>> {
 	 * @param {number} options.duobaoIcon - 选填，夺宝图标的id，默认为 1
 	 * @param {number} options.skipRow - 选填，需要跳过的行数 (从 1 开始数)
 	 * @returns {number} 夺宝图标的数量
+	 * @description 有些游戏的每一列图标是会合并的。所以需要用到合并框的信息（ebb）
+	 * @description 有些游戏会跳过某一行的信息，比如墨西哥。那么需要传入跳过行的信息
 	 */
 	public getSc({
 		rl,
@@ -977,8 +977,8 @@ export default class BaseSlot<T extends Record<string, any>> {
 
 	/**
 	 * 获取 gwt
-	 * @description 位置含义的参数，所以计算逻辑只是按照当初的理解来写的
 	 * @param {number} aw - aw
+	 * @description 位置含义的参数，所以计算逻辑只是按照当初的理解来写的
 	 */
 	public getGwt(aw: number) {
 		let gwt = -1;
@@ -1060,7 +1060,6 @@ export default class BaseSlot<T extends Record<string, any>> {
 
 	/**
 	 * 墨西哥：ge 计算
-	 * @description 不是通用的计算方式
 	 * @param {Object} options - 配置项
 	 * @param {Object|null} options.wp - 中奖图标信息
 	 * @param {Object|null} options.wsp - 中奖图标的金框位置
@@ -1068,6 +1067,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 	 * @param {number} options.nst - 下一次游戏的模式信息
 	 * @param {number} options.mode - 非夺宝模式下中奖模式的 st 信息，默认值为 4
 	 * @return {number[]} 游戏模式信息
+	 * @description 不是通用的计算方式
 	 */
 	public getGeBy1492288({
 		wsp,
@@ -1815,14 +1815,14 @@ export default class BaseSlot<T extends Record<string, any>> {
 
 	/**
 	 * 计算本局中有多少个单元格数量
-	 * @description 鉴于目前一些游戏的 trl 都一样，所以 trl中的数据会默认当做 1 个单元格来计算，没有 trl信息，传入 0 即可
-	 * @description 方法内部已根据 rl 数据自动获取到了 行长度和列长度信息。
-	 * @description rl 收尾两列的图标默认不参与合并逻辑，所以每一个图标都算是一个单独的单元格
 	 * @param {Object} options - 配置参数
 	 * @param {Object} options.esb - 单元格合并的信息
 	 * @param {number[][]} options.rl - 随机数信息
 	 * @param {number} options.trlCellCount - 选填，trl 默认的单元格数量，默认为1，没有传入 0
 	 * @returns {number[]} nowpr - 每一列的单元格数量
+	 * @description 鉴于目前一些游戏的 trl 都一样，所以 trl中的数据会默认当做 1 个单元格来计算，没有 trl信息，传入 0 即可
+	 * @description 方法内部已根据 rl 数据自动获取到了 行长度和列长度信息。
+	 * @description rl 收尾两列的图标默认不参与合并逻辑，所以每一个图标都算是一个单独的单元格
 	 */
 	public getNowpr({
 		esb,
@@ -1882,9 +1882,9 @@ export default class BaseSlot<T extends Record<string, any>> {
 
 	/**
 	 * 计算每框中每一个图标的位置信息 (获取 esb 和 es 信息)
-	 * @description 这两个字段的输入和输出一致
 	 * @param {Object} record - 框合并的信息
 	 * @returns {Object} 合并框中的每一个图标位置信息
+	 * @description 这两个字段的输入和输出一致
 	 */
 	public getEsbAndEs(
 		record: Record<string, PGSlot.Ebb>

@@ -1212,7 +1212,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 		scGm?: number;
 		playCount?: number;
 		prevFs?: Record<string, any> | null;
-	}): { s: number; ts: number; aw: number } | null {
+	}): ({ s: number; ts: number; aw: number } & Record<string, any>) | null {
 		// 触发夺宝
 		if (sc >= scRadix) {
 			// 计算当前夺宝流程下的次数

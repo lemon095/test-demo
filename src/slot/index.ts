@@ -70,12 +70,19 @@ export default class BaseSlot<T extends Record<string, any>> {
 	public readonly totalBet: number;
 	/** 总下注 - 安全值 */
 	public readonly safeTotalBet: number;
-	/** 阈值：多少次不赢，默认为 15 */
-	public notWinnerTotal = 15;
-	/** 累计多少次不赢，默认为 0 */
-	public notWinnerCount = 0;
 	public readonly isFb?: boolean;
+	/** 阈值：多少次不赢，默认为 15 */
+	protected notWinnerTotal = 15;
+	/** 累计多少次不赢，默认为 0 */
+	protected notWinnerCount = 0;
+	/** 本局预测的结果 */
 	protected spinResult: T[] = [];
+	/** 是否必中 */
+	protected isRequiredWinner = false;
+	/** 最大金额重摇次数 */
+	protected maxPriceCount: number = 0;
+	/** 最大si 重摇次数 */
+	protected spinCount: number = 0;
 	/**
 	 * base slot 构造器
 	 * @param {Object} options - 配置选项

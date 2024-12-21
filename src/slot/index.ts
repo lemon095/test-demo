@@ -956,8 +956,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 		if (this.isPreWin) {
 			return tw;
 		}
-		const totalBet = this.useSafeBet ? this.safeTotalBet : this.totalBet;
-		return new Decimal(tw).minus(totalBet).toNumber();
+		return new Decimal(tw).minus(this.totalBet).toNumber();
 	}
 
 	/**

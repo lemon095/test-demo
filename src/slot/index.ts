@@ -57,7 +57,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 	/** 是否启用安全值 */
 	private readonly useSafeBet: boolean;
 	/** 上一局的游戏信息 */
-	public readonly prevSi?: T;
+	private readonly prevSiData?: T;
 	/** 用户信息 */
 	public readonly userType: PGSlot.UserType;
 	/** cs */
@@ -103,7 +103,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 		this.trlWeightsMap = trlWeights;
 		this.useSafeBet = useSafeBet;
 		this.userType = userType;
-		this.prevSi = prevSi;
+		this.prevSiData = prevSi;
 		this.cs = cs;
 		this.ml = ml;
 		this.lineRate = lineRate;
@@ -113,6 +113,14 @@ export default class BaseSlot<T extends Record<string, any>> {
 			this.totalBet = new Decimal(this.totalBet).mul(gmFb).toNumber();
 			this.isFb = isFb;
 		}
+	}
+
+	public get prevSi(): T | undefined {
+		if (!isArray(this.spinResult) || isEmpty(this.spinResult)) {
+			return this.prevSiData;
+		}
+		const prevSpin = this.spinResult[this.spinResult.length - 1];
+		return prevSpin || this.prevSiData;
 	}
 
 	/** 当前是否为购买触发的夺宝 */

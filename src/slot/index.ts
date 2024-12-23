@@ -2645,6 +2645,11 @@ export default class BaseSlot<T extends Record<string, any>> {
 		});
 	}
 
+	/**
+	 * 获取最大可中奖金额
+	 * @param {number} maxAmount - 最大金额，默认值为 20000
+	 * @returns {number} 最大可中奖金额
+	 */
 	public getMaxPrice(maxAmount = 20000) {
 		const maxPrice = Math.min(
 			this.safeTotalBet * 100 - this.safeTotalBet,
@@ -2655,5 +2660,27 @@ export default class BaseSlot<T extends Record<string, any>> {
 			return maxPrice - prevAw;
 		}
 		return maxPrice;
+	}
+
+	/**
+	 * 根据权重随机获取是否中奖
+	 * @param {Object} options - 配置参数
+	 * @param {number} options.min - 选填，默认值为 0
+	 * @param {number} options.max - 选填，默认值为 100
+	 * @param {number} options.weight - 选填，默认值为 -1
+	 * @returns {boolean} 是否中奖，随机出的数小于等于 weight 则认为中奖
+	 */
+	public randomWinner({
+		min = 0,
+		max = 100,
+		weight = -1,
+	}: {
+		min?: number;
+		max?: number;
+		weight?: number;
+	}) {
+		if (weight < min || weight > max) return false;
+		const count = random.int(min, max);
+		return count <= weight;
 	}
 }

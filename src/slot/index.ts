@@ -2175,8 +2175,8 @@ export default class BaseSlot<T extends Record<string, any>> {
 						// 如果找不到，则从图标列表中随机一个非百搭和夺宝的图标
 						if (newIcon == baiDaIcon) {
 							const randIcon: number[] = iconIds;
-							let randomIconIndex = Math.floor(Math.random() * randIcon.length);
-							newIcon = randIcon[randomIconIndex];
+							let iconPos = random.int(0, randIcon.length - 1);
+							newIcon = randIcon[iconPos];
 						}
 					}
 

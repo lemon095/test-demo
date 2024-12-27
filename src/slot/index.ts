@@ -2023,6 +2023,9 @@ export default class BaseSlot<T extends Record<string, any>> {
 				const isBaiDa = rs.esst[keyIdx].ns === baiDaIcon;
 				const bt = isBaiDa ? 2 : 1;
 				const ls = isBaiDa ? 1 : 1;
+				if (isEmpty(ebb[keyIdx])) {
+					return;
+				}
 				ebb[keyIdx] = {
 					...ebb[keyIdx],
 					bt,

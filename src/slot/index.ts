@@ -2067,7 +2067,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 				ls = 1;
 			} else {
 				const weights = silverWeights[icon];
-				const isSilver = random.int(0, weights.length - 1) === 1;
+				const isSilver = weights[random.int(0, weights.length - 1)] === 1;
 				bt = isSilver ? 1 : 2;
 				ls = isSilver ? 2 : 1;
 			}

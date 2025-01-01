@@ -1643,7 +1643,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 			if (isEmpty(topWinnerPosition[key])) return acc;
 			return {
 				...acc,
-				[key]: topWinnerPosition[key],
+				[key]: uniq(topWinnerPosition[key]),
 			};
 		}, {} as Record<string, number[]>);
 		return {

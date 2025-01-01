@@ -1558,7 +1558,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 		// 中奖信息
 		const winnerPosition: Record<string, number[]> = {};
 		const topWinnerPosition: Record<string, number[]> = {};
-		const winnerLineCount: Record<string, number> = {};
+
 		// 连线信息，3 列相邻中奖就是 3 连。
 		// let lineCount = 0;
 		// trl 是否成立
@@ -1602,7 +1602,6 @@ export default class BaseSlot<T extends Record<string, any>> {
 			if (notWinner) {
 				continue;
 			}
-			winnerLineCount[icon] = winCount;
 			// 已经出现最低中奖路径
 			winnerPosition[icon] = [...(winnerPosition[icon] || []), i];
 			if (isHaveTrl) {
@@ -1624,14 +1623,14 @@ export default class BaseSlot<T extends Record<string, any>> {
 				if (colWp.length === 0 && isNull(trlIcon)) break;
 				// 添加中奖信息
 				winnerPosition[icon].push(...colWp);
-				winnerLineCount[icon] = winnerLineCount[icon] + 1;
 				if (isNumber(trlIcon)) {
 					topWinnerPosition[icon].push(trlIcon);
 				}
 			}
 		}
-		if (isEmpty(winnerPosition))
+		if (isEmpty(winnerPosition)) {
 			return { wp: null, twp: null, winnerLineCount: null };
+		}
 		// 中奖路数据进行排序
 		keys(winnerPosition).forEach((key) => {
 			winnerPosition[key] = uniq(winnerPosition[key]).sort(function (a, b) {
@@ -1645,6 +1644,19 @@ export default class BaseSlot<T extends Record<string, any>> {
 				[key]: uniq(topWinnerPosition[key]),
 			};
 		}, {} as Record<string, number[]>);
+		const winnerLineCount = Object.keys(winnerPosition).reduce(
+			(acc, iconId) => {
+				const maxWp = Math.max(...winnerPosition[iconId]);
+				let lineCount = Math.floor(maxWp / colLength) + 1;
+				const twpLineCount = twp[iconId]?.map((item) => item + 2) || [];
+				lineCount = Math.max(lineCount, ...twpLineCount);
+				return {
+					...acc,
+					[iconId]: lineCount,
+				};
+			},
+			{} as Record<string, number>
+		);
 		return {
 			wp: winnerPosition,
 			twp: isEmpty(twp) ? null : twp,

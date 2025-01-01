@@ -69,4 +69,23 @@ export default class ClassFeatSlot extends BaseSlot<any> {
 		}
 		return { wp: mode ? null : { 1: [1, 2, 3] } };
 	}
+
+	/** aw 计算 */
+	public getAw({
+		tw,
+		prevAw,
+		isPreWin = false,
+		isDuoBaoPending = false,
+	}: {
+		tw?: number;
+		prevAw?: number;
+		isPreWin: boolean;
+		isDuoBaoPending: boolean;
+	}): number {
+		const aw = new Decimal(tw || 0);
+		if (isDuoBaoPending || isPreWin) {
+			return aw.add(prevAw || 0).toNumber();
+		}
+		return aw.toNumber();
+	}
 }

@@ -2023,6 +2023,9 @@ export default class BaseSlot<T extends Record<string, any>> {
 				const isBaiDa = rs.esst[keyIdx].ns === baiDaIcon;
 				const bt = isBaiDa ? 2 : 1;
 				const ls = isBaiDa ? 1 : 1;
+				if (isEmpty(ebb[keyIdx])) {
+					return;
+				}
 				ebb[keyIdx] = {
 					...ebb[keyIdx],
 					bt,
@@ -2067,7 +2070,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 				ls = 1;
 			} else {
 				const weights = silverWeights[icon];
-				const isSilver = random.int(0, weights.length - 1) === 1;
+				const isSilver = weights[random.int(0, weights.length - 1)] === 1;
 				bt = isSilver ? 1 : 2;
 				ls = isSilver ? 2 : 1;
 			}
@@ -2175,8 +2178,8 @@ export default class BaseSlot<T extends Record<string, any>> {
 						// 如果找不到，则从图标列表中随机一个非百搭和夺宝的图标
 						if (newIcon == baiDaIcon) {
 							const randIcon: number[] = iconIds;
-							let randomIconIndex = Math.floor(Math.random() * randIcon.length);
-							newIcon = randIcon[randomIconIndex];
+							let iconPos = random.int(0, randIcon.length - 1);
+							newIcon = randIcon[iconPos];
 						}
 					}
 

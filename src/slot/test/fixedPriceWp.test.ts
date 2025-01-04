@@ -24,8 +24,14 @@ describe("固定中奖路线WP", () => {
 				),
 			})
 		).toEqual({
-			"2": [1, 5, 9],
-			"16": [1, 6, 9],
+			wp: {
+				"2": [1, 5, 9],
+				"16": [1, 6, 9],
+			},
+			winnerLineCount: {
+				2: 3,
+				16: 3,
+			},
 		});
 		expect(
 			slot.getFixedPriceWp({
@@ -36,8 +42,14 @@ describe("固定中奖路线WP", () => {
 				),
 			})
 		).toEqual({
-			"9": [2, 5, 9],
-			"12": [2, 6, 9],
+			wp: {
+				"9": [2, 5, 9],
+				"12": [2, 6, 9],
+			},
+			winnerLineCount: {
+				9: 3,
+				12: 3,
+			},
 		});
 		expect(
 			slot.getFixedPriceWp({
@@ -48,10 +60,18 @@ describe("固定中奖路线WP", () => {
 				),
 			})
 		).toEqual({
-			"1": [2, 6, 10],
-			"4": [1, 6, 11],
-			"10": [1, 6, 10],
-			"13": [2, 6, 11],
+			wp: {
+				"1": [2, 6, 10],
+				"4": [1, 6, 11],
+				"10": [1, 6, 10],
+				"13": [2, 6, 11],
+			},
+			winnerLineCount: {
+				1: 3,
+				4: 3,
+				10: 3,
+				13: 3,
+			},
 		});
 		expect(
 			slot.getFixedPriceWp({
@@ -62,7 +82,12 @@ describe("固定中奖路线WP", () => {
 				),
 			})
 		).toEqual({
-			"20": [1, 7, 9, 15],
+			wp: {
+				"20": [1, 7, 9, 15],
+			},
+			winnerLineCount: {
+				20: 4,
+			},
 		});
 		expect(
 			slot.getFixedPriceWp({
@@ -73,10 +98,18 @@ describe("固定中奖路线WP", () => {
 				),
 			})
 		).toEqual({
-			"6": [1, 5, 10],
-			"10": [1, 6, 10],
-			"11": [3, 6, 10],
-			"18": [1, 5, 10],
+			wp: {
+				"6": [1, 5, 10],
+				"10": [1, 6, 10],
+				"11": [3, 6, 10],
+				"18": [1, 5, 10],
+			},
+			winnerLineCount: {
+				"6": 3,
+				"10": 3,
+				"11": 3,
+				"18": 3,
+			},
 		});
 		expect(
 			slot.getFixedPriceWp({
@@ -87,10 +120,18 @@ describe("固定中奖路线WP", () => {
 				),
 			})
 		).toEqual({
-			"2": [1, 5, 9],
-			"5": [3, 6, 9],
-			"16": [1, 6, 9],
-			"20": [1, 7, 9],
+			wp: {
+				"2": [1, 5, 9],
+				"5": [3, 6, 9],
+				"16": [1, 6, 9],
+				"20": [1, 7, 9],
+			},
+			winnerLineCount: {
+				"2": 3,
+				"5": 3,
+				"16": 3,
+				"20": 3,
+			},
 		});
 		expect(
 			slot.getFixedPriceWp({
@@ -101,7 +142,12 @@ describe("固定中奖路线WP", () => {
 				),
 			})
 		).toEqual({
-			"8": [2, 7, 11],
+			wp: {
+				"8": [2, 7, 11],
+			},
+			winnerLineCount: {
+				8: 3,
+			},
 		});
 		expect(
 			slot.getFixedPriceWp({
@@ -112,9 +158,16 @@ describe("固定中奖路线WP", () => {
 				),
 			})
 		).toEqual({
-			"7": [3, 7, 10, 15],
-			"15": [2, 7, 10, 15],
-			"19": [3, 7, 10, 13],
+			wp: {
+				"7": [3, 7, 10, 15],
+				"15": [2, 7, 10, 15],
+				"19": [3, 7, 10, 13],
+			},
+			winnerLineCount: {
+				7: 4,
+				15: 4,
+				19: 4,
+			},
 		});
 		expect(
 			slot.getFixedPriceWp({
@@ -125,7 +178,12 @@ describe("固定中奖路线WP", () => {
 				),
 			})
 		).toEqual({
-			"3": [3, 7, 11, 15, 19],
+			wp: {
+				"3": [3, 7, 11, 15, 19],
+			},
+			winnerLineCount: {
+				3: 5,
+			},
 		});
 	});
 	it("验证夺宝开头的情况", () => {
@@ -137,7 +195,7 @@ describe("固定中奖路线WP", () => {
 					4
 				),
 			})
-		).toEqual(null);
+		).toEqual({ wp: null, winnerLineCount: null });
 	});
 	it("验证百搭开头的情况", () => {
 		expect(
@@ -149,13 +207,33 @@ describe("固定中奖路线WP", () => {
 				),
 			})
 		).toEqual({
-			"1": [2, 6, 10],
-			"4": [1, 6, 11],
-			"10": [1, 6, 10],
-			"13": [2, 6, 11],
+			wp: {
+				"1": [2, 6, 10],
+				"4": [1, 6, 11],
+				"10": [1, 6, 10],
+				"13": [2, 6, 11],
+			},
+			winnerLineCount: {
+				"1": 3,
+				"4": 3,
+				"10": 3,
+				"13": 3,
+			},
 		});
 	});
 	it("验证所有的五连线信息", () => {
+		const winnerPosition = FIXED_PRICE_ROUTES.reduce((acc, route, index) => {
+			return {
+				...acc,
+				[index + 1]: route.map((pos, index) => index * 4 + pos),
+			};
+		}, {} as Record<string, number[]>);
+		const winnerLineCount = keys(winnerPosition).reduce((acc, winId) => {
+			return {
+				...acc,
+				[winId]: winnerPosition[winId].length,
+			};
+		}, {} as Record<string, number>);
 		expect(
 			slot.getFixedPriceWp({
 				fixedRoutes: FIXED_PRICE_ROUTES,
@@ -164,13 +242,9 @@ describe("固定中奖路线WP", () => {
 					4
 				),
 			})
-		).toEqual(
-			FIXED_PRICE_ROUTES.reduce((acc, route, index) => {
-				return {
-					...acc,
-					[index + 1]: route.map((pos, index) => index * 4 + pos),
-				};
-			}, {})
-		);
+		).toEqual({
+			wp: winnerPosition,
+			winnerLineCount,
+		});
 	});
 });

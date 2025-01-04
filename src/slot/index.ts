@@ -675,9 +675,12 @@ export default class BaseSlot<T extends Record<string, any>> {
 		duoBaoIcon?: number;
 		baiDaIcon?: number;
 		baseCount?: number;
-	}): Record<string, number[]> | null {
+	}): {
+		wp: Record<string, number[]> | null;
+		winnerLineCount: Record<string, number> | null;
+	} {
 		// 需要考虑的条件：1. 夺宝不能中奖 2. 百搭可以搭配任意字符
-		const wp = {};
+		const wp: Record<string, number[]> | null = {};
 		const colLength = rl[0].length;
 		fixedRoutes.forEach((route, winId) => {
 			let prevIcon = baiDaIcon;
@@ -714,7 +717,22 @@ export default class BaseSlot<T extends Record<string, any>> {
 				});
 			}
 		});
-		return isEmpty(wp) ? null : wp;
+		if (isEmpty(wp)) {
+			return {
+				wp: null,
+				winnerLineCount: null,
+			};
+		}
+		const winnerLineCount = keys(wp).reduce((acc, winId) => {
+			return {
+				...acc,
+				[winId]: wp[winId].length,
+			};
+		}, {} as Record<string, number>);
+		return {
+			wp,
+			winnerLineCount,
+		};
 	}
 
 	/**
@@ -2696,5 +2714,55 @@ export default class BaseSlot<T extends Record<string, any>> {
 		if (weight < min || weight > max) return false;
 		const count = random.int(min, max);
 		return count <= weight;
+	}
+
+	/**
+	 * 排除 rl 数据每一列的某个位置图标信息
+	 * @param {Object} options - 配置参数
+	 * @param {number[][]} options.rl - 待排除的 rl 数据
+	 * @param {number} options.colIndex - 选填，默认值为 0。每一列的位置信息，默认排除每一列的第一个图标信息。如果传-1，则不会进行排除。
+	 * @returns {number[][]} 排除后的数据
+	 */
+	public getRl3x5({ rl, colIndex = 0 }: { rl: number[][]; colIndex?: number }) {
+		const cloneRl = cloneDeep(rl);
+		return cloneRl.map((icons) =>
+			icons.filter((_, index) => index !== colIndex)
+		);
+	}
+
+	/**
+	 * 蝶恋花的 wp3x5 字段信息
+	 * @param {Object} options - 配置参数
+	 * @param {Object} options.wp - wp 字段信息
+	 * @param {number} options.colMinusCount - 每一列需要减掉的数量，默认每一列需要减去 1
+	 * @param {number[][]} options.rl - rl 字段信息
+	 * @returns {Object|null|undefined}
+	 */
+	public getWp3x5({
+		wp,
+		colMinusCount = 1,
+		rl,
+	}: {
+		wp?: Record<string, number[]> | null;
+		colMinusCount?: number;
+		rl: number[][];
+	}): Record<string, number[]> | null | undefined {
+		if (isEmpty(wp)) return wp;
+		const minusArr = rl.map((_, index) => (index + 1) * colMinusCount);
+		return keys(wp).reduce((acc, winId) => {
+			return {
+				...acc,
+				[winId]: wp[winId].map((pos, idx) => pos - minusArr[idx]),
+			};
+		}, {} as Record<string, number[]>);
+	}
+
+	/**
+	 * 获取 lw 金额的总计
+	 * @param {Object|undefined} lw - lw 信息
+	 * @returns {number}
+	 */
+	public getTlw(lw?: Record<string, number> | null) {
+		return BaseSlot._getCtw({ lw, gm: 1 });
 	}
 }

@@ -2805,4 +2805,31 @@ export default class BaseSlot<T extends Record<string, any>> {
 		if (isEmpty(wp)) return null;
 		return uniq(flattenDeep(values(wp))).sort((a, b) => a - b);
 	}
+
+	/**
+	 * ptbr 能消除的中奖图标位置信息，改字段就的另一种实现为：getPtbr
+	 * @param {Object} options - 配置参数
+	 * @param {number[]} options.wpl - 中奖图标位置信息
+	 * @param {number[]} options.swlb - 百搭图标的状态信息
+	 * @param {number} options.finalStatus - 最终状态，选填，默认为 4，即表示该图标已可消除。
+	 */
+	public getPtbrV2({
+		wpl,
+		swlb,
+		finalStatus = 4,
+	}: {
+		wpl?: number[] | null;
+		swlb?: number[][] | null;
+		finalStatus?: number;
+	}) {
+		if (isEmpty(wpl) || isNull(wpl) || isUndefined(wpl)) return null;
+		return wpl
+			.filter((pos) => {
+				const target = swlb?.find(([iconPos]) => iconPos === pos);
+				if (!target) return true;
+				if (target[1] === finalStatus) return true;
+				return false;
+			})
+			.sort((a, b) => a - b);
+	}
 }

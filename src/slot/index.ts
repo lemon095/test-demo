@@ -2768,4 +2768,32 @@ export default class BaseSlot<T extends Record<string, any>> {
 	public getTlw(lw?: Record<string, number> | null) {
 		return BaseSlot._getCtw({ lw, gm: 1 });
 	}
+
+	/**
+	 * aw 累计金额计算
+	 * 目前只有一种通用的计算方式，像那种累计倍率的游戏改方法并不适用。
+	 * @param {Object} options - 配置参数
+	 * @param {number} options.tw - tw 信息
+	 * @param {number} options.prevAw - 上一次 aw 的值
+	 * @param {boolean} options.isPreWin - 是否为上一局中奖
+	 * @param {boolean} options.isDuoBaoPending - 是否为夺宝流程
+	 * @returns {number} - 累计中奖金额
+	 */
+	public getAw({
+		tw,
+		prevAw,
+		isPreWin = false,
+		isDuoBaoPending = false,
+	}: {
+		tw?: number;
+		prevAw?: number;
+		isPreWin: boolean;
+		isDuoBaoPending: boolean;
+	}): number {
+		const aw = new Decimal(tw || 0);
+		if (isDuoBaoPending || isPreWin) {
+			return aw.add(prevAw || 0).toNumber();
+		}
+		return aw.toNumber();
+	}
 }

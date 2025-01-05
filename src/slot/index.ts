@@ -2796,4 +2796,13 @@ export default class BaseSlot<T extends Record<string, any>> {
 		}
 		return aw.toNumber();
 	}
+
+	/**
+	 * 中奖图标的位置信息集合
+	 * @param {Object} wp - 中奖图标位置信息
+	 */
+	public getWpl(wp?: Record<string, number[]> | null) {
+		if (isEmpty(wp)) return null;
+		return uniq(flattenDeep(values(wp))).sort((a, b) => a - b);
+	}
 }

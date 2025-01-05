@@ -1,5 +1,5 @@
 import { expect, describe, it } from "bun:test";
-import BaseSlot from "../feat";
+import BaseSlot from "../index";
 import {
 	RL_WEIGHTS,
 	TRL_WEIGHTS,

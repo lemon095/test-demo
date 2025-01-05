@@ -2062,6 +2062,9 @@ export default class BaseSlot<T extends Record<string, any>> {
 				};
 			});
 			keys(rs.espt).forEach((keyIdx) => {
+				if (isEmpty(ebb[keyIdx])) {
+					return;
+				}
 				ebb[keyIdx].fp = rs.espt[keyIdx].np[0];
 				ebb[keyIdx].lp = rs.espt[keyIdx].np[1];
 			});

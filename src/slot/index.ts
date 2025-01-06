@@ -2685,10 +2685,17 @@ export default class BaseSlot<T extends Record<string, any>> {
 	 * @param {number} maxAmount - 最大金额，默认值为 20000
 	 * @returns {number} 最大可中奖金额
 	 */
-	public getMaxPrice(maxAmount = 20000) {
+	public getMaxPrice({
+		maxAmount,
+		rtpProfit,
+	}: {
+		maxAmount: number;
+		rtpProfit: number;
+	}) {
 		const maxPrice = Math.min(
 			this.safeTotalBet * 100 - this.safeTotalBet,
-			maxAmount
+			maxAmount,
+			rtpProfit
 		);
 		if (this.isDuoBaoPending) {
 			const prevAw = this.prevSi?.aw || 0;

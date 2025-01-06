@@ -38,7 +38,7 @@ describe("ptbr：通用逻辑下的中奖信息", () => {
 	});
 });
 
-describe("ptbr：蝶恋花游侠下的中奖信息", () => {
+describe("ptbr：蝶恋花游戏下的中奖信息", () => {
 	describe("无 wpl 中奖信息", () => {
 		it("wpl 数据为 null", () => {
 			const ptbrInfo = slot.getPtbrV2({

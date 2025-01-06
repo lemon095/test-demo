@@ -2847,6 +2847,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 	 * @param {Array} options.highList - 高倍率列表
 	 * @param {Boolean} options.isDuoBaoPending - 是否为夺宝模式
 	 * @param {Array} options.rswl - 百搭最终形态的数据
+	 * @param {number} options.baseGm - 基础倍率，默认值为 1
 	 * @returns {Array} - 计算后的倍率列表
 	 */
 	public getGml({
@@ -2854,18 +2855,42 @@ export default class BaseSlot<T extends Record<string, any>> {
 		highList,
 		isDuoBaoPending,
 		rswl,
+		baseGm = 1,
 	}: {
 		baseList: number[];
 		highList: number[];
 		isDuoBaoPending: boolean;
 		rswl?: number[][] | null;
+		baseGm?: number;
 	}) {
-		const gm = isEmpty(rswl) || !isArray(rswl) ? 1 : rswl.length + 1;
+		const gm = isEmpty(rswl) || !isArray(rswl) ? 0 : rswl.length;
 		const gmList = isDuoBaoPending ? highList : baseList;
 		const editIndex = gmList.length - 1;
 		return gmList.map((item, index) => {
-			if (index === editIndex) return item * gm;
+			if (index === editIndex) return item + gm * baseGm;
 			return item;
 		});
+	}
+
+	/**
+	 * gmi 倍率列表中下标取值
+	 * @param {number} options - 配置参数
+	 * @param {number} options.cwc - 当前中奖流程的累计中奖次数
+	 * @param {number} options.min - 最小下标，默认只为 0，选填
+	 * @param {number} options.max - 最大下标。
+	 */
+	public getGmi({
+		cwc,
+		min = 0,
+		max,
+	}: {
+		cwc: number;
+		min?: number;
+		max: number;
+	}) {
+		if (min > max) {
+			throw new Error(`gmi in min: ${min} > max: ${max}`);
+		}
+		return Math.max(min, Math.min(cwc - 1, max));
 	}
 }

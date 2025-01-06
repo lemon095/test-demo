@@ -23,6 +23,7 @@ describe("gml 倍率信息::蝶恋花", () => {
 				baseList: [1, 2, 3, 5],
 				highList: [2, 4, 6, 10],
 				isDuoBaoPending: false,
+				baseGm: 5,
 			});
 			expect(gml).toEqual([1, 2, 3, 5]);
 		});
@@ -32,6 +33,7 @@ describe("gml 倍率信息::蝶恋花", () => {
 				highList: [2, 4, 6, 10],
 				isDuoBaoPending: false,
 				rswl: null,
+				baseGm: 5,
 			});
 			expect(gml).toEqual([1, 2, 3, 5]);
 		});
@@ -41,6 +43,7 @@ describe("gml 倍率信息::蝶恋花", () => {
 				highList: [2, 4, 6, 10],
 				isDuoBaoPending: false,
 				rswl: [],
+				baseGm: 5,
 			});
 			expect(gml).toEqual([1, 2, 3, 5]);
 		});
@@ -50,6 +53,7 @@ describe("gml 倍率信息::蝶恋花", () => {
 				highList: [2, 4, 6, 10],
 				isDuoBaoPending: false,
 				rswl: [[1, 4]],
+				baseGm: 5,
 			});
 			expect(gml).toEqual([1, 2, 3, 10]);
 		});
@@ -63,6 +67,7 @@ describe("gml 倍率信息::蝶恋花", () => {
 					[1, 4],
 					[1, 4],
 				],
+				baseGm: 5,
 			});
 			expect(gml).toEqual([1, 2, 3, 20]);
 		});
@@ -71,50 +76,55 @@ describe("gml 倍率信息::蝶恋花", () => {
 		it("rswl 数据为 undefined", () => {
 			const gml = slot.getGml({
 				baseList: [1, 2, 3, 5],
-				highList: [2, 4, 6, 10],
+				highList: [3, 6, 9, 15],
 				isDuoBaoPending: true,
+				baseGm: 5,
 			});
-			expect(gml).toEqual([2, 4, 6, 10]);
+			expect(gml).toEqual([3, 6, 9, 15]);
 		});
 		it("rswl 数据为 null", () => {
 			const gml = slot.getGml({
 				baseList: [1, 2, 3, 5],
-				highList: [2, 4, 6, 10],
+				highList: [3, 6, 9, 15],
 				isDuoBaoPending: true,
 				rswl: null,
+				baseGm: 5,
 			});
-			expect(gml).toEqual([2, 4, 6, 10]);
+			expect(gml).toEqual([3, 6, 9, 15]);
 		});
 		it("rswl 数据为 []", () => {
 			const gml = slot.getGml({
 				baseList: [1, 2, 3, 5],
-				highList: [2, 4, 6, 10],
+				highList: [3, 6, 9, 15],
 				isDuoBaoPending: true,
 				rswl: [],
+				baseGm: 5,
 			});
-			expect(gml).toEqual([2, 4, 6, 10]);
+			expect(gml).toEqual([3, 6, 9, 15]);
 		});
 		it("rswl 存在一条数据", () => {
 			const gml = slot.getGml({
 				baseList: [1, 2, 3, 5],
-				highList: [2, 4, 6, 10],
+				highList: [3, 6, 9, 15],
 				isDuoBaoPending: true,
 				rswl: [[1, 4]],
+				baseGm: 5,
 			});
-			expect(gml).toEqual([2, 4, 6, 20]);
+			expect(gml).toEqual([3, 6, 9, 20]);
 		});
 		it("rswl 存在三条数据", () => {
 			const gml = slot.getGml({
 				baseList: [1, 2, 3, 5],
-				highList: [2, 4, 6, 10],
+				highList: [3, 6, 9, 15],
 				isDuoBaoPending: true,
 				rswl: [
 					[1, 4],
 					[1, 4],
 					[1, 4],
 				],
+				baseGm: 5,
 			});
-			expect(gml).toEqual([2, 4, 6, 40]);
+			expect(gml).toEqual([3, 6, 9, 30]);
 		});
 	});
 });

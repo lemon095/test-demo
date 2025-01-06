@@ -2839,4 +2839,33 @@ export default class BaseSlot<T extends Record<string, any>> {
 			})
 			.sort((a, b) => a - b);
 	}
+
+	/**
+	 * gml 倍率列表计算
+	 * @param {Object} options - 参数对象
+	 * @param {Array} options.baseList - 基础倍率列表
+	 * @param {Array} options.highList - 高倍率列表
+	 * @param {Boolean} options.isDuoBaoPending - 是否为夺宝模式
+	 * @param {Array} options.rswl - 百搭最终形态的数据
+	 * @returns {Array} - 计算后的倍率列表
+	 */
+	public getGml({
+		baseList,
+		highList,
+		isDuoBaoPending,
+		rswl,
+	}: {
+		baseList: number[];
+		highList: number[];
+		isDuoBaoPending: boolean;
+		rswl?: number[][] | null;
+	}) {
+		const gm = isEmpty(rswl) || !isArray(rswl) ? 1 : rswl.length + 1;
+		const gmList = isDuoBaoPending ? highList : baseList;
+		const editIndex = gmList.length - 1;
+		return gmList.map((item, index) => {
+			if (index === editIndex) return item * gm;
+			return item;
+		});
+	}
 }

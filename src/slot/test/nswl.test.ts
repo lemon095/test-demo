@@ -42,7 +42,7 @@ describe("nswl: @百搭位置边界问题验证", () => {
   it("@rl中都是百搭数据", () => {
     const nswl = Array(20)
       .fill(0)
-      .map((_, index) => [index, 1]);
+      .map((_, index) => [index, 1]) as [number, number][];
     expect(
       slot.getNswl({
         rl: [

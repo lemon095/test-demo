@@ -2900,11 +2900,11 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @params {[number, number][]} swlb 百搭形态信息
    * @returns 百搭的最终形态数据
    */
-  public getRswl(swlb?: number[][] | null): null | number[][] {
+  public getRswl(swlb?: [number, number][] | null): null | [number, number][] {
     const rswl = swlb?.filter(
       ([position, status]) => status === 4 && isFinite(position)
     );
-    return isEmpty(rswl) ? null : (rswl as number[][]);
+    return isEmpty(rswl) ? null : (rswl as [number, number][]);
   }
 
   /**
@@ -2912,11 +2912,11 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @params {[number, number]} swlb 百搭形态信息
    * @returns 百搭形态的过程数据
    */
-  public getSwl(swlb?: number[][] | null): null | number[][] {
+  public getSwl(swlb?: [number, number][] | null): null | [number, number][] {
     const rswl = swlb?.filter(
       ([position, status]) => status < 4 && isFinite(position)
     );
-    return isEmpty(rswl) ? null : (rswl as number[][]);
+    return isEmpty(rswl) ? null : (rswl as [number, number][]);
   }
 
   /**
@@ -2935,7 +2935,7 @@ export default class BaseSlot<T extends Record<string, any>> {
     baiDaIcon?: number;
     rl: number[][];
     wp?: Record<string, number[]> | null;
-  }): null | number[][] {
+  }): null | [number, number][] {
     const rls = flattenDeep(rl);
     // 先初始化 nswl
     const poss = rls.reduce((acc, icon, index) => {
@@ -2943,7 +2943,7 @@ export default class BaseSlot<T extends Record<string, any>> {
         acc.push([index, 1]);
       }
       return acc;
-    }, [] as number[][]);
+    }, [] as [number, number][]);
     if (isEmpty(poss)) {
       return null;
     }

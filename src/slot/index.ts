@@ -2925,25 +2925,47 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @param {number[][]} options.rl - 图标位置信息
    * @param {Object} options.wp - 图标中奖信息
    * @param {number} options.baidaIcon - 百搭图标的 id信息
+   * @param {boolean} options.isPrevWin - 上一局是否中奖
+   * @param {number[][]} options.rns - 掉落下的 rl 信息
    * @returns 初始信息，如果该百搭位置不参与中奖，则初始状态 1，参与中奖，则初始状态为 3
    */
   public getNswl({
     baiDaIcon = 0,
     rl,
     wp,
+    rns,
+    isPrevWin,
   }: {
     baiDaIcon?: number;
     rl: number[][];
     wp?: Record<string, number[]> | null;
+    isPrevWin: boolean;
+    rns?: (number[] | null)[] | null;
   }): null | [number, number][] {
-    const rls = flattenDeep(rl);
-    // 先初始化 nswl
-    const poss = rls.reduce((acc, icon, index) => {
-      if (icon === baiDaIcon) {
-        acc.push([index, 1]);
-      }
-      return acc;
-    }, [] as [number, number][]);
+    const poss: [number, number][] = [];
+    if (isPrevWin && isArray(rns)) {
+      // 处理掉落下的 rl
+      const colLength = rl[0].length;
+      rns.reduce((acc, icons, colIndex) => {
+        if (!isArray(icons)) return acc;
+        for (let i = 0; i < icons.length; i++) {
+          const icon = icons[i];
+          if (icon !== baiDaIcon) continue;
+          const pos = colIndex * colLength + i;
+          acc.push([pos, 1]);
+        }
+        return acc;
+      }, poss);
+    } else {
+      const rls = flattenDeep(rl);
+      // 先初始化 nswl
+      rls.reduce((acc, icon, index) => {
+        if (icon === baiDaIcon) {
+          acc.push([index, 1]);
+        }
+        return acc;
+      }, poss);
+    }
     if (isEmpty(poss)) {
       return null;
     }
@@ -2959,5 +2981,63 @@ export default class BaseSlot<T extends Record<string, any>> {
       }
     }
     return poss;
+  }
+
+  /**
+   * swlb 百搭形态信息
+   * @param {Object} options - 配置对象
+   * @param {number[][]} options.nswl - 百搭形态初始信息
+   * @param {Object} options.wp - 图标中奖信息
+   * @param {number} options.baidaIcon - 百搭图标的 id信息
+   * @param {number[][]} options.prevSwlb - 上一局的百搭形态信息
+   * @param {number[][]} options.rns - 掉落下的 rl 信息
+   */
+  public getSwlb({
+    nswl,
+    wp,
+    baidaIcon,
+    prevSwlb,
+    rns,
+  }: {
+    nswl?: [number, number][] | null;
+    wp?: Record<string, number[]> | null;
+    baidaIcon?: number;
+    prevSwlb?: [number, number][] | null;
+    rns?: number[][] | null;
+  }) {
+    const si1 = {
+      rl: [7, 4, 3, 5, 8, 2, 0, 7, 7, 8, 7, 5, 8, 4, 7, 8, 6, 7, 2, 7],
+      wp: {
+        17: [3, 6, 11],
+      },
+      ptbr: [3, 11],
+      nswl: [[6, 2]],
+    };
+    const si2 = {
+      ptbr: [1, 11, 14, 17, 9, 7],
+      wp: {
+        4: [1, 6, 11, 14, 17],
+        16: [1, 6, 9, 14, 17],
+        20: [1, 7, 9],
+      },
+      rs: {
+        rns: [[8], null, [7], null, null],
+      },
+      rl: [8, 7, 4, 3, 8, 2, 0, 7, 7, 7, 8, 7, 8, 4, 7, 8, 6, 7, 2, 7],
+    };
+    const si3 = {
+      rl: [5, 8, 4, 3, 7, 8, 2, 0, 8, 8, 7, 8, 6, 8, 4, 8, 8, 6, 2, 7],
+      wp: {
+        2: [1, 5, 9, 13],
+        20: [1, 7, 9, 15],
+      },
+      ptbr: [1, 5, 9, 13, 7, 15],
+      rs: {
+        rns: [[5], [7], [8, 8], [6], [8]],
+      },
+    };
+    // 额外需要注意的信息：rns中存在掉落的百搭数据
+    // 两种逻辑，一种是掉落下的百搭变换逻辑，一种为非掉落下的百搭变换逻辑
+    // 可能会用到 prevNswl数据
   }
 }

@@ -83,6 +83,74 @@ describe("swlb: @上一局中奖", () => {
         })
       ).toEqual([[7, 4]]);
     });
+    it("@百搭不参与中奖", () => {
+      expect(
+        slot.getSwlb({
+          isPrevWin: true,
+          colLength: 4,
+          rowLength: 5,
+          prevSwlb: [
+            [6, 2],
+            [8, 1],
+          ],
+          wpl: [1, 6, 7, 9, 11, 14, 17],
+        })
+      ).toEqual([
+        [6, 3],
+        [8, 1],
+      ]);
+    });
   });
-  // describe("@nswl存在值", () => {});
+  describe("@nswl存在值", () => {
+    it("@百搭参与中奖", () => {
+      expect(
+        slot.getSwlb({
+          nswl: [[4, 2]],
+          isPrevWin: true,
+          colLength: 4,
+          rowLength: 5,
+          prevSwlb: [[6, 2]],
+          wpl: [1, 6, 7, 9, 11, 14, 17],
+        })
+      ).toEqual([
+        [4, 2],
+        [6, 3],
+      ]);
+    });
+    it("@百搭参与中奖且位置更改", () => {
+      expect(
+        slot.getSwlb({
+          nswl: [[4, 2]],
+          isPrevWin: true,
+          colLength: 4,
+          rowLength: 5,
+          prevSwlb: [[6, 3]],
+          wpl: [1, 5, 9, 13, 7, 15],
+          prevPtbr: [1, 11, 14, 17, 9, 7],
+        })
+      ).toEqual([
+        [4, 2],
+        [7, 4],
+      ]);
+    });
+    it("@百搭不参与中奖", () => {
+      expect(
+        slot.getSwlb({
+          nswl: [[4, 2]],
+          isPrevWin: true,
+          colLength: 4,
+          rowLength: 5,
+          prevSwlb: [
+            [6, 2],
+            [8, 1],
+          ],
+          wpl: [1, 6, 7, 9, 11, 14, 17],
+        })
+      ).toEqual([
+        [4, 2],
+        [6, 3],
+        [8, 1],
+      ]);
+    });
+  });
 });

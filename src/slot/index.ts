@@ -3010,7 +3010,7 @@ export default class BaseSlot<T extends Record<string, any>> {
     colLength: number;
     rowLength: number;
     wpl?: number[] | null;
-  }) {
+  }): [number, number][] | null {
     const si1 = {
       wpl: [3, 6, 11],
       nswl: [[6, 2]],
@@ -3065,7 +3065,7 @@ export default class BaseSlot<T extends Record<string, any>> {
         // 判断是否需要变更状态
         const isChangeStatus = winnerPoss.includes(newPos);
         const newStatus = isChangeStatus ? status + 1 : status;
-        return [newPos, newStatus];
+        return [newPos, newStatus] as [number, number];
       });
       return isEmpty(new_nswl) ? newSwlb : [...new_nswl!, ...newSwlb];
     }

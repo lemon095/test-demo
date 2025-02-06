@@ -2987,57 +2987,88 @@ export default class BaseSlot<T extends Record<string, any>> {
    * swlb 百搭形态信息
    * @param {Object} options - 配置对象
    * @param {number[][]} options.nswl - 百搭形态初始信息
-   * @param {Object} options.wp - 图标中奖信息
-   * @param {number} options.baidaIcon - 百搭图标的 id信息
+   * @param {Object} options.wpl - 图标中奖信息
    * @param {number[][]} options.prevSwlb - 上一局的百搭形态信息
-   * @param {number[][]} options.rns - 掉落下的 rl 信息
+   * @param {boolean} options.isPrevWin - 上一局是否中奖
+   * @param {number[]} options.prevPtbr - 上一局消除的图标信息
+   * @param {number} options.colLength - 列长度
+   * @param {number} options.rowLength - 行长度
    */
   public getSwlb({
     nswl,
-    wp,
-    baidaIcon,
     prevSwlb,
-    rns,
+    wpl,
+    isPrevWin,
+    prevPtbr,
+    colLength,
+    rowLength,
   }: {
     nswl?: [number, number][] | null;
-    wp?: Record<string, number[]> | null;
-    baidaIcon?: number;
     prevSwlb?: [number, number][] | null;
-    rns?: number[][] | null;
+    isPrevWin: boolean;
+    prevPtbr?: number[] | null;
+    colLength: number;
+    rowLength: number;
+    wpl?: number[] | null;
   }) {
     const si1 = {
-      rl: [7, 4, 3, 5, 8, 2, 0, 7, 7, 8, 7, 5, 8, 4, 7, 8, 6, 7, 2, 7],
-      wp: {
-        17: [3, 6, 11],
-      },
-      ptbr: [3, 11],
+      wpl: [3, 6, 11],
       nswl: [[6, 2]],
+      ptbr: [3, 11],
+      swlb: [[6, 2]],
     };
     const si2 = {
+      wpl: [1, 6, 11, 14, 17, 9, 7],
+      nswl: null,
       ptbr: [1, 11, 14, 17, 9, 7],
-      wp: {
-        4: [1, 6, 11, 14, 17],
-        16: [1, 6, 9, 14, 17],
-        20: [1, 7, 9],
-      },
-      rs: {
-        rns: [[8], null, [7], null, null],
-      },
-      rl: [8, 7, 4, 3, 8, 2, 0, 7, 7, 7, 8, 7, 8, 4, 7, 8, 6, 7, 2, 7],
+      swlb: [[6, 3]],
     };
     const si3 = {
-      rl: [5, 8, 4, 3, 7, 8, 2, 0, 8, 8, 7, 8, 6, 8, 4, 8, 8, 6, 2, 7],
-      wp: {
-        2: [1, 5, 9, 13],
-        20: [1, 7, 9, 15],
-      },
+      wpl: [1, 5, 9, 13, 7, 15],
+      nswl: null,
       ptbr: [1, 5, 9, 13, 7, 15],
-      rs: {
-        rns: [[5], [7], [8, 8], [6], [8]],
-      },
+      swlb: [[7, 4]],
     };
-    // 额外需要注意的信息：rns中存在掉落的百搭数据
+    const si4 = {
+      wpl: null,
+      nswl: null,
+      ptbr: null,
+      swlb: null,
+    };
     // 两种逻辑，一种是掉落下的百搭变换逻辑，一种为非掉落下的百搭变换逻辑
-    // 可能会用到 prevNswl数据
+    // 百搭的位置变化信息
+    if (isPrevWin) {
+      const new_nswl = nswl || null;
+      // 如果上一局没有百搭形态信息，则直接使用这局新出现的百搭形态信息
+      if (isEmpty(prevSwlb)) return new_nswl;
+      // 根据上一局删除的图标位置信息计算本次百搭位置是否需要变更
+      const removePoss = isArray(prevPtbr) ? prevPtbr : [];
+      const winnerPoss = isArray(wpl) ? wpl : [];
+      const newSwlb = prevSwlb!.map(([pos, status]) => {
+        let moveNum = 0;
+        for (let row = 0; row < rowLength; row++) {
+          const start = row * colLength;
+          const end = start + colLength - 1;
+          const currentColPos = removePoss
+            .filter((removePos) => {
+              const isRemoveCol = removePos >= start && removePos <= end;
+              const isBaiDaCol = pos >= start && pos <= end;
+              return isRemoveCol && isBaiDaCol;
+            })
+            .filter((removePos) => {
+              return removePos > pos;
+            });
+          // 拿到移动的格子数量
+          moveNum = moveNum + currentColPos.length;
+        }
+        const newPos = pos + moveNum;
+        // 判断是否需要变更状态
+        const isChangeStatus = winnerPoss.includes(newPos);
+        const newStatus = isChangeStatus ? status + 1 : status;
+        return [newPos, newStatus];
+      });
+      return isEmpty(new_nswl) ? newSwlb : [...new_nswl!, ...newSwlb];
+    }
+    return isArray(nswl) ? nswl : null;
   }
 }

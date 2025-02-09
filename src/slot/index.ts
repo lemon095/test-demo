@@ -3011,30 +3011,6 @@ export default class BaseSlot<T extends Record<string, any>> {
     rowLength: number;
     wpl?: number[] | null;
   }): [number, number][] | null {
-    const si1 = {
-      wpl: [3, 6, 11],
-      nswl: [[6, 2]],
-      ptbr: [3, 11],
-      swlb: [[6, 2]],
-    };
-    const si2 = {
-      wpl: [1, 6, 11, 14, 17, 9, 7],
-      nswl: null,
-      ptbr: [1, 11, 14, 17, 9, 7],
-      swlb: [[6, 3]],
-    };
-    const si3 = {
-      wpl: [1, 5, 9, 13, 7, 15],
-      nswl: null,
-      ptbr: [1, 5, 9, 13, 7, 15],
-      swlb: [[7, 4]],
-    };
-    const si4 = {
-      wpl: null,
-      nswl: null,
-      ptbr: null,
-      swlb: null,
-    };
     // 两种逻辑，一种是掉落下的百搭变换逻辑，一种为非掉落下的百搭变换逻辑
     // 百搭的位置变化信息
     if (isPrevWin) {
@@ -3045,6 +3021,9 @@ export default class BaseSlot<T extends Record<string, any>> {
       const removePoss = isArray(prevPtbr) ? prevPtbr : [];
       const winnerPoss = isArray(wpl) ? wpl : [];
       const newSwlb = prevSwlb!
+        .filter(([_, status]) => {
+          return status < 4;
+        })
         .map(([pos, status]) => {
           let moveNum = 0;
           for (let row = 0; row < rowLength; row++) {
@@ -3067,9 +3046,6 @@ export default class BaseSlot<T extends Record<string, any>> {
           const isChangeStatus = winnerPoss.includes(newPos);
           const newStatus = isChangeStatus ? status + 1 : status;
           return [newPos, newStatus] as [number, number];
-        })
-        .filter(([_, status]) => {
-          return status <= 4;
         });
       const current_swlb = isEmpty(new_nswl)
         ? newSwlb

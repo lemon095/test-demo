@@ -153,4 +153,40 @@ describe("swlb: @上一局中奖", () => {
       ]);
     });
   });
+  describe("@swlb异常数据", () => {
+    it("@上一局已是最终形态，本次需要消除", () => {
+      expect(
+        slot.getSwlb({
+          nswl: null,
+          isPrevWin: true,
+          colLength: 4,
+          rowLength: 5,
+          prevPtbr: [1, 2, 3, 7, 10, 11],
+          prevSwlb: [
+            [6, 3],
+            [9, 3],
+            [10, 4],
+          ],
+          wpl: [1, 2, 7, 9, 11],
+        })
+      ).toEqual([
+        [7, 4],
+        [11, 4],
+      ]);
+      expect(
+        slot.getSwlb({
+          nswl: null,
+          isPrevWin: true,
+          colLength: 4,
+          rowLength: 5,
+          prevPtbr: [1, 2, 3, 7, 10, 11],
+          prevSwlb: [
+            [7, 4],
+            [11, 4],
+          ],
+          wpl: [1, 2, 7, 9, 11],
+        })
+      ).toBeNull();
+    });
+  });
 });

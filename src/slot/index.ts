@@ -3044,30 +3044,37 @@ export default class BaseSlot<T extends Record<string, any>> {
       // 根据上一局删除的图标位置信息计算本次百搭位置是否需要变更
       const removePoss = isArray(prevPtbr) ? prevPtbr : [];
       const winnerPoss = isArray(wpl) ? wpl : [];
-      const newSwlb = prevSwlb!.map(([pos, status]) => {
-        let moveNum = 0;
-        for (let row = 0; row < rowLength; row++) {
-          const start = row * colLength;
-          const end = start + colLength - 1;
-          const currentColPos = removePoss
-            .filter((removePos) => {
-              const isRemoveCol = removePos >= start && removePos <= end;
-              const isBaiDaCol = pos >= start && pos <= end;
-              return isRemoveCol && isBaiDaCol;
-            })
-            .filter((removePos) => {
-              return removePos > pos;
-            });
-          // 拿到移动的格子数量
-          moveNum = moveNum + currentColPos.length;
-        }
-        const newPos = pos + moveNum;
-        // 判断是否需要变更状态
-        const isChangeStatus = winnerPoss.includes(newPos);
-        const newStatus = isChangeStatus ? status + 1 : status;
-        return [newPos, newStatus] as [number, number];
-      });
-      return isEmpty(new_nswl) ? newSwlb : [...new_nswl!, ...newSwlb];
+      const newSwlb = prevSwlb!
+        .map(([pos, status]) => {
+          let moveNum = 0;
+          for (let row = 0; row < rowLength; row++) {
+            const start = row * colLength;
+            const end = start + colLength - 1;
+            const currentColPos = removePoss
+              .filter((removePos) => {
+                const isRemoveCol = removePos >= start && removePos <= end;
+                const isBaiDaCol = pos >= start && pos <= end;
+                return isRemoveCol && isBaiDaCol;
+              })
+              .filter((removePos) => {
+                return removePos > pos;
+              });
+            // 拿到移动的格子数量
+            moveNum = moveNum + currentColPos.length;
+          }
+          const newPos = pos + moveNum;
+          // 判断是否需要变更状态
+          const isChangeStatus = winnerPoss.includes(newPos);
+          const newStatus = isChangeStatus ? status + 1 : status;
+          return [newPos, newStatus] as [number, number];
+        })
+        .filter(([_, status]) => {
+          return status <= 4;
+        });
+      const current_swlb = isEmpty(new_nswl)
+        ? newSwlb
+        : [...new_nswl!, ...newSwlb];
+      return isEmpty(current_swlb) ? null : current_swlb;
     }
     return isArray(nswl) ? nswl : null;
   }

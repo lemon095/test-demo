@@ -2937,46 +2937,64 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @param {Object} options.wp - 图标中奖信息
    * @param {number} options.baidaIcon - 百搭图标的 id信息
    * @param {boolean} options.isPrevWin - 上一局是否中奖
-   * @param {number[][]} options.rns - 掉落下的 rl 信息
+   * @param {number[]} options.prevPtbr - 上一局的消除的图标信息
+   * @param {Array} options.prevSwlb - 上一局的百搭形态信息
    * @returns 初始信息，如果该百搭位置不参与中奖，则初始状态 1，参与中奖，则初始状态为 3
    */
   public getNswl({
     baiDaIcon = 0,
     rl,
     wp,
-    rns,
+    prevPtbr,
+    prevSwlb,
     isPrevWin,
   }: {
     baiDaIcon?: number;
     rl: number[][];
     wp?: Record<string, number[]> | null;
     isPrevWin: boolean;
-    rns?: (number[] | null)[] | null;
+    prevPtbr?: number[] | null;
+    prevSwlb?: [number, number][] | null;
   }): null | [number, number][] {
     const poss: [number, number][] = [];
-    if (isPrevWin && isArray(rns)) {
-      // 处理掉落下的 rl
+    const rls = flattenDeep(rl);
+    // 获取当前百搭图标的正确位置
+    function swlb_move_pos() {
+      if (!isPrevWin) return null;
       const colLength = rl[0].length;
-      rns.reduce((acc, icons, colIndex) => {
-        if (!isArray(icons)) return acc;
-        for (let i = 0; i < icons.length; i++) {
-          const icon = icons[i];
-          if (icon !== baiDaIcon) continue;
-          const pos = colIndex * colLength + i;
-          acc.push([pos, 1]);
+      const rowLength = rl.length;
+      const removePoss = isArray(prevPtbr) ? prevPtbr : [];
+      const newSwlb = prevSwlb?.map(([pos]) => {
+        let moveNum = 0;
+        for (let row = 0; row < rowLength; row++) {
+          const start = row * colLength;
+          const end = start + colLength - 1;
+          const currentColPos = removePoss
+            .filter((removePos) => {
+              const isRemoveCol = removePos >= start && removePos <= end;
+              const isBaiDaCol = pos >= start && pos <= end;
+              return isRemoveCol && isBaiDaCol;
+            })
+            .filter((removePos) => {
+              return removePos > pos;
+            });
+          // 拿到移动的格子数量
+          moveNum = moveNum + currentColPos.length;
         }
-        return acc;
-      }, poss);
-    } else {
-      const rls = flattenDeep(rl);
-      // 先初始化 nswl
-      rls.reduce((acc, icon, index) => {
-        if (icon === baiDaIcon) {
-          acc.push([index, 1]);
-        }
-        return acc;
-      }, poss);
+        const newPos = pos + moveNum;
+        return newPos;
+      });
+      return newSwlb;
     }
+    // 先初始化 nswl
+    const swlb = swlb_move_pos();
+    rls.reduce((acc, icon, index) => {
+      const isHave = swlb?.some((pos) => pos === index);
+      if (icon === baiDaIcon && !isHave) {
+        acc.push([index, 1]);
+      }
+      return acc;
+    }, poss);
     if (isEmpty(poss)) {
       return null;
     }

@@ -2849,6 +2849,7 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @param {Boolean} options.isDuoBaoPending - 是否为夺宝模式
    * @param {Array} options.rswl - 百搭最终形态的数据
    * @param {number} options.baseGm - 基础倍率，默认值为 1
+   * @param {Array} options.prevGml - 上一局的倍率列表
    * @returns {Array} - 计算后的倍率列表
    */
   public getGml({
@@ -2857,20 +2858,30 @@ export default class BaseSlot<T extends Record<string, any>> {
     isDuoBaoPending,
     rswl,
     baseGm = 1,
+    prevGml,
   }: {
     baseList: number[];
     highList: number[];
     isDuoBaoPending: boolean;
+    prevGml?: number[] | null;
     rswl?: number[][] | null;
     baseGm?: number;
   }) {
     const gm = isEmpty(rswl) || !isArray(rswl) ? 0 : rswl.length;
     const gmList = isDuoBaoPending ? highList : baseList;
+
     const editIndex = gmList.length - 1;
-    return gmList.map((item, index) => {
-      if (index === editIndex) return item + gm * baseGm;
-      return item;
-    });
+    return gmList
+      .map((item, index) => {
+        if (prevGml?.[editIndex] && index === editIndex) {
+          return prevGml[editIndex];
+        }
+        return item;
+      })
+      .map((item, index) => {
+        if (index === editIndex) return item + gm * baseGm;
+        return item;
+      });
   }
 
   /**
@@ -2904,7 +2915,7 @@ export default class BaseSlot<T extends Record<string, any>> {
     const rswl = swlb?.filter(
       ([position, status]) => status === 4 && isFinite(position)
     );
-    return isEmpty(rswl) ? null : (rswl as [number, number][]);
+    return isEmpty(rswl) ? [] : (rswl as [number, number][]);
   }
 
   /**

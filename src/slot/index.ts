@@ -162,13 +162,28 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @param count - 每一列的图标数量
    * @returns rl的随机信息
    */
-  public randomRl(weights: number[][], count: number, duobaoIcon: number = 1) {
+  public randomRl(
+    weights: number[][],
+    count: number[],
+    duobaoIcon?: number
+  ): number[][];
+  public randomRl(
+    weights: number[][],
+    count: number,
+    duobaoIcon?: number
+  ): number[][];
+  public randomRl(
+    weights: number[][],
+    count: number | number[],
+    duobaoIcon: number = 1
+  ): number[][] {
     let result: number[][] = [];
     for (let i = 0; i < weights.length; i++) {
       const row: number[] = [];
       const colWeight = weights[i];
       let duobaoCount = 0;
-      for (let j = 0; j < count; j++) {
+      const length = isArray(count) ? count[i] : count;
+      for (let j = 0; j < length; j++) {
         // 是否为起始位置
         const isStartPos = i === 0 && j === 0;
         // 第一列只能有一个夺宝图标

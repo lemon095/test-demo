@@ -1525,25 +1525,28 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @param { number } options.colIndex - 列的索引
    * @param { number } options.baiDaIcon - 选填，百搭图标的 id。默认为 0
    * @param { boolean } options.nullIcon - 选填，是否在返回值中用 null 填充信息，默认为 false 即不会使用 null 填充
+   * @param { boolean } options.colLengthIsZero - 选填，列长度是否为 0，默认为 false（不为零）
    * @returns { number[] } 图标对应的信息
    */
   public static _findWinnerIconPosition<T extends boolean = false>({
     icons,
     targetIcon,
-    colLength,
     colIndex,
     baiDaIcon = 0,
     nullIcon = false as T,
+    colLengthIsZero = false,
   }: {
     icons: number[];
     targetIcon: number;
-    colLength: number;
     colIndex: number;
     baiDaIcon?: number;
     nullIcon?: boolean;
+    colLengthIsZero?: boolean;
   }): T extends true ? (number | null)[] : number[] {
     const posInfo = [];
-    for (let i = 0; i < icons.length; i++) {
+    const length = icons.length;
+    const colLength = colLengthIsZero ? 0 : length;
+    for (let i = 0; i < length; i++) {
       const icon = icons[i];
       // 当前图标是否为百搭
       const isCurrentBaiDa = icon === baiDaIcon;
@@ -1585,18 +1588,15 @@ export default class BaseSlot<T extends Record<string, any>> {
     winnerLineCount: Record<string, number> | null;
   } {
     const firstCol = rl[0];
-    // 拿到列的长度
-    const colLength = firstCol.length;
     // 拿到剩余列数据
     const cols = rl.slice(1);
     // 中奖信息
     const winnerPosition: Record<string, number[]> = {};
     const topWinnerPosition: Record<string, number[]> = {};
+    const winnerLineCount: Record<string, number> = {};
 
-    // 连线信息，3 列相邻中奖就是 3 连。
-    // let lineCount = 0;
-    // trl 是否成立
     const isHaveTrl = isArray(trl) && trl.length > 0;
+
     for (let i = 0; i < firstCol.length; i++) {
       const icon = firstCol[i];
       // 夺宝不能连线
@@ -1607,7 +1607,7 @@ export default class BaseSlot<T extends Record<string, any>> {
         icons: trl,
         targetIcon: icon,
         // trl 的中奖位置是从 0 开始数，所以列长度和列索引都为 0
-        colLength: 0,
+        colLengthIsZero: true,
         colIndex: 0,
         baiDaIcon,
         // null 填充信息
@@ -1617,7 +1617,6 @@ export default class BaseSlot<T extends Record<string, any>> {
         BaseSlot._findWinnerIconPosition({
           icons: col,
           targetIcon: icon,
-          colLength,
           // 因为从第二列开始截取，所以要加1
           colIndex: index + 1,
           baiDaIcon,
@@ -1636,6 +1635,10 @@ export default class BaseSlot<T extends Record<string, any>> {
       if (notWinner) {
         continue;
       }
+      if (!winnerLineCount[icon]) {
+        winnerLineCount[icon] = winCount;
+      }
+
       // 已经出现最低中奖路径
       winnerPosition[icon] = [...(winnerPosition[icon] || []), i];
       if (isHaveTrl) {
@@ -1650,16 +1653,21 @@ export default class BaseSlot<T extends Record<string, any>> {
       // 拿到剩余的列中奖信息
       const afterWP = winnerPos.slice(winCount - 1);
       const afterTrlIdx = winCount - 1;
+      let lineCount = winCount;
       for (let j = 0; j < afterWP.length; j++) {
         const colWp = afterWP[j];
         const trlIcon = trlWinnerPos[afterTrlIdx + j];
         // 未中奖则退出当前循环
-        if (colWp.length === 0 && isNull(trlIcon)) break;
+        if (colWp.length === 0 && !isFinite(trlIcon)) break;
+        lineCount = j + winCount + 1;
         // 添加中奖信息
         winnerPosition[icon].push(...colWp);
         if (isNumber(trlIcon)) {
           topWinnerPosition[icon].push(trlIcon);
         }
+      }
+      if (lineCount > winCount) {
+        winnerLineCount[icon] = lineCount;
       }
     }
     if (isEmpty(winnerPosition)) {
@@ -1678,22 +1686,114 @@ export default class BaseSlot<T extends Record<string, any>> {
         [key]: uniq(topWinnerPosition[key]),
       };
     }, {} as Record<string, number[]>);
-    const winnerLineCount = Object.keys(winnerPosition).reduce(
-      (acc, iconId) => {
-        const maxWp = Math.max(...winnerPosition[iconId]);
-        let lineCount = Math.floor(maxWp / colLength) + 1;
-        const twpLineCount = twp[iconId]?.map((item) => item + 2) || [];
-        lineCount = Math.max(lineCount, ...twpLineCount);
-        return {
-          ...acc,
-          [iconId]: lineCount,
-        };
-      },
-      {} as Record<string, number>
-    );
     return {
       wp: winnerPosition,
       twp: isEmpty(twp) ? null : twp,
+      winnerLineCount,
+    };
+  }
+
+  /**
+   * 相邻路中奖信息计算 - 不规则图形计算
+   * @param { Object } options - 配置信息
+   * @param { number[][] } options.rl - 随机结果
+   * @param { number } options.duobaoIcon - 选填，夺宝图标的 id。默认为 1
+   * @param { number } options.baiDaIcon - 选填，百搭图标的 id。默认为 0
+   * @param { number } options.winCount - 选填，最低中奖路径数量。默认为 3
+   * @returns { Object | null } 返回中奖信息
+   */
+  public getAdjoinWpV2({
+    rl,
+    duobaoIcon = 1,
+    baiDaIcon = 0,
+    winCount = 3,
+  }: {
+    rl: number[][];
+    duobaoIcon?: number;
+    baiDaIcon?: number;
+    winCount?: number;
+  }): {
+    wp: Record<string, number[]> | null;
+    winnerLineCount: Record<string, number> | null;
+  } {
+    const firstCol = rl[0];
+    // 拿到列的长度
+    const colLength = firstCol.length;
+    // 拿到剩余列数据
+    const cols = rl.slice(1);
+    // 中奖信息
+    const winnerPosition: Record<string, number[]> = {};
+    const winnerLineCount: Record<string, number> = {};
+    for (let i = 0; i < firstCol.length; i++) {
+      const icon = firstCol[i];
+      // 夺宝不能连线
+      if (icon === duobaoIcon) {
+        continue;
+      }
+      const winnerPos = cols.map((col, index) =>
+        BaseSlot._findWinnerIconPosition({
+          icons: col,
+          targetIcon: icon,
+          colIndex: index + 1,
+          baiDaIcon,
+        })
+      );
+      const minWP = winnerPos.slice(0, winCount - 1);
+      const notWinner = minWP.some((poss) => {
+        // 不满足中奖条件，返回 true
+        const flag1 = poss.length === 0;
+        return flag1;
+      });
+      // 不满足最低中奖路径的条件，跳过当前循环
+      if (notWinner) {
+        continue;
+      }
+      // 已经出现最低中奖路径
+      winnerPosition[icon] = [...(winnerPosition[icon] || []), i];
+      winnerLineCount[icon] = winCount;
+
+      minWP.forEach((poss) => {
+        winnerPosition[icon].push(...poss);
+      });
+      // 拿到剩余的列中奖信息
+      const afterWP = winnerPos.slice(winCount - 1);
+      let isWinner = false;
+      for (let j = 0; j < afterWP.length; j++) {
+        const colWp = afterWP[j];
+        // 未中奖则退出当前循环
+        if (colWp.length === 0) break;
+        // 添加中奖信息
+        isWinner = true;
+        winnerPosition[icon].push(...colWp);
+      }
+      if (isWinner) {
+        winnerLineCount[icon] += 1;
+      }
+    }
+    if (isEmpty(winnerPosition)) {
+      return { wp: null, winnerLineCount: null };
+    }
+    // 中奖路数据进行排序
+    keys(winnerPosition).forEach((key) => {
+      winnerPosition[key] = uniq(winnerPosition[key]).sort(function (a, b) {
+        return a - b;
+      });
+    });
+
+    // const winnerLineCount = Object.keys(winnerPosition).reduce(
+    //   (acc, iconId) => {
+    //     const maxWp = Math.max(...winnerPosition[iconId]);
+    //     let lineCount = Math.floor(maxWp / colLength) + 1;
+    //     lineCount = Math.max(lineCount);
+    //     return {
+    //       ...acc,
+    //       [iconId]: lineCount,
+    //     };
+    //   },
+    //   {} as Record<string, number>
+    // );
+    return {
+      wp: winnerPosition,
       winnerLineCount,
     };
   }

@@ -200,4 +200,140 @@ describe("@wp非固定列的中奖情况", () => {
       ).toEqual({ wp: null, winnerLineCount: null, twp: null });
     });
   });
+  describe("@黑帮数据：需要使用orl而不是rl数据", () => {
+    it("@6连中奖", () => {
+      expect(
+        slot.getAdjoinWp({
+          rl: [
+            [9, 7, 2],
+            [8, 2, 3],
+            [7, 10, 12, 0],
+            [7, 2, 7, 3],
+            [9, 3, 7, 2],
+            [2, 2, 2, 8],
+          ],
+        })
+      ).toEqual({
+        wp: {
+          "2": [2, 4, 9, 11, 17, 18, 19, 20],
+        },
+        twp: null,
+        winnerLineCount: {
+          "2": 6,
+        },
+      });
+    });
+    it("@5连中奖", () => {
+      expect(
+        slot.getAdjoinWp({
+          rl: [
+            [7, 9, 2],
+            [2, 3, 9],
+            [9, 10, 12, 9],
+            [9, 7, 3, 9],
+            [9, 3, 7, 2],
+            [2, 2, 2, 8],
+          ],
+        })
+      ).toEqual({
+        wp: {
+          "9": [1, 5, 6, 9, 10, 13, 14],
+        },
+        twp: null,
+        winnerLineCount: {
+          "9": 5,
+        },
+      });
+    });
+    it("@4连中奖", () => {
+      expect(
+        slot.getAdjoinWp({
+          rl: [
+            [12, 5, 4],
+            [12, 3, 7],
+            [9, 7, 6, 12],
+            [3, 11, 8, 12],
+            [5, 6, 11, 5],
+            [11, 10, 10, 4],
+          ],
+        })
+      ).toEqual({
+        wp: {
+          "12": [0, 3, 9, 13],
+        },
+        twp: null,
+        winnerLineCount: {
+          "12": 4,
+        },
+      });
+      expect(
+        slot.getAdjoinWp({
+          rl: [
+            [7, 4, 12],
+            [11, 8, 7],
+            [12, 8, 7, 4],
+            [9, 7, 2, 3],
+            [4, 2, 4, 11],
+            [12, 3, 1, 8],
+          ],
+        })
+      ).toEqual({
+        wp: {
+          "7": [0, 5, 8, 11],
+        },
+        twp: null,
+        winnerLineCount: {
+          "7": 4,
+        },
+      });
+    });
+    it("@3连中奖", () => {
+      expect(
+        slot.getAdjoinWp({
+          rl: [
+            [8, 7, 4],
+            [7, 4, 3],
+            [4, 9, 3, 5],
+            [7, 11, 10, 11],
+            [7, 8, 11, 12],
+            [4, 2, 11, 4],
+          ],
+        })
+      ).toEqual({
+        wp: {
+          "4": [2, 4, 6],
+        },
+        twp: null,
+        winnerLineCount: {
+          "4": 3,
+        },
+      });
+    });
+    it("@未中奖数据", () => {
+      expect(
+        slot.getAdjoinWp({
+          rl: [
+            [10, 2, 8],
+            [8, 5, 7],
+            [7, 12, 7, 9],
+            [2, 8, 3, 8],
+            [10, 11, 5, 11],
+            [11, 5, 2, 3],
+          ],
+        })
+      ).toEqual({ wp: null, winnerLineCount: null, twp: null });
+      expect(
+        slot.getAdjoinWp({
+          rl: [
+            [7, 9, 7],
+            [10, 8, 3],
+            [7, 10, 12, 0],
+            [7, 0, 7, 3],
+            [9, 9, 3, 7],
+            [9, 0, 0, 8],
+          ],
+        })
+      ).toEqual({ wp: null, winnerLineCount: null, twp: null });
+    });
+  });
 });

@@ -3103,22 +3103,22 @@ export default class BaseSlot<T extends Record<string, any>> {
   /**
    * 根据图标信息，查找该图标所在的位置信息
    * @param {Object} options - 配置对象
-   * @param {number[][]} options.rondomList - 随机的图标列表信息
+   * @param {number[][]} options.randomList - 随机的图标列表信息
    * @param {number} options.targetIconId - 目标图标 id
    * @param {number} options.skipRow - 选填，跳过的行数，默认为0
    */
   public findIconPos({
-    rondomList,
+    randomList,
     targetIconId,
     skipRow = 0,
   }: {
-    rondomList: number[][] | number[];
+    randomList: number[][] | number[];
     targetIconId: number;
     skipRow?: number;
   }): number[] {
-    if (!isArray(rondomList)) throw new Error("trl 或 rl 参数数据格式错误");
+    if (!isArray(randomList)) throw new Error("trl 或 rl 参数数据格式错误");
     const icons = (
-      isArray(rondomList[0]) ? rondomList : [rondomList]
+      isArray(randomList[0]) ? randomList : [randomList]
     ) as number[][];
     const columnsLength = icons.map((item) => item.length);
     const columnsRange = columnsLength.map((colLength, colIndex) => {

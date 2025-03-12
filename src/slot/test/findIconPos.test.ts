@@ -21,7 +21,7 @@ describe("@通用逻辑:查找当前图标的位置信息", () => {
     test("存在目标元素且为二维数组", () => {
       expect(
         slot.findIconPos({
-          rondomList: [
+          randomList: [
             [1, 11, 9, 2, 7],
             [12, 12, 9, 9, 10],
             [11, 11, 9, 5, 7],
@@ -36,7 +36,7 @@ describe("@通用逻辑:查找当前图标的位置信息", () => {
     it("不存在目标元素且为二维数组", () => {
       expect(
         slot.findIconPos({
-          rondomList: [
+          randomList: [
             [1, 11, 9, 2, 7],
             [12, 12, 9, 9, 10],
             [11, 11, 9, 5, 7],
@@ -51,7 +51,7 @@ describe("@通用逻辑:查找当前图标的位置信息", () => {
     test("存在目标元素且为一维数组", () => {
       expect(
         slot.findIconPos({
-          rondomList: [
+          randomList: [
             1, 11, 9, 2, 7, 12, 12, 9, 9, 10, 11, 11, 9, 5, 7, 12, 12, 8, 1, 1,
             2, 2, 2, 2, 2, 5, 5, 10, 6, 12,
           ],
@@ -62,7 +62,7 @@ describe("@通用逻辑:查找当前图标的位置信息", () => {
     it("不存在目标元素且为二维数组", () => {
       expect(
         slot.findIconPos({
-          rondomList: [
+          randomList: [
             1, 11, 9, 2, 7, 12, 12, 9, 9, 10, 11, 11, 9, 5, 7, 12, 12, 8, 1, 1,
             2, 2, 2, 2, 2, 5, 5, 10, 6, 12,
           ],
@@ -73,7 +73,7 @@ describe("@通用逻辑:查找当前图标的位置信息", () => {
     it("空列表处理", () => {
       expect(
         slot.findIconPos({
-          rondomList: [],
+          randomList: [],
           targetIconId: 0,
         })
       ).toEqual([]);
@@ -83,7 +83,7 @@ describe("@通用逻辑:查找当前图标的位置信息", () => {
     test("存在目标元素且为二维数组", () => {
       expect(
         slot.findIconPos({
-          rondomList: [
+          randomList: [
             [1, 11, 9, 2, 7],
             [12, 12, 9, 9, 10],
             [11, 11, 9, 5, 7],
@@ -99,7 +99,7 @@ describe("@通用逻辑:查找当前图标的位置信息", () => {
     it("不存在目标元素且为二维数组", () => {
       expect(
         slot.findIconPos({
-          rondomList: [
+          randomList: [
             [1, 11, 9, 2, 7],
             [12, 12, 9, 9, 10],
             [11, 11, 9, 5, 7],
@@ -115,7 +115,7 @@ describe("@通用逻辑:查找当前图标的位置信息", () => {
     test("存在目标元素且为一维数组", () => {
       expect(
         slot.findIconPos({
-          rondomList: [
+          randomList: [
             2, 11, 9, 2, 7, 12, 12, 9, 9, 10, 11, 11, 9, 5, 7, 12, 12, 8, 1, 1,
             2, 2, 2, 2, 2, 5, 5, 10, 6, 12,
           ],
@@ -127,7 +127,7 @@ describe("@通用逻辑:查找当前图标的位置信息", () => {
     it("不存在目标元素且为二维数组", () => {
       expect(
         slot.findIconPos({
-          rondomList: [
+          randomList: [
             1, 11, 9, 2, 7, 12, 12, 9, 9, 10, 11, 11, 9, 5, 7, 12, 12, 8, 1, 1,
             2, 2, 2, 2, 2, 5, 5, 10, 6, 12,
           ],
@@ -139,7 +139,7 @@ describe("@通用逻辑:查找当前图标的位置信息", () => {
     it("空列表处理", () => {
       expect(
         slot.findIconPos({
-          rondomList: [],
+          randomList: [],
           skipRow: 1,
           targetIconId: 0,
         })

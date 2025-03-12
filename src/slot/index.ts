@@ -3099,4 +3099,87 @@ export default class BaseSlot<T extends Record<string, any>> {
     }
     return isArray(nswl) ? nswl : null;
   }
+
+  /**
+   * 根据图标信息，查找该图标所在的位置信息
+   * @param {Object} options - 配置对象
+   * @param {number[][]} options.rondomList - 随机的图标列表信息
+   * @param {number} options.targetIconId - 目标图标 id
+   * @param {number} options.skipRow - 选填，跳过的行数，默认为0
+   */
+  public findIconPos({
+    rondomList,
+    targetIconId,
+    skipRow = 0,
+  }: {
+    rondomList: number[][] | number[];
+    targetIconId: number;
+    skipRow?: number;
+  }): number[] {
+    if (!isArray(rondomList)) throw new Error("trl 或 rl 参数数据格式错误");
+    const icons = (
+      isArray(rondomList[0]) ? rondomList : [rondomList]
+    ) as number[][];
+    const columnsLength = icons.map((item) => item.length);
+    const columnsRange = columnsLength.map((colLength, colIndex) => {
+      if (colIndex === 0) {
+        return [0, colLength - 1];
+      }
+      const start = columnsLength.slice(0, colIndex).reduce((acc, cur) => {
+        return acc + cur;
+      }, 0);
+      return [start, start + colLength - 1];
+    }) as [number, number][];
+    const pos: number[] = [];
+    // 遍历每一列的图标
+    for (let colIndex = 0; colIndex < columnsLength.length; colIndex++) {
+      const colLength = columnsLength[colIndex];
+      const [start] = columnsRange[colIndex];
+      // 遍历每一行的图标
+      for (let rowIndex = 0; rowIndex < colLength; rowIndex++) {
+        // 如果需要跳过行，并且当前行是需要跳过的行，则跳过当前行
+        // if (*)
+        if (rowIndex + 1 === skipRow) {
+          continue;
+        }
+        // 拿到当前图标的位置信息
+        const iconPos = start + rowIndex;
+        if (icons[colIndex][rowIndex] === targetIconId) {
+          pos.push(iconPos);
+        }
+      }
+    }
+    return pos;
+  }
+
+  /**
+   * + 根据图标位置信息，计算出图标的数量
+   * + sc计算v2版本
+   * @param {Object} options - 配置对象
+   * @param {number[]} options.iconPos - 图标位置信息
+   * @param {Record<string, number[]>} options.esb - 图标合并信息
+   */
+  public getIconCount({
+    iconPos,
+    esb,
+  }: {
+    iconPos: number[];
+    esb?: Record<string, number[]> | null;
+  }): number {
+    const esbValues = values(esb || {});
+    return iconPos.reduce((count, pos) => {
+      const mergeList = esbValues.filter((item) => item.includes(pos));
+      if (mergeList.length > 0) {
+        for (let d = 0; d < mergeList.length; d++) {
+          const lastPos = last(mergeList[d]) || -1;
+          if (lastPos !== pos) {
+            continue;
+          }
+          return count + 1;
+        }
+        return count;
+      }
+      return count + 1;
+    }, 0);
+  }
 }

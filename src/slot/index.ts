@@ -114,6 +114,10 @@ export default class BaseSlot<T extends Record<string, any>> {
     this.prevSiData = prevSi;
     this.cs = cs;
     this.ml = ml;
+    if (this.isPreWin || this.isDuoBaoPending) {
+      this.cs = this.prevSiData?.cs || cs;
+      this.ml = this.prevSiData?.ml || ml;
+    }
     this.lineRate = lineRate;
     this.totalBet = new Decimal(cs).mul(ml).mul(lineRate).toNumber();
     this.safeTotalBet = new Decimal(cs).mul(ml).mul(lineRate).toNumber();

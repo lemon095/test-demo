@@ -1715,8 +1715,8 @@ export default class BaseSlot<T extends Record<string, any>> {
   /**
    * 计算中奖线路数
    * @param {Object} options - 配置参数
-   * @param {Object|null} options.bwp - rl 的中奖位置信息
-   * @param {Object|null} options.twp - twp 的中奖位置信息
+   * @param {Object|null} options.bwp - rl 的中奖位置信息。如果没有合并框的情况下，bwp可以是wp的信息
+   * @param {Object|null} options.twp - trl 的中奖位置信息
    * @param {number} options.colLength - 列长度
    * @param {number} options.rowLength - 行长度
    * @returns {Object|null} 中奖线数量信息
@@ -1724,20 +1724,39 @@ export default class BaseSlot<T extends Record<string, any>> {
   public getSnww({
     bwp,
     twp,
-    colLength,
-    rowLength,
+    colLengths,
+  }: {
+    twp?: Record<string, number[]> | null;
+    bwp: Record<string, number[]> | null;
+    colLengths: [number, number][];
+  }): Record<string, number> | null;
+  public getSnww({
+    bwp,
+    twp,
+    colLengths,
   }: {
     twp?: Record<string, number[]> | null;
     bwp: Record<string, number[][]> | null;
-    colLength: number;
-    rowLength: number;
+    colLengths: [number, number][];
+  }): Record<string, number> | null;
+  public getSnww({
+    bwp,
+    twp,
+    colLengths,
+  }: {
+    twp?: Record<string, number[]> | null;
+    bwp: Record<string, number[][]> | Record<string, number[]> | null;
+    colLengths: [number, number][];
   }): Record<string, number> | null {
     if (isEmpty(bwp)) return null;
     const result: Record<string, number[]> = {};
     const wpKeys = keys(bwp);
 
     wpKeys.reduce((acc, iconId) => {
-      const currentValue = bwp[iconId];
+      const _value = bwp[iconId];
+      const currentValue: number[][] = isArray(_value[0])
+        ? (_value as number[][])
+        : (_value as number[]).map((item) => [item]);
       const crrentTwp = twp?.[iconId] || [];
       acc[iconId] = [];
 
@@ -1751,11 +1770,11 @@ export default class BaseSlot<T extends Record<string, any>> {
       currentValue.forEach((item) => {
         const first = item[0];
         const last = item[item.length - 1];
-        for (let rowIndex = 0; rowIndex < rowLength; rowIndex++) {
+        for (let rowIndex = 0; rowIndex < colLengths.length; rowIndex++) {
           // 计算每一列的起始索引
-          const start = rowIndex * colLength;
+          const start = colLengths[rowIndex][0];
           // 计算每一列的结束索引
-          const end = start + colLength - 1;
+          const end = colLengths[rowIndex][1];
           // 判断中奖位置在那一列，进行列的中奖次数统计
           if (first >= start && last <= end) {
             const count = acc[iconId][rowIndex] || 0;
@@ -3181,5 +3200,160 @@ export default class BaseSlot<T extends Record<string, any>> {
       }
       return count + 1;
     }, 0);
+  }
+
+  /**
+   * 招财猫lctp计算
+   */
+  public getLctp({ trl, trns }: { trl: number[]; trns?: number[] | null }) {
+    let lctp: number[] | null = null;
+    if (this.isPreWin) {
+      lctp = this.findIconPos({ randomList: trns || [], targetIconId: 2 });
+      console.log("lctp", lctp.length);
+      const startPos = 4 - lctp.length;
+      console.log("startPos", startPos, lctp);
+      lctp = lctp.map((_, pos) => startPos + pos);
+    } else {
+      lctp = this.findIconPos({ randomList: trl, targetIconId: 2 });
+    }
+    if (isEmpty(lctp)) return null;
+    return lctp;
+  }
+
+  /**
+   * 计算每一列中的图标变金框的概率
+   * @param {Object} options - 配置对象
+   * @param {number[][]} options.rl - 图标随机数信息
+   * @param {Record<PGSlot.UserType, Record<number, PGSlot.WeightCfg[]>>} options.weights - 金框图标权重
+   */
+  public getGoldPosition({
+    rl,
+    weights,
+  }: {
+    rl: number[][];
+    weights: Record<PGSlot.UserType, Record<string, PGSlot.WeightCfg[]>>;
+  }) {
+    const weight = weights[this.userType];
+    if (isEmpty(weight)) {
+      throw new Error("权重信息为空");
+    }
+    const goldWeights: Record<number, number[]> = keys(weight).reduce(
+      (acc, key) => {
+        return {
+          ...acc,
+          [key]: this.convertWeights(weight[key]),
+        };
+      },
+      {} as Record<number, number[]>
+    );
+    const goldRl: (1 | null)[][] = rl.map((col, colIndex) => {
+      const goldWeight = goldWeights[colIndex];
+      if (isEmpty(goldWeight)) {
+        return col.map((_) => null);
+      }
+      return col.map((iconId) => {
+        const goldPos = random.int(0, goldWeight.length - 1);
+        const goldIcon = goldWeight[goldPos];
+        if (iconId === goldIcon) {
+          return 1;
+        }
+        return null;
+      });
+    });
+    const gsp: number[] = flattenDeep(goldRl).reduce((acc, flag, pos) => {
+      if (flag === 1) {
+        acc.push(pos);
+      }
+      return acc;
+    }, [] as number[]);
+    return {
+      goldRl,
+      gsp,
+    };
+  }
+  /**
+   * 黑帮风云gsp实现逻辑
+   * @param {Object} options - 配置对象
+   * @param {number[][]} options.rl - 图标随机数信息
+   * @param {Record<PGSlot.UserType, Record<number, PGSlot.WeightCfg[]>>} options.weights - 金框图标权重
+   * @param {number[]} options.prevGswp - 上一局中奖的金框图标信息
+   * @param {number[]} options.prevGsp - 上一局的金框图标信息
+   * @param {number[]} options.ngsp - 新的金框图标信息
+   */
+  public getGspBy1580541({
+    rl,
+    weights,
+    prevGswp,
+    prevGsp,
+    ngsp,
+  }: Parameters<InstanceType<typeof BaseSlot>["getGoldPosition"]>[0] & {
+    prevGswp?: number[] | null;
+    prevGsp?: number[] | null;
+    ngsp?: number[] | null;
+  }) {
+    if (this.isPreWin) {
+      // TODO:需要考虑掉落后的金框图标位置
+      // 删除上一局中奖的gsp图标信息
+      const currentGsp = difference(prevGsp || [], prevGswp || []);
+      if (isEmpty(ngsp) || !isArray(ngsp)) {
+        return currentGsp;
+      }
+      return uniq([...currentGsp, ...ngsp]);
+    }
+    const result = this.getGoldPosition({ rl, weights });
+    return result.gsp;
+  }
+  /**
+   * 金框图标中奖位置信息
+   * @param {Object} options - 配置对象
+   * @param {number[]} options.wpl - 中奖图标位置信息
+   * @param {number[]} options.gsp - 金框图标位置信息
+   */
+  public getGswp({ wpl, gsp }: { wpl: number[]; gsp: number[] }) {
+    if (isEmpty(gsp) || !isArray(gsp)) {
+      return null;
+    }
+    const gswp = gsp.filter((pos) => {
+      return wpl.includes(pos);
+    });
+    return gswp;
+  }
+  /**
+   * 中奖流程中金框图标的中奖位置信息
+   * @param {Object} options - 配置对象
+   * @param {number[]} options.prevSwp - 上一局的中奖位置信息
+   * @param {number[]} options.gswp - 金框图标中奖位置信息
+   */
+  public getSwp({
+    prevSwp,
+    gswp,
+  }: {
+    prevSwp?: number[] | null;
+    gswp?: number[] | null;
+  }) {
+    if (isEmpty(gswp) || !isArray(gswp)) {
+      return prevSwp;
+    }
+    const result = [...(prevSwp || []), ...gswp];
+    if (isEmpty(result)) return null;
+    return result;
+  }
+  /**
+   * 获取每一列的起始和结束位置信息
+   * @param {Object} options - 配置对象
+   * @param {number[][]} options.rl - 图标随机数信息
+   * @returns {[number, number][]} - 每一列的起始和结束位置信息
+   */
+  public getColumnsRange({ rl }: { rl: number[][] }): [number, number][] {
+    const columnsLength = rl.map((item) => item.length);
+    return columnsLength.map((colLength, colIndex) => {
+      if (colIndex === 0) {
+        return [0, colLength - 1];
+      }
+      const start = columnsLength.slice(0, colIndex).reduce((acc, cur) => {
+        return acc + cur;
+      }, 0);
+      return [start, start + colLength - 1];
+    });
   }
 }

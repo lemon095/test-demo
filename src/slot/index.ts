@@ -3330,9 +3330,9 @@ export default class BaseSlot<T extends Record<string, any>> {
   }: {
     prevSwp?: number[] | null;
     gswp?: number[] | null;
-  }) {
+  }): number[] | null {
     if (isEmpty(gswp) || !isArray(gswp)) {
-      return prevSwp;
+      return prevSwp || null;
     }
     const result = [...(prevSwp || []), ...gswp];
     if (isEmpty(result)) return null;
@@ -3355,5 +3355,65 @@ export default class BaseSlot<T extends Record<string, any>> {
       }, 0);
       return [start, start + colLength - 1];
     });
+  }
+  /**
+   * 获取掉落后图标的位置信息
+   * @param {Object} options - 配置对象
+   * @param {number[][]} options.rns - 掉落的图标信息
+   * @param {number[][]} options.rl - 图标随机数信息
+   * @returns {number[][]} - 掉落后图标的位置信息
+   */
+  public getRnsp({
+    rns,
+    rl,
+  }: {
+    rns?: number[][] | null;
+    rl: number[][];
+  }): number[][] | null {
+    if (isEmpty(rns) || !isArray(rns)) {
+      return null;
+    }
+    const colLengths = this.getColumnsRange({ rl });
+    return rns.map((col, colIndex) => {
+      if (!isArray(col) || isEmpty(col)) return [];
+      const [start] = colLengths[colIndex];
+      return col.map((_, idx) => start + idx).sort((a, b) => b - a);
+    });
+  }
+
+  /**
+   * 计算百搭变倍率的信息
+   * @param {Object} options - 配置对象
+   * @param {number[]} options.swp - 百搭变倍率的图标位置信息
+   * @param {Record<PGSlot.UserType, Record<number, PGSlot.WeightCfg[]>>} options.weights - 倍率信息的权重表
+   * @param {boolean} options.isWinner - 本局是否中奖
+   */
+  public getMp({
+    swp,
+    isWinner,
+    weights,
+  }: {
+    swp?: number[] | null;
+    isWinner?: boolean;
+    weights: PGSlot.WeightCfg[];
+  }) {
+    // 上一局中奖且本局未中奖的情况下
+    if (this.isPreWin && !isWinner) {
+      if (isEmpty(swp) || !isArray(swp)) return null;
+      const weightList = this.convertWeights(weights);
+      const mp: Record<string, number> = swp.reduce((acc, pos) => {
+        const gm = random.int(0, weightList.length - 1);
+        if (gm > 1) {
+          return {
+            ...acc,
+            [pos]: gm,
+          };
+        }
+        return acc;
+      }, {} as Record<string, number>);
+      if (isEmpty(mp)) return null;
+      return mp;
+    }
+    return null;
   }
 }

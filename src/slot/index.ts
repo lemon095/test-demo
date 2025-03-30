@@ -3416,4 +3416,50 @@ export default class BaseSlot<T extends Record<string, any>> {
     }
     return null;
   }
+
+  /**
+   * 黑帮风云，计算下一局金框图标的位置信息
+   * @param {Object} options - 配置对象
+   * @param {number[][]} options.rns - 掉落后的图标信息
+   * @param {number[][]} options.rnsp - 掉落后图标的位置信息]
+   * @param {Record<PGSlot.UserType, Record<number, PGSlot.WeightCfg[]>>} options.weights - 金框图标权重
+   */
+  public getNgspBy1580541({
+    rns,
+    rnsp,
+    weights,
+  }: {
+    rns?: number[][] | null;
+    rnsp?: number[][] | null;
+    weights: Record<PGSlot.UserType, Record<string, PGSlot.WeightCfg[]>>;
+  }) {
+    if (isEmpty(rns) || !isArray(rns)) return null;
+    const weight = weights[this.userType];
+    const goldWeights: Record<number, number[]> = keys(weight).reduce(
+      (acc, key) => {
+        return {
+          ...acc,
+          [key]: this.convertWeights(weight[key]),
+        };
+      },
+      {} as Record<number, number[]>
+    );
+    const ngsp: number[] = [];
+    rns.forEach((col, colIndex) => {
+      const goldWeight = goldWeights[colIndex];
+      if (isEmpty(goldWeight)) {
+        return;
+      }
+      return col?.forEach((iconId, rowIndex) => {
+        const goldPos = random.int(0, goldWeight.length - 1);
+        const goldIcon = goldWeight[goldPos];
+        if (iconId === goldIcon) {
+          const rnspPos = rnsp?.[colIndex]?.[rowIndex];
+          if (isUndefined(rnspPos) || isEmpty(rnspPos)) return;
+          ngsp.push(rnspPos);
+        }
+      });
+    });
+    return ngsp;
+  }
 }

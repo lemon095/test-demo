@@ -2306,13 +2306,13 @@ export default class BaseSlot<T extends Record<string, any>> {
     esb,
   }: {
     wp?: Record<string, number[]> | null;
-    esb: Record<string, number[]>;
+    esb?: Record<string, number[]> | null;
   }): Record<string, number[][]> | null {
     if (isEmpty(wp)) return null;
     return keys(wp).reduce((bwp, crrKey) => {
       const bwpValue: number[][] = [];
       const wpValue = wp[crrKey];
-      const posArrSet = values(esb);
+      const posArrSet = values(esb || {});
       wpValue.forEach((item) => {
         const posArr = posArrSet.find((posArr) => posArr.includes(item));
         if (posArr) {
@@ -3309,12 +3309,18 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @param {number[]} options.wpl - 中奖图标位置信息
    * @param {number[]} options.gsp - 金框图标位置信息
    */
-  public getGswp({ wpl, gsp }: { wpl: number[]; gsp: number[] }) {
+  public getGswp({
+    wpl,
+    gsp,
+  }: {
+    wpl?: number[] | null;
+    gsp?: number[] | null;
+  }) {
     if (isEmpty(gsp) || !isArray(gsp)) {
       return null;
     }
     const gswp = gsp.filter((pos) => {
-      return wpl.includes(pos);
+      return wpl?.includes(pos);
     });
     return gswp;
   }
@@ -3365,18 +3371,33 @@ export default class BaseSlot<T extends Record<string, any>> {
    */
   public getRnsp({
     rns,
-    rl,
+    prevRl,
+    columnsLength,
   }: {
     rns?: number[][] | null;
-    rl: number[][];
+    prevRl: number[];
+    columnsLength: [number, number][];
   }): number[][] | null {
     if (isEmpty(rns) || !isArray(rns)) {
       return null;
     }
-    const colLengths = this.getColumnsRange({ rl });
+    const rlArr: number[][] = [];
+    for (let colIndex = 0; colIndex < columnsLength.length; colIndex++) {
+      const [start, end] = columnsLength[colIndex];
+      const icons = prevRl.slice(start, end + 1);
+      rlArr.push(icons);
+    }
     return rns.map((col, colIndex) => {
       if (!isArray(col) || isEmpty(col)) return [];
-      const [start] = colLengths[colIndex];
+      const [start] = columnsLength[colIndex];
+      const icons = rlArr[colIndex];
+      // 先收集百搭的位置
+      const zeroPoss = icons.reduce((acc, icon, pos) => {
+        if (icon === 0) {
+          acc.push(pos);
+        }
+        return acc;
+      }, [] as number[]);
       return col.map((_, idx) => start + idx).sort((a, b) => b - a);
     });
   }
@@ -3461,5 +3482,12 @@ export default class BaseSlot<T extends Record<string, any>> {
       });
     });
     return ngsp;
+  }
+  /** 只累计中奖期间的金额 */
+  public getSsaw({ prevSsaw, ctw }: { prevSsaw?: number; ctw?: number }) {
+    if (this.isPreWin) {
+      return new Decimal(prevSsaw || 0).add(ctw || 0).toNumber();
+    }
+    return ctw || 0;
   }
 }

@@ -1179,7 +1179,7 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @returns {Object|null}
    */
   public getFstc(
-    prevFstc: Record<string, number> | null
+    prevFstc?: Record<string, number> | null
   ): Record<string, number> | null {
     prevFstc = prevFstc || {};
     // 处理夺宝流程
@@ -3423,7 +3423,8 @@ export default class BaseSlot<T extends Record<string, any>> {
       if (isEmpty(swp) || !isArray(swp)) return null;
       const weightList = this.convertWeights(weights);
       const mp: Record<string, number> = swp.reduce((acc, pos) => {
-        const gm = random.int(0, weightList.length - 1);
+        const gmIndex = random.int(0, weightList.length - 1);
+        const gm = weightList[gmIndex];
         if (gm > 1) {
           return {
             ...acc,

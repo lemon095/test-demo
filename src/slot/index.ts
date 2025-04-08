@@ -1365,11 +1365,8 @@ export default class BaseSlot<T extends Record<string, any>> {
         move_gsp.push(curGsp);
       }
     }
-    const gsp: number[] = difference(
-      [..._ngsp, ...move_gsp, ..._prev_gsp],
-      diff_gsp
-    );
-    return gsp;
+    const gsp: number[] = difference(_prev_gsp, diff_gsp);
+    return uniq([...gsp, ..._ngsp, ...move_gsp]).sort((a, b) => a - b);
   }
 
   /**
@@ -3284,22 +3281,48 @@ export default class BaseSlot<T extends Record<string, any>> {
   public getGspBy1580541({
     rl,
     weights,
-    prevGswp,
     prevGsp,
     ngsp,
+    cgsp,
+    baiDaIcon = 0,
+    prevRl,
   }: Parameters<InstanceType<typeof BaseSlot>["getGoldPosition"]>[0] & {
-    prevGswp?: number[] | null;
-    prevGsp?: number[] | null;
-    ngsp?: number[] | null;
+    prevGsp: number[] | null;
+    ngsp: number[] | null;
+    cgsp: [number, number][] | null;
+    prevRl: number[] | null;
+    baiDaIcon?: number;
   }) {
     if (this.isPreWin) {
-      // TODO:需要考虑掉落后的金框图标位置
-      // 删除上一局中奖的gsp图标信息
-      const currentGsp = difference(prevGsp || [], prevGswp || []);
-      if (isEmpty(ngsp) || !isArray(ngsp)) {
-        return currentGsp;
+      // if (isEmpty(prevGsp)) return null;
+      const _ngsp = isArray(ngsp) ? ngsp : [];
+      const _cgsp = isArray(cgsp) ? cgsp : [];
+      const _prevGsp = prevGsp || [];
+      // 需要删除的 gsp 集合
+      const diff_gsp: number[] = [];
+      // 需要更新位置的 gsp 集合
+      const move_gsp: number[] = [];
+      // 收集百搭图标的 gsp 信息
+      const gsp_baida = _prevGsp.filter((gsp) => prevRl?.[gsp] === baiDaIcon);
+      // 删除百搭图标的 gsp
+      const _prev_gsp: number[] = _prevGsp.filter((gsp) => {
+        return prevRl?.[gsp] !== baiDaIcon;
+      });
+
+      for (let i = 0; i < _cgsp.length; i++) {
+        const [preGsp, curGsp] = _cgsp[i];
+        if (gsp_baida.includes(preGsp)) {
+          continue;
+        }
+        if (isNumber(+preGsp)) {
+          diff_gsp.push(preGsp);
+        }
+        if (isNumber(+curGsp)) {
+          move_gsp.push(curGsp);
+        }
       }
-      return uniq([...currentGsp, ...ngsp]);
+      const gsp: number[] = difference(_prev_gsp, diff_gsp);
+      return uniq([...gsp, ..._ngsp, ...move_gsp]).sort((a, b) => a - b);
     }
     const result = this.getGoldPosition({ rl, weights });
     return result.gsp;
@@ -3343,7 +3366,7 @@ export default class BaseSlot<T extends Record<string, any>> {
     }
     const result = [...(prevSwp || []), ...gswp];
     if (isEmpty(result)) return null;
-    return result;
+    return union(result);
   }
   /**
    * 获取每一列的起始和结束位置信息

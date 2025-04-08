@@ -3397,32 +3397,38 @@ export default class BaseSlot<T extends Record<string, any>> {
     rns,
     prevRl,
     columnsLength,
+    baidaIcon = 0,
   }: {
     rns?: number[][] | null;
     prevRl: number[];
     columnsLength: [number, number][];
+    baidaIcon?: number;
   }): number[][] | null {
     if (isEmpty(rns) || !isArray(rns)) {
       return null;
     }
-    const rlArr: number[][] = [];
-    for (let colIndex = 0; colIndex < columnsLength.length; colIndex++) {
-      const [start, end] = columnsLength[colIndex];
-      const icons = prevRl.slice(start, end + 1);
-      rlArr.push(icons);
-    }
+    const prevRls = columnsLength.map(([start, end]) =>
+      prevRl.slice(start, end + 1)
+    );
     return rns.map((col, colIndex) => {
       if (!isArray(col) || isEmpty(col)) return [];
       const [start] = columnsLength[colIndex];
-      const icons = rlArr[colIndex];
-      // 先收集百搭的位置
-      const zeroPoss = icons.reduce((acc, icon, pos) => {
-        if (icon === 0) {
-          acc.push(pos);
+      const columnIcons = prevRls[colIndex];
+      // 计算每一列的百搭位置信息
+      const baidaPos = columnIcons.reduce((acc, icon, iconPos) => {
+        if (icon === baidaIcon) {
+          acc.push(iconPos + start);
         }
         return acc;
       }, [] as number[]);
-      return col.map((_, idx) => start + idx).sort((a, b) => b - a);
+      return col
+        .map((_, idx) => {
+          const pos = start + idx;
+          // 收集需要掉落在百搭位置后面的图标数量
+          const count = baidaPos.filter((baidaPos) => pos >= baidaPos).length;
+          return pos + count;
+        })
+        .sort((a, b) => b - a);
     });
   }
 

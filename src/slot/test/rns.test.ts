@@ -208,3 +208,37 @@ describe("相邻中奖路线: rns", () => {
     console.log("rns", rns.rns);
   });
 });
+describe("黑帮rns", () => {
+  const slot = new BaseSlot({
+    rlWeights: RL_WEIGHTS,
+    trlWeights: TRL_WEIGHTS,
+    userType: UserType.common,
+    cs: 0,
+    ml: 0,
+  });
+  it("黑帮rns测试", () => {
+    const rl = [
+      [0, 2],
+      [3, 5],
+      [6, 9],
+      [10, 13],
+      [14, 17],
+      [18, 21],
+    ].map(([start, end]) =>
+      [
+        3, 10, 8, 8, 6, 8, 9, 4, 0, 9, 0, 3, 6, 9, 6, 3, 10, 0, 10, 8, 9, 10,
+      ].slice(start, end + 1)
+    );
+    console.log("rl", rl);
+    const { rns } = slot.getRns({
+      mode: RnsCalculateType.RNS随机,
+      rl: rl,
+      prevWinPos: [0, 2, 5, 13, 21],
+      prevRl: [
+        11, 8, 11, 6, 8, 11, 9, 4, 0, 9, 0, 6, 9, 11, 6, 3, 10, 0, 8, 9, 10, 11,
+      ],
+      iconIds: [2, 3, 4, 5, 6, 7, 8, 9, 10],
+    });
+    expect(rns).toEqual([[3, 8], [8], [], [9], [], [10]]);
+  });
+});

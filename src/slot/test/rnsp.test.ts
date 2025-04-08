@@ -7,7 +7,7 @@ import {
   ICON_MUL_MAP,
 } from "../TetWeights";
 import { UserType } from "utils/helper";
-import { chunk, keys, values } from "lodash";
+import { chunk, flatMapDeep, flattenDeep, keys, values } from "lodash";
 
 const slot = new BaseSlot({
   rlWeights: RL_WEIGHTS,
@@ -56,10 +56,14 @@ describe("rnsp掉落图标的位置信息", () => {
   it("掉落的图标在百搭之后", () => {
     expect(
       slot.getRnsp({
-        prevRl: [
-          5, 2, 11, 3, 7, 2, 8, 12, 0, 11, 0, 2, 10, 2, 7, 8, 11, 12, 8, 3, 4,
-          10,
-        ],
+        prevRl: flattenDeep([
+          [5, 2, 11],
+          [3, 7, 2],
+          [8, 12, 0, 11],
+          [0, 2, 10, 2],
+          [7, 8, 11, 12],
+          [8, 3, 4, 10],
+        ]),
         columnsLength: [
           [0, 2],
           [3, 5],
@@ -71,6 +75,27 @@ describe("rnsp掉落图标的位置信息", () => {
         rns: [[10], [4], [], [8, 10], [], []],
       })
     ).toEqual([[0], [3], [], [12, 11], [], []]);
+    expect(
+      slot.getRnsp({
+        prevRl: flattenDeep([
+          [11, 8, 11],
+          [6, 8, 11],
+          [9, 4, 0, 9],
+          [0, 6, 9, 11],
+          [6, 3, 10, 0],
+          [8, 9, 10, 11],
+        ]),
+        columnsLength: [
+          [0, 2],
+          [3, 5],
+          [6, 9],
+          [10, 13],
+          [14, 17],
+          [18, 21],
+        ],
+        rns: [[10, 3], [8], [], [3], [], [10]],
+      })
+    ).toEqual([[1, 0], [3], [], [11], [], [18]]);
   });
   it("不存在掉落", () => {
     expect(

@@ -1386,24 +1386,25 @@ export default class BaseSlot<T extends Record<string, any>> {
     preOrl,
     preGsp,
     prePtr,
-    colLength,
+    columnsLength,
     baiDaIcon = 0,
   }: {
     preOrl: number[];
     preGsp: number[];
     prePtr: number[];
-    colLength: number;
+    columnsLength: [number, number][];
     baiDaIcon?: number;
   }): number[][] | null {
     if (!this.isPreWin || preGsp.length === 0) {
       return null;
     }
-    const newpreOrl = chunk(preOrl, colLength);
+    const newpreOrl = columnsLength.map(([start, end]) =>
+      preOrl.slice(start, end + 1)
+    );
     let cgsp: number[][] = [];
-    newpreOrl.forEach((item, index) => {
+    newpreOrl.forEach((item, colIndex) => {
       preGsp.forEach((value) => {
-        const posStart = item.length * index;
-        const posEnd = posStart + item.length - 1;
+        const [posStart, posEnd] = columnsLength[colIndex];
         if (
           posStart <= value &&
           posEnd >= value &&

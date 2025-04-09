@@ -2853,25 +2853,29 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @param {number[]} options.wpl - 中奖图标位置信息
    * @param {number[]} options.swlb - 百搭图标的状态信息
    * @param {number} options.finalStatus - 最终状态，选填，默认为 4，即表示该图标已可消除。
+   * @param {Function} options.filterFn - 过滤逻辑，默认为蝶恋花的过滤逻辑
    */
   public getPtbrV2({
     wpl,
     swlb,
     finalStatus = 4,
+    filterFn,
   }: {
     wpl?: number[] | null;
     swlb?: number[][] | null;
     finalStatus?: number;
+    filterFn?: (pos: number) => boolean;
   }) {
     if (isEmpty(wpl) || isNull(wpl) || isUndefined(wpl)) return null;
-    return wpl
-      .filter((pos) => {
-        const target = swlb?.find(([iconPos]) => iconPos === pos);
-        if (!target) return true;
-        if (target[1] === finalStatus) return true;
-        return false;
-      })
-      .sort((a, b) => a - b);
+    const filterHandle = isFunction(filterFn)
+      ? filterFn
+      : (pos: number) => {
+          const target = swlb?.find(([iconPos]) => iconPos === pos);
+          if (!target) return true;
+          if (target[1] === finalStatus) return true;
+          return false;
+        };
+    return wpl.filter(filterHandle).sort((a, b) => a - b);
   }
 
   /**

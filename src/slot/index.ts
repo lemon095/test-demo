@@ -1377,12 +1377,14 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @param {Number} options.colLength- 列的长度
    * @param {Array} options.preOrl - 上一次的随机数信息
    * @param {number} options.baiDaIcon - 百搭图标的 id,默认为 0
+   * @param {number[]} options.prevSwp - 上一次参与中奖的金框图标位置
    * @returns {number[][] | null}
    */
   public getCgsp({
     preOrl,
     preGsp,
     prePtr,
+    prevGswp,
     columnsLength,
     baiDaIcon = 0,
   }: {
@@ -1391,6 +1393,7 @@ export default class BaseSlot<T extends Record<string, any>> {
     prePtr: number[];
     columnsLength: [number, number][];
     baiDaIcon?: number;
+    prevGswp?: number[];
   }): number[][] | null {
     if (!this.isPreWin || preGsp.length === 0) {
       return null;
@@ -1399,6 +1402,7 @@ export default class BaseSlot<T extends Record<string, any>> {
       preOrl.slice(start, end + 1)
     );
     let cgsp: number[][] = [];
+    const swp = prevGswp || [];
     newpreOrl.forEach((item, colIndex) => {
       preGsp.forEach((value) => {
         const [posStart, posEnd] = columnsLength[colIndex];
@@ -1410,6 +1414,11 @@ export default class BaseSlot<T extends Record<string, any>> {
           let posi = 0;
           prePtr.forEach((prePos) => {
             if (prePos > value && prePos <= posEnd) {
+              posi += 1;
+            }
+          });
+          swp.forEach((prePos) => {
+            if (prePos > value && prePos < posEnd) {
               posi += 1;
             }
           });

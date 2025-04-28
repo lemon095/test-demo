@@ -1423,7 +1423,11 @@ export default class BaseSlot<T extends Record<string, any>> {
             }
           });
           if (posi > 0) {
-            cgsp.push([value, value + posi]);
+            const nextGsp = value + posi;
+            // 金框不能移动到夺宝上面
+            if (!swp.some((prePos) => prePos === nextGsp)) {
+              cgsp.push([value, value + posi]);
+            }
           }
         }
       });
@@ -3425,7 +3429,7 @@ export default class BaseSlot<T extends Record<string, any>> {
     );
     return rns.map((col, colIndex) => {
       if (!isArray(col) || isEmpty(col)) return [];
-      const [start] = columnsLength[colIndex];
+      const [start, end] = columnsLength[colIndex];
       const columnIcons = prevRls[colIndex];
       // 计算每一列的百搭位置信息
       const baidaPos = columnIcons.reduce((acc, icon, iconPos) => {
@@ -3436,10 +3440,15 @@ export default class BaseSlot<T extends Record<string, any>> {
       }, [] as number[]);
       return col
         .map((_, idx) => {
-          const pos = start + idx;
-          // 收集需要掉落在百搭位置后面的图标数量
-          const count = baidaPos.filter((baidaPos) => pos >= baidaPos).length;
-          return pos + count;
+          let pos = start + idx;
+          baidaPos.forEach((baidaPos) => {
+            if (baidaPos >= start && baidaPos <= end) {
+              if (pos >= baidaPos) {
+                pos += 1;
+              }
+            }
+          });
+          return pos;
         })
         .sort((a, b) => b - a);
     });

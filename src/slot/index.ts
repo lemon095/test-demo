@@ -226,7 +226,7 @@ export default class BaseSlot<T extends Record<string, any>> {
   }
 
   /**
-   * 随机图标-强制不中奖
+   * 随机图标-强制不中奖连线版，仅适用图标的数量大于第一列图标的数量的场景
    * @param {Object} options - 配置选项
    * @param {number[]} options.count - 每一列图标的数量
    * @param {number} options.lineCount - 选填，最小中奖连线数量，默认值为3

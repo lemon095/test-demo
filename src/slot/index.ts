@@ -164,45 +164,60 @@ export default class BaseSlot<T extends Record<string, any>> {
    * 随机 rl 中的图标信息
    * @param weights - 权重表
    * @param count - 每一列的图标数量
+   * @param duobaoIcon - 百搭图标id
+   * @param iconLimit - 图标的数量限制，格式：[[图标, 最大出现次数]]
    * @returns rl的随机信息
    */
   public randomRl(
     weights: number[][],
     count: number[],
+    iconLimit?: [number, number][],
     duobaoIcon?: number
   ): number[][];
   public randomRl(
     weights: number[][],
     count: number,
+    iconLimit?: [number, number][],
     duobaoIcon?: number
   ): number[][];
   public randomRl(
     weights: number[][],
     count: number | number[],
+    iconLimit?: [number, number][],
     duobaoIcon: number = 1
   ): number[][] {
     let result: number[][] = [];
+    const iconCount: Record<string, number> = {};
     for (let i = 0; i < weights.length; i++) {
       const row: number[] = [];
       const colWeight = weights[i];
-      let duobaoCount = 0;
       const length = isArray(count) ? count[i] : count;
       for (let j = 0; j < length; j++) {
+        let iconWeights = colWeight;
+        if (isArray(iconLimit)) {
+          iconWeights = colWeight.filter((icon) => {
+            const limitCount = iconCount[icon] || 0;
+            const limitIcons = iconLimit
+              ?.filter(([_, limit]) => limitCount >= limit)
+              ?.map((item) => item[0]);
+            return !limitIcons?.includes(icon);
+          });
+        }
         // 是否为起始位置
         const isStartPos = i === 0 && j === 0;
         // 第一列只能有一个夺宝图标
-        const isFirstCol = i === 0 && duobaoCount > 0;
+        const isFirstCol = i === 0 && iconCount[duobaoIcon] > 0;
         if (isStartPos || isFirstCol) {
-          const iconWeights = colWeight.filter((item) => item !== duobaoIcon);
+          iconWeights = colWeight.filter((item) => item !== duobaoIcon);
           const idx = random.int(0, iconWeights.length - 1);
+          const icon = iconWeights[idx];
+          iconCount[icon] = (iconCount[icon] || 0) + 1;
           row.push(iconWeights[idx]);
         } else {
-          const idx = random.int(0, colWeight.length - 1);
-          const icon = colWeight[idx];
-          if (icon === duobaoIcon) {
-            duobaoCount++;
-          }
-          row.push(colWeight[idx]);
+          const idx = random.int(0, iconWeights.length - 1);
+          const icon = iconWeights[idx];
+          iconCount[icon] = (iconCount[icon] || 0) + 1;
+          row.push(iconWeights[idx]);
         }
       }
       result.push(row as number[]);

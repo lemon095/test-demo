@@ -226,6 +226,61 @@ export default class BaseSlot<T extends Record<string, any>> {
   }
 
   /**
+   * 随机图标-强制不中奖
+   * @param {Object} options - 配置选项
+   * @param {number[]} options.count - 每一列图标的数量
+   * @param {number} options.lineCount - 选填，最小中奖连线数量，默认值为3
+   * @param {number[]} options.iconIds - 图标id，请不要包含百搭和夺宝
+   * @param {number} options.trlCount - 选填，trl的图标数量，默认值为4
+   */
+  public notPrizeRLByLine({
+    count,
+    lineCount = 3,
+    iconIds,
+    trlCount = 4,
+  }: {
+    count: number[];
+    iconIds: number[];
+    lineCount?: number;
+    trlCount?: number;
+  }) {
+    const rl: number[][] = [];
+    const trl: number[] = [];
+    for (let i = 0; i < count.length; i++) {
+      const row: number[] = [];
+      const length = count[i];
+      for (let j = 0; j < length; j++) {
+        let iconWeights = iconIds;
+        if (i > 0 && i < lineCount) {
+          iconWeights = iconWeights.filter((icon) => {
+            return !rl[0].includes(icon);
+          });
+        }
+        const pos = random.int(0, iconWeights.length - 1);
+        const icon = iconWeights[pos];
+        row.push(icon);
+      }
+      rl.push(row);
+    }
+    const firstRow = rl[0];
+    for (let i = 0; i < trlCount; i++) {
+      let iconWeights = iconIds;
+      if (i < lineCount - 1) {
+        iconWeights = iconWeights.filter((icon) => {
+          return !firstRow.includes(icon);
+        });
+      }
+      const pos = random.int(0, iconWeights.length - 1);
+      const icon = iconWeights[pos];
+      trl.push(icon);
+    }
+    return {
+      rl,
+      trl,
+    };
+  }
+
+  /**
    * 随机 trl 中的图标信息
    * @param weights - trl 的权重表
    * @returns trl的随机信息

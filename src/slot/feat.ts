@@ -112,10 +112,17 @@ export default class ClassFeatSlot extends BaseSlot<any> {
     // 转换的图标
     const icon = iconWeights[iconPos];
 
+    let targetCount = 0;
+
     const posList = flattenDeep(rl)
       .map((_icon, pos) => {
         // 捣蛋鬼强制不中奖逻辑
         if (mode && pos < 12) return 99;
+        // 优化：在非强制不中奖下自己不转自己
+        if (_icon === icon && !mode && targetCount < 12) {
+          targetCount += 1;
+          return 99;
+        }
         return pos;
       })
       .filter((pos) => pos !== 99);

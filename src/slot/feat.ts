@@ -115,7 +115,7 @@ export default class ClassFeatSlot extends BaseSlot<any> {
     const posList = flattenDeep(rl)
       .map((_icon, pos) => {
         // 捣蛋鬼强制不中奖逻辑
-        if (_icon === icon && mode && pos < 12) return 99;
+        if (mode && pos < 12) return 99;
         return pos;
       })
       .filter((pos) => pos !== 99);

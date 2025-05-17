@@ -198,7 +198,9 @@ export default class BaseSlot<T extends Record<string, any>> {
           iconWeights = colWeight.filter((icon) => {
             const limitCount = iconCount[icon] || 0;
             const limitIcons = iconLimit
-              ?.filter(([_, limit]) => limitCount >= limit)
+              ?.filter(([_, limit]) => {
+                return limitCount >= limit && _ === icon;
+              })
               ?.map((item) => item[0]);
             return !limitIcons?.includes(icon);
           });
@@ -981,7 +983,7 @@ export default class BaseSlot<T extends Record<string, any>> {
       if (skipRow && new Decimal(skipPos).isInt()) {
         continue;
       }
-      if (_rl[iconPos] !== 1) {
+      if (_rl[iconPos] !== duobaoIcon) {
         continue;
       }
       const duobaos = esbValues.filter((idxArr) =>
@@ -990,6 +992,54 @@ export default class BaseSlot<T extends Record<string, any>> {
       if (duobaos.length) {
         for (let d = 0; d < duobaos.length; d++) {
           const lastIdx = last(duobaos[d]) || -1;
+          if (lastIdx !== iconPos) {
+            continue;
+          }
+          count += 1;
+        }
+      } else {
+        count += 1;
+      }
+    }
+    return count;
+  }
+
+  /**
+   * 获取某个图标出现的次数
+   * sc 的 v3 版本实现
+   */
+  public getIconCountV2({
+    rl,
+    trl = [],
+    iconId = 1,
+    esb = {},
+  }: {
+    rl: number[][];
+    trl?: number[];
+    esb?: Record<string, number[]> | null;
+    iconId?: number;
+  }): number {
+    if (!isArray(trl) || !isArray(rl))
+      throw new Error("trl 或 rl 参数数据格式错误");
+    if (!isObject(esb)) throw new Error("esb 参数数据格式错误");
+    const esbValues = values(esb);
+    const _rl = flatMapDeep([...rl]);
+    let count = trl.reduce((acc, crrIcon) => {
+      if (crrIcon === iconId) {
+        return acc + 1;
+      }
+      return acc;
+    }, 0);
+    for (let iconPos = 0; iconPos < _rl.length; iconPos++) {
+      if (_rl[iconPos] !== iconId) {
+        continue;
+      }
+      const esbArr = esbValues.filter((idxArr) =>
+        idxArr.some((pos) => pos === iconPos)
+      );
+      if (esbArr.length) {
+        for (let d = 0; d < esbArr.length; d++) {
+          const lastIdx = last(esbArr[d]) || -1;
           if (lastIdx !== iconPos) {
             continue;
           }
@@ -3258,7 +3308,7 @@ export default class BaseSlot<T extends Record<string, any>> {
 
   /**
    * + 根据图标位置信息，计算出图标的数量
-   * + sc计算v2版本
+   * + sc 计算v2版本
    * @param {Object} options - 配置对象
    * @param {number[]} options.iconPos - 图标位置信息
    * @param {Record<string, number[]>} options.esb - 图标合并信息

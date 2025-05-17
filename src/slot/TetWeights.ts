@@ -780,3 +780,122 @@ export const MafiaMayhem_ICON_BIG_MAP = {
     ],
   },
 };
+
+/** 捣蛋鬼模式，符号个数概率 */
+export const FortuneMrHallowEggCount = {
+  [UserType.common]: [
+    {
+      icon: 5,
+      weight: 800,
+    },
+    {
+      icon: 6,
+      weight: 500,
+    },
+    {
+      icon: 7,
+      weight: 100,
+    },
+    {
+      icon: 8,
+      weight: 10,
+    },
+  ],
+  [UserType.newuser]: [
+    {
+      icon: 5,
+      weight: 800,
+    },
+    {
+      icon: 6,
+      weight: 500,
+    },
+    {
+      icon: 7,
+      weight: 100,
+    },
+    {
+      icon: 8,
+      weight: 10,
+    },
+  ],
+  [UserType.trail]: [
+    {
+      icon: 5,
+      weight: 800,
+    },
+    {
+      icon: 6,
+      weight: 500,
+    },
+    {
+      icon: 7,
+      weight: 100,
+    },
+    {
+      icon: 8,
+      weight: 10,
+    },
+  ],
+};
+
+/** 捣蛋鬼模式，图标概率 */
+export const FortuneMrHallowEggIconWeights: Record<
+  UserType,
+  PGSlot.WeightCfg[]
+> = {
+  [UserType.common]: [
+    {
+      icon: 2,
+      weight: 1,
+    },
+    {
+      icon: 3,
+      weight: 3,
+    },
+    {
+      icon: 4,
+      weight: 5,
+    },
+    {
+      icon: 5,
+      weight: 8,
+    },
+  ],
+  [UserType.newuser]: [
+    {
+      icon: 2,
+      weight: 1,
+    },
+    {
+      icon: 3,
+      weight: 3,
+    },
+    {
+      icon: 4,
+      weight: 5,
+    },
+    {
+      icon: 5,
+      weight: 8,
+    },
+  ],
+  [UserType.trail]: [
+    {
+      icon: 2,
+      weight: 1,
+    },
+    {
+      icon: 3,
+      weight: 3,
+    },
+    {
+      icon: 4,
+      weight: 5,
+    },
+    {
+      icon: 5,
+      weight: 8,
+    },
+  ],
+};

@@ -28,8 +28,13 @@ import {
   TwCalculateType,
   RnsCalculateType,
   PcwcCalculateType,
+  UserType,
 } from "utils/helper";
 import Decimal from "decimal.js";
+import {
+  FortuneMrHallowEggCount,
+  FortuneMrHallowEggIconWeights,
+} from "./TetWeights";
 
 export default class ClassFeatSlot extends BaseSlot<any> {
   constructor(options: BaseSlotOptions<any>) {
@@ -90,5 +95,42 @@ export default class ClassFeatSlot extends BaseSlot<any> {
       });
     });
     return prevRlArr;
+  }
+  /** 捣蛋鬼图标和图标位置信息 */
+  public getEggIconInfo({ rl, mode }: { rl: number[][]; mode?: "noPrize" }) {
+    const iconCountWeights = this.convertWeights(
+      FortuneMrHallowEggCount[this.userType]
+    );
+    const iconCountPos = random.int(0, iconCountWeights.length - 1);
+    // 需要转换的图标数量
+    const iconCount = iconCountWeights[iconCountPos];
+
+    const iconWeights = this.convertWeights(
+      FortuneMrHallowEggIconWeights[this.userType]
+    );
+    const iconPos = random.int(0, iconWeights.length - 1);
+    // 转换的图标
+    const icon = iconWeights[iconPos];
+
+    const posList = flattenDeep(rl)
+      .map((_icon, pos) => {
+        // 捣蛋鬼强制不中奖逻辑
+        if (_icon === icon && mode && pos < 12) return 99;
+        return pos;
+      })
+      .filter((pos) => pos !== 99);
+
+    // 收集捣蛋鬼图标位置信息
+    const mergeIcons: Record<string, number> = {};
+    for (let i = 0; i < iconCount; i++) {
+      // 获取随机的位置信息
+      const pos = random.int(0, posList.length - 1);
+      // 从位置列表中拿到该位置信息
+      const iconPos = posList[pos];
+      // 删除已使用的位置
+      posList.splice(pos, 1);
+      mergeIcons[iconPos] = icon;
+    }
+    return mergeIcons;
   }
 }

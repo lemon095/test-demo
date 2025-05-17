@@ -198,8 +198,8 @@ export default class BaseSlot<T extends Record<string, any>> {
           iconWeights = colWeight.filter((icon) => {
             const limitCount = iconCount[icon] || 0;
             const limitIcons = iconLimit
-              ?.filter(([_, limit]) => {
-                return limitCount >= limit && _ === icon;
+              ?.filter(([limitIcon, limit]) => {
+                return limitCount >= limit && limitIcon === icon;
               })
               ?.map((item) => item[0]);
             return !limitIcons?.includes(icon);
@@ -210,7 +210,7 @@ export default class BaseSlot<T extends Record<string, any>> {
         // 第一列只能有一个夺宝图标
         const isFirstCol = i === 0 && iconCount[duobaoIcon] > 0;
         if (isStartPos || isFirstCol) {
-          iconWeights = colWeight.filter((item) => item !== duobaoIcon);
+          iconWeights = iconWeights.filter((item) => item !== duobaoIcon);
           const idx = random.int(0, iconWeights.length - 1);
           const icon = iconWeights[idx];
           iconCount[icon] = (iconCount[icon] || 0) + 1;
@@ -1011,13 +1011,13 @@ export default class BaseSlot<T extends Record<string, any>> {
   public getIconCountV2({
     rl,
     trl = [],
-    iconId = 1,
+    iconId,
     esb = {},
   }: {
     rl: number[][];
     trl?: number[];
     esb?: Record<string, number[]> | null;
-    iconId?: number;
+    iconId: number;
   }): number {
     if (!isArray(trl) || !isArray(rl))
       throw new Error("trl 或 rl 参数数据格式错误");

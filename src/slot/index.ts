@@ -834,6 +834,7 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @param {Record<string, Record<number, number>>} options.iconMul - 图标对应的倍率信息
    * @param {number[][]} options.rl - 本次中奖的图标数组
    * @param {number} options.winnerLineCount - 中奖奖信息，如果 3 列中奖则 是 3 连线
+   * @param {number} options.baidaIcon - 百搭图标id
    * @returns {Record<string, number>} 中奖图标对应的倍数
    * @description 目前的游戏第一列不会出现百搭符号，如果有存在第一列有百搭符号的。那么 wp 和 rwsp 的计算都不适用
    */
@@ -842,11 +843,13 @@ export default class BaseSlot<T extends Record<string, any>> {
     rl,
     winnerLineCount,
     iconMul,
+    baidaIcon = 0,
   }: {
     wp?: Record<string, number[]> | null;
     rl: number[][];
     winnerLineCount?: Record<string, number> | null;
     iconMul: Record<string, Record<number, number>>;
+    baidaIcon?: number;
   }) {
     if (isEmpty(wp)) return null;
     if (isEmpty(winnerLineCount)) {
@@ -858,7 +861,20 @@ export default class BaseSlot<T extends Record<string, any>> {
       const posArr = wp[winId];
       const pos = posArr[0];
       // 兼容固定中奖线的情况，所以从 rl 中重新获取下中奖图标的信息
-      const icon = orl[pos];
+      let icon = orl[pos];
+      const iconSet = new Set();
+      const iconIds = posArr.map((pos) => {
+        iconSet.add(orl[pos]);
+        return orl[pos];
+      });
+      // 用于排除第一个图标是否为百搭的情况
+      if (iconSet.size > 1) {
+        const newIconId = iconIds.filter((iconId) => iconId !== baidaIcon)[0];
+        if (!isUndefined(newIconId)) {
+          // 替换新的图标
+          icon = newIconId;
+        }
+      }
       const lineCount = winnerLineCount[winId];
       return {
         ...acc,

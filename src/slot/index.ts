@@ -3679,4 +3679,46 @@ export default class BaseSlot<T extends Record<string, any>> {
     }
     return ctw || 0;
   }
+
+  /**
+   * 强制不中奖 - 数量统计
+   * @param {Object} options - 配置选项
+   * @param {number[]} options.tableInfo - 游戏表信息，tableInfo.length表示几列, tableInfo[i]表示第i列的图标数量
+   * @param {number} options.count - 最小中奖数量，默认8个
+   * @param {number[]} options.iconIds - 图标id信息
+   */
+  public notPrizeRLByCount({
+    tableInfo,
+    winnerCount,
+    iconIds,
+  }: {
+    tableInfo: number[];
+    winnerCount: number;
+    iconIds: number[];
+  }): { rl: number[][] } {
+    const rl: number[][] = [];
+    const excludeIcons: number[] = [];
+    const iconCountMap = new Map<number, number>();
+    for (let i = 0; i < tableInfo.length; i++) {
+      const row: number[] = [];
+      const length = tableInfo[i];
+      for (let j = 0; j < length; j++) {
+        const iconWeights = difference(iconIds, excludeIcons);
+        const pos = random.int(0, iconWeights.length - 1);
+        const icon = iconWeights[pos];
+        const prev_count = iconCountMap.get(icon) || 0;
+        const next_count = prev_count + 1;
+        // 还差一个就达到中奖条件时，将此图标排除
+        if (next_count === winnerCount - 1) {
+          excludeIcons.push(icon);
+        }
+        iconCountMap.set(icon, next_count);
+        row.push(icon);
+      }
+      rl.push(row);
+    }
+    return {
+      rl,
+    };
+  }
 }

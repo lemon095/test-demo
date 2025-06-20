@@ -3731,9 +3731,19 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @param {number} options.baidaIcon - 选填，百搭图标的id，默认为0
    * @return {Object} - 中奖信息
    */
-  public getWinnerByCount({ rl, winnerCount = 8, duobaoIcon = 1, baidaIcon = 0 }: { rl: number[][]; winnerCount?: number; duobaoIcon?: number; baidaIcon?: number }): {
-    wp: Record<string, number[]>;
-    iconWinnerCount: Record<string, number>;
+  public getWinnerByCount({
+    rl,
+    winnerCount = 8,
+    duobaoIcon = 1,
+    baidaIcon = 0,
+  }: {
+    rl: number[][];
+    winnerCount?: number;
+    duobaoIcon?: number;
+    baidaIcon?: number;
+  }): {
+    wp: Record<string, number[]> | null;
+    iconWinnerCount: Record<string, number> | null;
   } {
     const iconPosMap = new Map<number, number[]>();
     const wp: Record<string, number[]> = {};
@@ -3743,7 +3753,7 @@ export default class BaseSlot<T extends Record<string, any>> {
       if (!iconPosMap.has(icon)) {
         iconPosMap.set(icon, [idx]);
       } else {
-        const positions = iconPosMap.get(icon) || []; 
+        const positions = iconPosMap.get(icon) || [];
         positions.push(idx);
         iconPosMap.set(icon, positions);
       }
@@ -3758,6 +3768,111 @@ export default class BaseSlot<T extends Record<string, any>> {
         iconWinnerCount[icon] = positions.length;
       }
     });
+    if (isEmpty(wp)) {
+      return { wp: null, iconWinnerCount: null };
+    }
     return { wp, iconWinnerCount };
+  }
+
+  /**
+   * 计算rm位置上的中奖信息
+   * @param {Object} options - 配置参数
+   * @param {number[]|null} options.wpl - 中奖位置信息
+   * @param {boolean} options.isPrevWin - 上一局是否中奖
+   * @param {Object|null} options.prevRm - 上一局rm位置的中奖信息
+   * @return {Object} - rm位置上的中奖信息
+   */
+  public getRm({
+    wpl,
+    isPrevWin,
+    prevRm,
+  }: {
+    wpl: number[] | null;
+    isPrevWin: boolean;
+    prevRm?: Record<string, [number, number]> | null;
+  }): Record<string, [number, number]> {
+    const initRm: Record<string, [number, number]> = {
+      6: [0, 0],
+      8: [0, 0],
+      21: [0, 0],
+      23: [0, 0],
+    };
+    const currentRm = isPrevWin ? prevRm || initRm : initRm;
+    if (isEmpty(wpl)) {
+      return currentRm;
+    }
+    const rm = wpl!.reduce((acc, pos) => {
+      if (isArray(acc[pos])) {
+        const [status] = acc[pos];
+        if (status === 0) {
+          acc[pos][0] = 1;
+          acc[pos][1] = 0;
+        } else {
+          acc[pos][0] = 1;
+          acc[pos][1] += 2;
+        }
+      }
+      return acc;
+    }, currentRm);
+    return rm;
+  }
+
+  /**
+   * 基于rm位置上的中奖信息计算cmp信息
+   * @param {Object} options - 配置参数
+   * @param {Record<string, [number, number]>} options.rm - rm位置上的中奖信息
+   * @return {number[]} - cmp信息，长度为4表示rm的每个位置信息
+   */
+  public getCmp({
+    rm,
+  }: {
+    rm: Record<string, [number, number]>;
+  }): number[] | null {
+    const cmp: number[] = [];
+    Object.entries(rm).forEach(([key, value]) => {
+      const [status, gm] = value;
+      if (status > 0 && gm > 0) {
+        cmp.push(+key);
+      }
+    });
+    if (isEmpty(cmp)) return null;
+    return cmp;
+  }
+
+  /**
+   * 累计cmp的信息计算 --- acmp
+   * @param {Object} options - 配置参数
+   * @param {number[]} options.cmp - cmp信息
+   * @param {number} options.prevAcmp - 上一局acmp信息
+   * @param {boolean} options.isPrevWin - 上一局是否中奖
+   * @return {number[]} - acmp信息
+   */
+  public getAcmp({
+    cmp,
+    prevAcmp,
+    isPrevWin,
+  }: {
+    cmp: number[] | null;
+    prevAcmp?: number[] | null;
+    isPrevWin: boolean;
+  }): number[] | null {
+    // 根据当前和中奖的上一局acmp信息计算acmp
+    // acmp的值需要去重
+    if (isPrevWin) {
+      const acmp = uniq([...(prevAcmp || []), ...(cmp || [])]);
+      if (isEmpty(acmp)) return null;
+      return acmp;
+    }
+    return cmp;
+  }
+
+  /**
+   * 根据acmp的信息计算ima信息
+   * @param {Object} options - 配置参数
+   * @param {number[]} options.acmp - acmp信息
+   * @return {boolean} - ima信息
+   */
+  public getIma({ acmp }: { acmp: number[] | null }): boolean {
+    return !isEmpty(acmp);
   }
 }

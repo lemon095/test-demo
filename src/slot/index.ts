@@ -3689,7 +3689,7 @@ export default class BaseSlot<T extends Record<string, any>> {
    */
   public notPrizeRLByCount({
     tableInfo,
-    winnerCount,
+    winnerCount = 8,
     iconIds,
   }: {
     tableInfo: number[];
@@ -3720,5 +3720,44 @@ export default class BaseSlot<T extends Record<string, any>> {
     return {
       rl,
     };
+  }
+
+  /**
+   * 固定数量中奖信息计算
+   * @param {Object} options - 配置参数
+   * @param {number[][]} options.rl - 图标随机数信息
+   * @param {number} options.winnerCount - 最小中奖数量，默认8个
+   * @param {number} options.duobaoIcon - 选填，夺宝图标的id，默认为1
+   * @param {number} options.baidaIcon - 选填，百搭图标的id，默认为0
+   * @return {Object} - 中奖信息
+   */
+  public getWinnerByCount({ rl, winnerCount = 8, duobaoIcon = 1, baidaIcon = 0 }: { rl: number[][]; winnerCount?: number; duobaoIcon?: number; baidaIcon?: number }): {
+    wp: Record<string, number[]>;
+    iconWinnerCount: Record<string, number>;
+  } {
+    const iconPosMap = new Map<number, number[]>();
+    const wp: Record<string, number[]> = {};
+    const iconWinnerCount: Record<string, number> = {};
+    const flatRl: number[] = flattenDeep(rl);
+    flatRl.forEach((icon, idx) => {
+      if (!iconPosMap.has(icon)) {
+        iconPosMap.set(icon, [idx]);
+      } else {
+        const positions = iconPosMap.get(icon) || []; 
+        positions.push(idx);
+        iconPosMap.set(icon, positions);
+      }
+    });
+    const baidaPositions = iconPosMap.get(baidaIcon) || [];
+    iconPosMap.entries().forEach(([icon, iconPositions]) => {
+      const iconNum = Number(icon);
+      if (iconNum === duobaoIcon) return;
+      const positions = uniq([...iconPositions, ...baidaPositions]);
+      if (positions.length >= winnerCount) {
+        wp[icon] = positions.sort((a, b) => a - b);
+        iconWinnerCount[icon] = positions.length;
+      }
+    });
+    return { wp, iconWinnerCount };
   }
 }

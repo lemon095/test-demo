@@ -2,14 +2,12 @@ import { expect, describe, it } from "bun:test";
 import BaseSlot from "../index";
 import { chunk } from "lodash";
 import { RL_WEIGHTS, TRL_WEIGHTS } from "../TetWeights";
-import { UserType } from "utils/helper";
 
 describe("通用：上一次是否中奖", () => {
   it("测试输入空值的情况，比如：{}、null、undefined", () => {
     const slot1 = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: { wp: {} },
@@ -17,7 +15,6 @@ describe("通用：上一次是否中奖", () => {
     const slot2 = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: { wp: null },
@@ -25,7 +22,6 @@ describe("通用：上一次是否中奖", () => {
     const slot3 = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
     });
@@ -37,7 +33,6 @@ describe("通用：上一次是否中奖", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: { wp: { 1: [1, 2, 3] } },
@@ -50,7 +45,6 @@ describe("通用：是否为夺宝流程", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: {},
@@ -61,7 +55,6 @@ describe("通用：是否为夺宝流程", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: {
@@ -74,7 +67,6 @@ describe("通用：是否为夺宝流程", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: {
@@ -88,7 +80,6 @@ describe("通用：是否为夺宝流程", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: {
@@ -101,7 +92,6 @@ describe("通用：是否为夺宝流程", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: {
@@ -114,7 +104,6 @@ describe("通用：是否为夺宝流程", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: {
@@ -127,7 +116,6 @@ describe("通用：是否为夺宝流程", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: {
@@ -141,7 +129,6 @@ describe("通用：是否为夺宝流程", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: {
@@ -156,7 +143,6 @@ describe("极速：随机tgm倍数", () => {
   const slot = new BaseSlot({
     rlWeights: RL_WEIGHTS,
     trlWeights: TRL_WEIGHTS,
-    userType: UserType.common,
     cs: 0,
     ml: 0,
   });
@@ -172,7 +158,6 @@ describe("极速：tmd 计算", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: { wp: { 1: [2] } },
@@ -192,7 +177,6 @@ describe("极速：tmd 计算", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: { wp: { 1: [2] } },
@@ -212,7 +196,6 @@ describe("极速：tmd 计算", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: { wp: { 1: [2] } },
@@ -236,7 +219,6 @@ describe("极速：tmd 计算", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: { wp: { 1: [2] } },
@@ -257,7 +239,6 @@ describe("极速: acw计算", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: { wp: null },
@@ -268,7 +249,6 @@ describe("极速: acw计算", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: {
@@ -293,7 +273,6 @@ describe("极速: acw计算", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
       prevSi: {
@@ -314,7 +293,6 @@ describe("极速: acw计算", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
     });
@@ -335,7 +313,6 @@ describe("极速：md 计算", () => {
   const slot = new BaseSlot({
     rlWeights: RL_WEIGHTS,
     trlWeights: TRL_WEIGHTS,
-    userType: UserType.common,
     cs: 0,
     ml: 0,
   });
@@ -792,7 +769,6 @@ describe("通用: ctw计算", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
     });
@@ -802,7 +778,6 @@ describe("通用: ctw计算", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
     });
@@ -818,7 +793,6 @@ describe("通用: ctw计算", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
     });
@@ -835,7 +809,6 @@ describe("通用: ctw计算", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
     });
@@ -854,7 +827,6 @@ describe("通用：trl 随机图标", () => {
   const slot = new BaseSlot({
     rlWeights: RL_WEIGHTS,
     trlWeights: TRL_WEIGHTS,
-    userType: UserType.common,
     cs: 0,
     ml: 0,
   });
@@ -872,7 +844,6 @@ describe("通用：trl 随机图标", () => {
   const slot = new BaseSlot({
     rlWeights: RL_WEIGHTS,
     trlWeights: TRL_WEIGHTS,
-    userType: UserType.common,
     cs: 0,
     ml: 0,
   });
@@ -894,7 +865,6 @@ describe("通用：rl 权重表", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.trail,
       cs: 0,
       ml: 0,
     });
@@ -905,7 +875,6 @@ describe("通用：rl 权重表", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.newuser,
       cs: 0,
       ml: 0,
     });
@@ -916,7 +885,6 @@ describe("通用：rl 权重表", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
     });
@@ -929,7 +897,6 @@ describe("通用：trl 权重表", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.trail,
       cs: 0,
       ml: 0,
     });
@@ -940,7 +907,6 @@ describe("通用：trl 权重表", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.newuser,
       cs: 0,
       ml: 0,
     });
@@ -951,7 +917,6 @@ describe("通用：trl 权重表", () => {
     const slot = new BaseSlot({
       rlWeights: RL_WEIGHTS,
       trlWeights: TRL_WEIGHTS,
-      userType: UserType.common,
       cs: 0,
       ml: 0,
     });

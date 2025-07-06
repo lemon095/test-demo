@@ -5,26 +5,25 @@ import { UserType } from "utils/helper";
 const slot = new BaseSlot({
   rlWeights: RL_WEIGHTS,
   trlWeights: TRL_WEIGHTS,
-  userType: UserType.common,
   cs: 2,
   ml: 1,
 });
 describe("rswl: swlb信息不存在或异常数据", () => {
   it("swlb 信息为 null：", () => {
     const rswl = slot.getRswl(null);
-    expect(rswl).toBeNull();
+    expect(rswl).toBeArray();
   });
   it("swlb信息为 undefined", () => {
     const rswl = slot.getRswl(undefined);
-    expect(rswl).toBeNull();
+    expect(rswl).toBeArray();
   });
   it("swlb信息为 空数组", () => {
     const rswl = slot.getRswl([]);
-    expect(rswl).toBeNull();
+    expect(rswl).toBeArray();
   });
   it("swlb信息中存在异常位置信息", () => {
     const rswl = slot.getRswl([[NaN, 4]]);
-    expect(rswl).toBeNull();
+    expect(rswl).toBeArray();
   });
 });
 
@@ -36,7 +35,7 @@ describe("rswl: 存在 swlb信息", () => {
         [7, 3],
         [9, 2],
       ])
-    ).toBeNull();
+    ).toBeArray();
   });
   it("swlb信息中存在最终形态", () => {
     expect(

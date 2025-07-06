@@ -99,14 +99,14 @@ export default class ClassFeatSlot extends BaseSlot<any> {
   /** 捣蛋鬼图标和图标位置信息 */
   public getEggIconInfo({ rl, mode }: { rl: number[][]; mode?: "noPrize" }) {
     const iconCountWeights = this.convertWeights(
-      FortuneMrHallowEggCount[this.userType]
+      FortuneMrHallowEggCount[UserType.common]
     );
     const iconCountPos = random.int(0, iconCountWeights.length - 1);
     // 需要转换的图标数量
     const iconCount = iconCountWeights[iconCountPos];
 
     const iconWeights = this.convertWeights(
-      FortuneMrHallowEggIconWeights[this.userType]
+      FortuneMrHallowEggIconWeights[UserType.common]
     );
     const iconPos = random.int(0, iconWeights.length - 1);
     // 转换的图标

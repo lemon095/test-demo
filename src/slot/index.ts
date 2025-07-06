@@ -29,11 +29,9 @@ import RnsAdapter, { type RnsAdapterOptions } from "./RnsAdapter";
 
 export interface BaseSlotOptions<T extends Record<string, any>> {
   /** rl 权重表配置 */
-  rlWeights: PGSlot.RandomWeights;
+  rlWeights: PGSlot.WeightCfg[][];
   /** trl 权重表配置 */
-  trlWeights?: PGSlot.RandomWeights;
-  /** 用户类型 */
-  userType: PGSlot.UserType;
+  trlWeights?: PGSlot.WeightCfg[][];
   /** 上一局的信息 */
   prevSi?: T;
   /** 金额相关 */
@@ -52,15 +50,13 @@ export interface BaseSlotOptions<T extends Record<string, any>> {
 
 export default class BaseSlot<T extends Record<string, any>> {
   /** rl的权重表 */
-  private readonly rlWeightsMap: PGSlot.RandomWeights;
+  private readonly rlWeightsMap: PGSlot.WeightCfg[][];
   /** trl的权重表 */
-  private readonly trlWeightsMap?: PGSlot.RandomWeights;
+  private readonly trlWeightsMap?: PGSlot.WeightCfg[][];
   /** 是否启用安全值 */
   private readonly useSafeBet: boolean;
   /** 上一局的游戏信息 */
   private readonly prevSiData?: T;
-  /** 用户信息 */
-  public readonly userType: PGSlot.UserType;
   /** cs */
   public readonly cs: number;
   /** ml */
@@ -89,7 +85,6 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @param {Object} options - 配置选项
    * @param {array} options.rlWeights 必填，rl的权重表
    * @param {array} options.trlWeights 必填，trl的权重表
-   * @param {UserType} options.userType 必填，用户类型
    * @param {Object} options.prevSi 必填，上一次的 si
    * @param {number} options.cs 必填
    * @param {number} options.ml 必填
@@ -98,7 +93,6 @@ export default class BaseSlot<T extends Record<string, any>> {
   constructor({
     rlWeights,
     trlWeights,
-    userType,
     prevSi,
     cs,
     ml,
@@ -110,7 +104,6 @@ export default class BaseSlot<T extends Record<string, any>> {
     this.rlWeightsMap = rlWeights;
     this.trlWeightsMap = trlWeights;
     this.useSafeBet = useSafeBet;
-    this.userType = userType;
     this.prevSiData = prevSi;
     this.cs = cs;
     this.ml = ml;
@@ -143,22 +136,16 @@ export default class BaseSlot<T extends Record<string, any>> {
    * rl 的权重表信息
    */
   public get rlTables(): number[][] {
-    if (isUndefined(this.userType)) {
-      throw new Error("请先设置用户类型");
-    }
-    return this.convertWeights(this.rlWeightsMap[this.userType]);
+    return this.convertWeights(this.rlWeightsMap);
   }
   /**
    * trl 的权重表信息
    */
   public get trlTables(): number[][] {
-    if (isUndefined(this.userType)) {
-      throw new Error("请先设置用户类型");
-    }
     if (isEmpty(this.trlWeightsMap)) {
       throw new Error("trlWeightsMap 为空");
     }
-    return this.convertWeights(this.trlWeightsMap[this.userType]);
+    return this.convertWeights(this.trlWeightsMap as PGSlot.WeightCfg[][]);
   }
   /**
    * 随机 rl 中的图标信息
@@ -3375,16 +3362,16 @@ export default class BaseSlot<T extends Record<string, any>> {
    * 计算每一列中的图标变金框的概率
    * @param {Object} options - 配置对象
    * @param {number[][]} options.rl - 图标随机数信息
-   * @param {Record<PGSlot.UserType, Record<number, PGSlot.WeightCfg[]>>} options.weights - 金框图标权重
+   * @param {Record<string, PGSlot.WeightCfg[]>} options.weights - 金框图标权重
    */
   public getGoldPosition({
     rl,
     weights,
   }: {
     rl: number[][];
-    weights: Record<PGSlot.UserType, Record<string, PGSlot.WeightCfg[]>>;
+    weights: Record<string, PGSlot.WeightCfg[]>;
   }) {
-    const weight = weights[this.userType];
+    const weight = weights;
     if (isEmpty(weight)) {
       throw new Error("权重信息为空");
     }
@@ -3426,7 +3413,7 @@ export default class BaseSlot<T extends Record<string, any>> {
    * 黑帮风云gsp实现逻辑
    * @param {Object} options - 配置对象
    * @param {number[][]} options.rl - 图标随机数信息
-   * @param {Record<PGSlot.UserType, Record<number, PGSlot.WeightCfg[]>>} options.weights - 金框图标权重
+   * @param {Record<string, PGSlot.WeightCfg[]>} options.weights - 金框图标权重
    * @param {number[]} options.prevGswp - 上一局中奖的金框图标信息
    * @param {number[]} options.prevGsp - 上一局的金框图标信息
    * @param {number[]} options.ngsp - 新的金框图标信息
@@ -3632,7 +3619,7 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @param {Object} options - 配置对象
    * @param {number[][]} options.rns - 掉落后的图标信息
    * @param {number[][]} options.rnsp - 掉落后图标的位置信息]
-   * @param {Record<PGSlot.UserType, Record<number, PGSlot.WeightCfg[]>>} options.weights - 金框图标权重
+   * @param {Record<string, PGSlot.WeightCfg[]>} options.weights - 金框图标权重
    */
   public getNgspBy1580541({
     rns,
@@ -3641,10 +3628,10 @@ export default class BaseSlot<T extends Record<string, any>> {
   }: {
     rns?: number[][] | null;
     rnsp?: number[][] | null;
-    weights: Record<PGSlot.UserType, Record<string, PGSlot.WeightCfg[]>>;
+    weights: Record<string, PGSlot.WeightCfg[]>;
   }) {
     if (isEmpty(rns) || !isArray(rns)) return null;
-    const weight = weights[this.userType];
+    const weight = weights;
     const goldWeights: Record<number, number[]> = keys(weight).reduce(
       (acc, key) => {
         return {

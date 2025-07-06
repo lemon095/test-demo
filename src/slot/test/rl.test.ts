@@ -6,7 +6,6 @@ import { UserType } from "utils/helper";
 const slot = new BaseSlot({
   rlWeights: RL_WEIGHTS,
   trlWeights: TRL_WEIGHTS,
-  userType: UserType.common,
   cs: 0,
   ml: 0,
 });

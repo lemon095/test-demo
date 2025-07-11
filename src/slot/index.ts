@@ -32,8 +32,6 @@ export interface BaseSlotOptions<T extends Record<string, any>> {
   rlWeights: PGSlot.WeightCfg[][];
   /** trl 权重表配置 */
   trlWeights?: PGSlot.WeightCfg[][];
-  /** 上一局的信息 */
-  prevSi?: T;
   /** 金额相关 */
   cs: number;
   /** 金额相关 */
@@ -55,8 +53,6 @@ export default class BaseSlot<T extends Record<string, any>> {
   private readonly trlWeightsMap?: PGSlot.WeightCfg[][];
   /** 是否启用安全值 */
   private readonly useSafeBet: boolean;
-  /** 上一局的游戏信息 */
-  private readonly prevSiData?: T;
   /** cs */
   public readonly cs: number;
   /** ml */
@@ -93,7 +89,6 @@ export default class BaseSlot<T extends Record<string, any>> {
   constructor({
     rlWeights,
     trlWeights,
-    prevSi,
     cs,
     ml,
     isFb,
@@ -104,13 +99,8 @@ export default class BaseSlot<T extends Record<string, any>> {
     this.rlWeightsMap = rlWeights;
     this.trlWeightsMap = trlWeights;
     this.useSafeBet = useSafeBet;
-    this.prevSiData = prevSi;
     this.cs = cs;
     this.ml = ml;
-    if (this.isPreWin || this.isDuoBaoPending) {
-      this.cs = this.prevSiData?.cs || cs;
-      this.ml = this.prevSiData?.ml || ml;
-    }
     this.lineRate = lineRate;
     this.totalBet = new Decimal(cs).mul(ml).mul(lineRate).toNumber();
     this.safeTotalBet = new Decimal(cs).mul(ml).mul(lineRate).toNumber();
@@ -122,15 +112,15 @@ export default class BaseSlot<T extends Record<string, any>> {
 
   public get prevSi(): T | undefined {
     if (!isArray(this.spinResult) || isEmpty(this.spinResult)) {
-      return this.prevSiData;
+      return void 0;
     }
     const prevSpin = this.spinResult[this.spinResult.length - 1];
-    return prevSpin || this.prevSiData;
+    return prevSpin || void 0;
   }
 
   /** 当前是否为购买触发的夺宝 */
   public get isBuyDuoBao(): boolean {
-    return this.isFb || false;
+    return (this.isFb && isEmpty(this.prevSi?.fs)) || false;
   }
   /**
    * rl 的权重表信息

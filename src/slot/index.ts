@@ -2111,16 +2111,19 @@ export default class BaseSlot<T extends Record<string, any>> {
    * @param {Object} options - 参数对象
    * @param {Object|null} options.wp - 本局中的中奖信息
    * @param {Object} options.ebb - 本局的框合并信息
+   * @param {boolean} options.stickyBaiDa - 选填，百搭是否粘性，默认不粘性
    * @param {Function} options.vanishFn - 选填，会消失框的判断函数，该函数默认普通框会消失。
    * @returns {Object} eb - 下一次的框合并信息
    */
   public getEb({
     wp,
     ebb,
+    stickyBaiDa = false,
     vanishFn,
   }: {
     wp?: Record<string, number[]> | null;
     ebb: Record<string, PGSlot.Ebb>;
+    stickyBaiDa?: boolean;
     vanishFn?: (info: PGSlot.Ebb) => boolean;
   }): Record<string, PGSlot.Ebb> {
     if (isEmpty(wp)) return cloneDeep(ebb);
@@ -2143,11 +2146,26 @@ export default class BaseSlot<T extends Record<string, any>> {
         if (vanishHandler(ebbValue)) {
           return acc;
         }
+        let { bt, ls } = ebbValue;
+        if (this.getEbbBorderColor(ebbValue, "银")) {
+          // 银变金
+          bt = 1;
+          ls = 1;
+        } else if (this.getEbbBorderColor(ebbValue, "金")) {
+          // 金变百搭 - 百搭走普通框
+          ls = stickyBaiDa ? ebbValue.lp - ebbValue.fp + 1 : 1;
+          bt = 2;
+        } else if (bt === 2 && ls > 1 && stickyBaiDa) {
+          // 百搭消耗次数
+          ls = ls - 1;
+        }
         // 非普通框的情况下，eb中包含 ebb 的框的信息
         return {
           ...acc,
           [crrKey]: {
             ...ebbValue,
+            bt,
+            ls,
           },
         };
       }
@@ -2209,16 +2227,11 @@ export default class BaseSlot<T extends Record<string, any>> {
       const ebb = cloneDeep(prevEb || {});
       // 如果 esst 没有信息，则不会进行框的颜色变更操作. 比如极速游戏
       keys(rs.esst || {}).forEach((keyIdx) => {
-        const isBaiDa = rs.esst[keyIdx].ns === baiDaIcon;
-        const bt = isBaiDa ? 2 : 1;
-        const ls = isBaiDa ? 1 : 1;
         if (isEmpty(ebb[keyIdx])) {
           return;
         }
         ebb[keyIdx] = {
           ...ebb[keyIdx],
-          bt,
-          ls,
         };
       });
       keys(rs.espt).forEach((keyIdx) => {

@@ -102,8 +102,11 @@ export default class BaseSlot<T extends Record<string, any>> {
     this.cs = cs;
     this.ml = ml;
     this.lineRate = lineRate;
-    this.totalBet = new Decimal(cs).mul(ml).mul(lineRate).toNumber();
-    this.safeTotalBet = new Decimal(cs).mul(ml).mul(lineRate).toNumber();
+    this.totalBet = new Decimal(this.cs).mul(this.ml).mul(lineRate).toNumber();
+    this.safeTotalBet = new Decimal(this.cs)
+      .mul(this.ml)
+      .mul(lineRate)
+      .toNumber();
     if (isFb && gmFb) {
       this.totalBet = new Decimal(this.totalBet).mul(gmFb).toNumber();
       this.isFb = isFb;

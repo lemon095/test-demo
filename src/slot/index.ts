@@ -64,18 +64,9 @@ export default class BaseSlot<T extends Record<string, any>> {
   /** 总下注 - 安全值 */
   public readonly safeTotalBet: number;
   public readonly isFb?: boolean;
-  /** 阈值：多少次不赢，默认为 15 */
-  protected notWinnerTotal = 15;
-  /** 累计多少次不赢，默认为 0 */
-  protected notWinnerCount = 0;
   /** 本局预测的结果 */
   protected spinResult: T[] = [];
-  /** 是否必中 */
-  protected isRequiredWinner = false;
-  /** 最大金额重摇次数 */
-  protected maxPriceCount: number = 0;
-  /** 最大si 重摇次数 */
-  protected spinCount: number = 0;
+  protected prevSiData?: T;
   /**
    * base slot 构造器
    * @param {Object} options - 配置选项
@@ -115,15 +106,15 @@ export default class BaseSlot<T extends Record<string, any>> {
 
   public get prevSi(): T | undefined {
     if (!isArray(this.spinResult) || isEmpty(this.spinResult)) {
-      return void 0;
+      return this.prevSiData;
     }
     const prevSpin = this.spinResult[this.spinResult.length - 1];
-    return prevSpin || void 0;
+    return cloneDeep(prevSpin) || void 0;
   }
 
   /** 当前是否为购买触发的夺宝 */
   public get isBuyDuoBao(): boolean {
-    return (this.isFb && isEmpty(this.prevSi?.fs)) || false;
+    return (this.isFb && (this.prevSi?.fs?.s || 0) === 0) || false;
   }
   /**
    * rl 的权重表信息
@@ -275,15 +266,6 @@ export default class BaseSlot<T extends Record<string, any>> {
       result.push(colWeight[idx]);
     }
     return result;
-  }
-  /**
-   * 是否大于等于某个次数，默认值为 15
-   * @param { number } this.notWinnerCount 当前次数
-   * @param { number }this.notWinnerTotal 总数，默认值为 15
-   * @return {boolean}
-   */
-  public get isNotWinOver15(): boolean {
-    return this.notWinnerCount >= this.notWinnerTotal;
   }
   /**
    * 上一次是否中奖
